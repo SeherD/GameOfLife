@@ -36,3 +36,17 @@
     transform: rotate(360deg);
   }
 }
+
+
+.board {
+   display: grid;
+   width: 90%;
+   height: 520px;
+   margin: auto;
+}
+.tile {
+   border-style: solid;
+   width: 50px;
+   height: 50px;
+   font-size: small;
+}
