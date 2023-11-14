@@ -2,13 +2,13 @@ import React, {Component} from 'react';
 import Tile from '../Components/Tile'
 import WheelComponent from 'react-wheel-of-prizes'
 import HouseCard from '../Components/HouseCard';
-//import 'react-wheel-of-prizes/dist/index.css'
 
 
 
 
 export default class GameBoard extends Component{
 state = {
+            //arrays with indices for the grid to determine the type of tile
             emptyPoints: [209, 204, 194, 179, 178, 177, 176, 174, 145, 146, 147, 134, 104, 
             118, 117, 115, 99, 84, 85, 88, 24, 39, 8, 7, 20, 35, 2, 3, 16, 15, 48, 47, 45, 60, 75, 78, 79, 81,
             96, 97, 112, 126, 125, 123, 122, 157, 155, 154, 153, 169, 183, 182, 213, 214, 200],
@@ -19,6 +19,7 @@ state = {
             endPoints: [185],
             housePoints: [149, 69, 6, 80, 152],
             skillPoints: [144, 116, 114, 9, 17, 46, 77, 212, 215],
+            //properties for the spinner
             segments: ['1', '2', '3', '4', '5', '6'],
             segColors: ['#fcf910',
                         '#e93131',
@@ -29,16 +30,20 @@ state = {
                         ]
         }
    
-
+    //function that is called after the spinner is done spinning
     onFinished = (winner) => {
         console.log(winner)
       }  
 
+      //create game board
     createBoard = () =>{
-
+        //create 15 by 15 grid
         return Array.from({ length: 15 }).map((_, rowIndex) => 
         <div className ='boardRow'>{
           Array.from({ length: 15 }).map((_, colIndex) => {
+            //loop through all of the indices and check if they are associated with any 
+            //specific tile type then create that type otherwise create a green empty tile 
+            //representing the background of the board
             var num = rowIndex*15 + colIndex;
                 if(this.state.careerPoints.includes(num)){
                     return <Tile

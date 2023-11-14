@@ -42,6 +42,8 @@ render()
             <div >
             <div className = "tile" style={{backgroundColor: this.props.color}} >
             {this.props.word}
+
+            {/*Pop up to show the life options when a player lands on specific tiles*/}
            <Modal
            ariaHideApp={false}
            isOpen = {this.state.open}
@@ -49,6 +51,9 @@ render()
            style={customStyles}
            
            >
+           {/*Carousel to browse through options and then a button to select
+           TODO: populate carousel with a function that makes a call to the database
+           and gets all of the options' information to populate*/}
         <Carousel showThumbs={false}
         showArrows={true}>
          <HouseCard
