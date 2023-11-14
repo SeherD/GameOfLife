@@ -1,9 +1,6 @@
 import React, {Component} from 'react';
 import Tile from '../Components/Tile'
 import WheelComponent from 'react-wheel-of-prizes'
-import HouseCard from '../Components/HouseCard';
-
-
 
 
 export default class GameBoard extends Component{

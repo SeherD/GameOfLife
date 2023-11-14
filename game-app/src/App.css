@@ -70,3 +70,17 @@
   width: 200px;
   height: 200px;
 }
+
+.playerInfo{
+  position: absolute;
+  top: 50px ;
+  left: 15px;
+  width: calc(50vw - 435px);
+  border-radius: 5%;
+  padding: 10px;
+}
+
+.avatar{
+  width: 50%;
+  border-radius: 50%;
+}
