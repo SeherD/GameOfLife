@@ -22,7 +22,7 @@ export default class GameBoard extends Component{
             housePoints: [149, 69, 6, 80, 152],
             skillPoints: [144, 116, 114, 9, 17, 46, 77, 212, 215],
             // all the tiles that are valid player locations on the board, in the order that players will pass them
-            // a "player position" is an index in this array
+            // each player in this.state.players stores the path it's on and its position on the path (array index)
             path: {
                 mainPath: [219, 204, 189, 174, 159, 144, 145, 146, 147, 148, 149, 134, 119, 118, 117, 116, 115, 114,
                 99, 84, 69, 54, 39, 24, 9, 8, 7, 6, 5, 4, 3, 2, 17, 16, 15, 30, 45, 60, 75, 76, 77, 78, 79, 80, 81,
@@ -49,6 +49,7 @@ export default class GameBoard extends Component{
             boardOffsetLeft: 0
         }
     
+    // used for determining boardOffsetLeft
     getBoardOffset = () => {
         const tileElement = this.boardRef.current;
         const rect = tileElement.getBoundingClientRect();
@@ -65,8 +66,9 @@ export default class GameBoard extends Component{
         if (prevState.players !== this.state.players) {
           this.updatePlayerPieces();
         }
-      }
+    }
 
+    // cycle through the players in this.state.players
     updateCurrentPlayer = () => {
         if (this.state.currentPlayer === this.state.players.length - 1) {
             this.setState({
@@ -79,6 +81,10 @@ export default class GameBoard extends Component{
         }
     }
 
+    /**
+     * updates the array of player pieces stored in the state
+     * this array might not be necessary anymore. remove it?
+     */
     updatePlayerPieces = () => {
         const playerPieces = this.state.players.map((player) => ({
           key: player.pid,
@@ -88,36 +94,33 @@ export default class GameBoard extends Component{
     
         this.setState({ playerPieces }, () => {
         });
-      };
+    };
 
+    // TODO: connect this to the Tile logic for giving the player options when they land on a certain tile
     handleTile = (onPath, atPosition) => {
         console.log(`player ${this.state.currentPlayer} is now on tile ${this.state.path[onPath][atPosition]}`);
     }
 
     calculateNewPosition = (currentPath, currentPosition, increment) => {
-        const path = this.state.path;
+        // calculate a tentative new position by increasing the position by the result of the spinner
         const tempPosition = parseInt(currentPosition) + parseInt(increment);
         let newPath = currentPath;
         let newPosition = tempPosition;
-        if (tempPosition >= path[currentPath].length) {
-            newPath = "mainpath";
+        // if the player finishes a side path, merge into the main path
+        const path = this.state.path;
+        if (currentPath !== "mainPath" && tempPosition >= path[currentPath].length) {
+            newPath = "mainPath";
             newPosition = tempPosition - path[currentPath].length;
         }
 
+        // check if the player is passing any stop tiles or reaching the end of the board
         const tilesPassed = path[currentPath].slice(currentPosition+1, newPosition);
-
-        let stopPosition;
-        let retirementPosition;
         tilesPassed.forEach((tile) => {
             // stop for stop tiles
-            if (this.state.stopPoints.includes(tile)) stopPosition = path[currentPath].indexOf(tile);
+            if (this.state.stopPoints.includes(tile)) newPosition = path[currentPath].indexOf(tile);
             // end on retirement tile
-            if (this.state.endPoints.includes(tile)) retirementPosition = path["mainPath"].indexOf(tile);
-        });
-        if (stopPosition) newPosition = stopPosition;
-
-        // end on retirement tile
-        
+            if (this.state.endPoints.includes(tile)) newPosition = path["mainPath"].indexOf(tile);
+        });     
 
         return [newPath, newPosition];
     }
@@ -130,6 +133,7 @@ export default class GameBoard extends Component{
         const newPathAndPosition = this.calculateNewPosition(currentPath, currentPosition, winner);
         const newPath = newPathAndPosition[0];
         const newPosition = newPathAndPosition[1];
+
         this.setState({players: updatePlayerPosition(this.state.players, currentPlayer.pid, newPath, newPosition)});
         console.log(`new path: ${newPath}, new position: ${newPosition}`);
         this.handleTile(newPath, newPosition);
@@ -205,6 +209,7 @@ export default class GameBoard extends Component{
                         })}
                     </div>
                 ))}
+                {/* place a piece for each element in this.state.playerPieces */}
                 {this.state.playerPieces.map((player) => (
                     <Piece
                         key={player.key}
@@ -217,12 +222,11 @@ export default class GameBoard extends Component{
         );
     }
   
-
-    
-
     render() {return (
         <div>
+            {/* used for determining boardOffsetLeft */}
             <div ref={this.boardRef} style={{ position: 'absolute', top: '-9999px' }} />
+            {/* game board */}
             <div className='board'>
                 {this.createBoard()}
                 <div className='spinner'>
