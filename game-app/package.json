@@ -11,9 +11,10 @@
     "react-dom": "^18.2.0",
     "react-grid-layout": "^1.4.3",
     "react-modal": "^3.16.1",
+    "react-motion": "^0.5.2",
     "react-responsive-carousel": "^3.2.23",
-    "react-scripts": "5.0.1",
-        "react-wheel-of-prizes": "^1.0.9",
+    "react-scripts": "^5.0.1",
+    "react-wheel-of-prizes": "^1.0.9",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
