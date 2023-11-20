@@ -16,7 +16,7 @@ export default class Tile extends Component {
     }
 
     handleClick = () =>{
-        if (this.props.word === "House") {
+        if (this.props.word === "House" || this.props.word === "Career") {
             this.setState({open: true})
         }
     }
