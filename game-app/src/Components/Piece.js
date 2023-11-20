@@ -9,12 +9,8 @@ export default class Piece extends Component {
         const { color, tile, boardOffsetLeft } = this.props;
         const rowIndex = Math.floor(tile/15);
         const x = rowIndex * 50;
-        console.log('row index:', rowIndex);
         const columnIndex = tile % 15;
         const y = columnIndex * 50 + boardOffsetLeft;
-        console.log('column index:', columnIndex);
-
-        console.log('Rendering Piece component with tile:', tile);
 
         return(
             // <Motion style={{x: spring(x), y: spring(y)}}>
