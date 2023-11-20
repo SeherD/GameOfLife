@@ -102,9 +102,57 @@ export default class GameBoard extends Component{
         // if currently on tile 119 - a stop point
         if (currentPlayer.currentPath === 'mainPath' && currentPlayer.position === 12) {
             // if player chose side path
-            if (slideIndex === 1) {
+            if (slideIndex === 0) {
                 const newPath = 'sidePath1';
                 const newPosition = 0;
+                this.setState(
+                    (prevState) => ({
+                        players: updatePlayerPosition(prevState.players, currentPlayer.pid, newPath, newPosition),
+                    }),
+                    () => {
+                        this.updatePlayerPieces();
+                    }
+                );
+            }
+        }
+        // if currently on tile 5 - a stop point
+        else if (currentPlayer.currentPath === 'mainPath' && currentPlayer.position === 28) {
+            // if player chose side path
+            if (slideIndex === 0) {
+                const newPath = 'sidePath2';
+                const newPosition = 0;
+                this.setState(
+                    (prevState) => ({
+                        players: updatePlayerPosition(prevState.players, currentPlayer.pid, newPath, newPosition),
+                    }),
+                    () => {
+                        this.updatePlayerPieces();
+                    }
+                );
+            }
+        }
+        // if currently on tile 127 - a stop point
+        else if (currentPlayer.currentPath === 'mainPath' && currentPlayer.position === 48) {
+            // if player chose side path
+            if (slideIndex === 0) {
+                const newPath = 'sidePath3';
+                const newPosition = 0;
+                this.setState(
+                    (prevState) => ({
+                        players: updatePlayerPosition(prevState.players, currentPlayer.pid, newPath, newPosition),
+                    }),
+                    () => {
+                        this.updatePlayerPieces();
+                    }
+                );
+            }
+        }
+        // if currently on tile 184 - a stop point
+        else if (currentPlayer.currentPath === 'mainPath' && currentPlayer.position === 55) {
+            // if player chose to retire early
+            if (slideIndex === 0) {
+                const newPath = 'mainPath';
+                const newPosition = 64;
                 this.setState(
                     (prevState) => ({
                         players: updatePlayerPosition(prevState.players, currentPlayer.pid, newPath, newPosition),
@@ -134,6 +182,12 @@ export default class GameBoard extends Component{
         if (currentPath === "sidePath1" && tempPosition >= path[currentPath].length) {
             newPath = "mainPath";
             newPosition = 19 + tempPosition - path[currentPath].length;
+        } else if (currentPath === "sidePath2" && tempPosition >= path[currentPath].length) {
+            newPath = "mainPath";
+            newPosition = 36 + tempPosition - path[currentPath].length;
+        } else if (currentPath === "sidePath3" && tempPosition >= path[currentPath].length) {
+            newPath = "mainPath";
+            newPosition = 53 + tempPosition - path[currentPath].length;
         }
 
         // check if the player is passing any stop tiles or reaching the end of the board

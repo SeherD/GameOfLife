@@ -8,6 +8,9 @@ import webdev from '../assets/webdev.png';
 import startup from '../assets/startup.png';
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import StopModal1 from './StopModal1';
+import StopModal2 from './StopModal2';
+import StopModal3 from './StopModal3';
+import StopModal4 from './StopModal4';
 
 export default class ModalContent extends Component {
     constructor(props) {
@@ -49,6 +52,18 @@ export default class ModalContent extends Component {
         } else if (this.state.type === "STOP" && this.state.stopID === 119) {
             return(
                 <StopModal1 handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
+            );
+        } else if (this.state.type === "STOP" && this.state.stopID === 5) {
+            return(
+                <StopModal2 handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
+            );
+        } else if (this.state.type === "STOP" && this.state.stopID === 127) {
+            return(
+                <StopModal3 handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
+            );
+        } else if (this.state.type === "STOP" && this.state.stopID === 184) {
+            return(
+                <StopModal4 handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
             );
         }
     }
