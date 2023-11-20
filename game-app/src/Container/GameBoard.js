@@ -7,9 +7,9 @@ import WheelComponent from 'react-wheel-of-prizes';
 
 export default class GameBoard extends Component{
     boardRef = React.createRef(); // used to get the left offset for the board - very hacky
+    // used to access specific tiles by index
+    tiles = Array.from({ length: 225 });
     state = {
-            // will contain the number of pixels the board is offset from the left side of the page
-            boardOffsetLeft: 0,
             //arrays with indices for the grid to determine the type of tile
             emptyPoints: [209, 204, 194, 179, 178, 177, 176, 174, 145, 146, 147, 134, 104, 
             118, 117, 115, 99, 84, 85, 88, 24, 39, 8, 7, 20, 35, 2, 3, 16, 15, 48, 47, 45, 60, 75, 78, 79, 81,
@@ -98,7 +98,10 @@ export default class GameBoard extends Component{
 
     // TODO: connect this to the Tile logic for giving the player options when they land on a certain tile
     handleTile = (onPath, atPosition) => {
-        console.log(`player ${this.state.currentPlayer} is now on tile ${this.state.path[onPath][atPosition]}`);
+        const index = this.state.path[onPath][atPosition];
+        console.log(`player ${this.state.currentPlayer} is now on tile ${index}`);
+        const tile = this.tiles[index];
+        tile.handleClick();
     }
 
     calculateNewPosition = (currentPath, currentPosition, increment) => {
@@ -142,14 +145,6 @@ export default class GameBoard extends Component{
 
     //create game board
     createBoard = () =>{
-        const playerPieces = this.state.players.map((player) => (
-            <Piece
-                key={player.pid}
-                color={player.color}
-                tile={this.state.path[player.currentPath][player.position]}
-                boardOffsetLeft={this.state.boardOffsetLeft}
-            />
-        ));
         //create 15 by 15 grid
         return (
             <div>
@@ -164,42 +159,50 @@ export default class GameBoard extends Component{
                                 return <Tile
                                     key = {num}
                                     color = {"purple"}
-                                    word = {"Career"} />
+                                    word = {"Career"}
+                                    ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.emptyPoints.includes(num)){
                                 return <Tile
                                     key = {num} 
                                     color = {"yellow"}
-                                    word = {""} />
+                                    word = {""}
+                                    ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.paydayPoints.includes(num)){
                                 return <Tile
                                     key = {num} 
                                     color = {"darkgreen"}
-                                    word = {"PayDay"} />
+                                    word = {"PayDay"}
+                                    ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.stopPoints.includes(num)){
                                 return <Tile
                                     key = {num} 
                                     color = {"red"}
-                                    word = {"STOP"} />
+                                    word = {"STOP"}
+                                    ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.startPoints.includes(num)){
                                 return <Tile
                                     key = {num} 
                                     color = {"orange"}
-                                    word = {"Start"} />
+                                    word = {"Start"}
+                                    ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.endPoints.includes(num)){
                                 return <Tile
                                     key = {num} 
                                     color = {"orange"}
-                                    word = {"Retirement!"} />
+                                    word = {"Retirement!"}
+                                    ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.housePoints.includes(num)){
                                 return <Tile
                                     key = {num} 
                                     color = {"blue"}
-                                    word = {"House"} />
+                                    word = {"House"}
+                                    ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.skillPoints.includes(num)){
                                 return <Tile
                                     key = {num} 
                                     color = {"#fb3199"}
-                                    word = {"Skills"} />
+                                    word = {"Skills"}
+                                    ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else {
                                 return <Tile
                                     key = {num} 

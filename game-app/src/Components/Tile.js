@@ -3,6 +3,8 @@ import Modal from 'react-modal'
 import ModalContent from './ModalContent'
 
 export default class Tile extends Component {
+    tileRef = React.createRef();
+
     constructor(props){
         super(props)
         this.state = {
@@ -14,7 +16,9 @@ export default class Tile extends Component {
     }
 
     handleClick = () =>{
-        this.setState({open: true})
+        if (this.props.word === "House") {
+            this.setState({open: true})
+        }
     }
 
     handleClose = () =>{
