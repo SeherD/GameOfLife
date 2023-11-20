@@ -8,15 +8,16 @@ export default class Tile extends Component {
     constructor(props){
         super(props)
         this.state = {
-            open: false
+            stopID: props.stopID,
+            open: false,
+            currentSlide: 0
         }
 
         this.handleClick = this.handleClick.bind(this)
-        this.handleClose = this.handleClose.bind(this)
     }
 
     handleClick = () =>{
-        if (this.props.word === "House" || this.props.word === "Career") {
+        if (this.props.word === "House" || this.props.word === "Career" || this.props.word === "STOP") {
             this.setState({open: true})
         }
     }
@@ -47,7 +48,7 @@ render()
                         isOpen = {this.state.open}
                         onRequestClose={this.handleClose}
                         style={customStyles}>
-                        <ModalContent type={this.props.word} handleClose={this.handleClose} />
+                        <ModalContent type={this.props.word} stopID={this.state.stopID} handleClose={this.handleClose} onModalClose={this.props.onModalClose} />
                     </Modal>
                 </div>
             </div>

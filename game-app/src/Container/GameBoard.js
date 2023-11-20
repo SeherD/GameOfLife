@@ -28,9 +28,9 @@ export default class GameBoard extends Component{
                 99, 84, 69, 54, 39, 24, 9, 8, 7, 6, 5, 4, 3, 2, 17, 16, 15, 30, 45, 60, 75, 76, 77, 78, 79, 80, 81,
                 96, 97, 112, 127, 142, 157, 156, 155, 154, 169, 184, 183, 182, 197, 212, 213, 214, 215, 200, 185],
                 universityPath: [224, 209, 194, 179, 178, 177, 176, 175],
-                sidePath1: [104, 89, 88, 87, 86, 85],
-                sidePath2: [20, 35, 50, 49, 48, 47, 46],
-                sidePath3: [126, 125, 124, 123, 122, 137, 152, 153]
+                sidePath1: [119, 104, 89, 88, 87, 86, 85],
+                sidePath2: [5, 20, 35, 50, 49, 48, 47, 46],
+                sidePath3: [127, 126, 125, 124, 123, 122, 137, 152, 153]
             },
             //properties for the spinner
             segments: ['1', '2', '3', '4', '5', '6'],
@@ -96,7 +96,27 @@ export default class GameBoard extends Component{
         });
     };
 
-    // TODO: connect this to the Tile logic for giving the player options when they land on a certain tile
+    handleModalClose = (slideIndex) => {
+        console.log('Slide index received in GameBoard:', slideIndex);
+        const currentPlayer = this.state.players[this.state.currentPlayer];
+        // if currently on tile 119 - a stop point
+        if (currentPlayer.currentPath === 'mainPath' && currentPlayer.position === 12) {
+            // if player chose side path
+            if (slideIndex === 1) {
+                const newPath = 'sidePath1';
+                const newPosition = 0;
+                this.setState(
+                    (prevState) => ({
+                        players: updatePlayerPosition(prevState.players, currentPlayer.pid, newPath, newPosition),
+                    }),
+                    () => {
+                        this.updatePlayerPieces();
+                    }
+                );
+            }
+        }
+    };
+
     handleTile = (onPath, atPosition) => {
         const index = this.state.path[onPath][atPosition];
         console.log(`player ${this.state.currentPlayer} is now on tile ${index}`);
@@ -111,9 +131,9 @@ export default class GameBoard extends Component{
         let newPosition = tempPosition;
         // if the player finishes a side path, merge into the main path
         const path = this.state.path;
-        if (currentPath !== "mainPath" && tempPosition >= path[currentPath].length) {
+        if (currentPath === "sidePath1" && tempPosition >= path[currentPath].length) {
             newPath = "mainPath";
-            newPosition = tempPosition - path[currentPath].length;
+            newPosition = 19 + tempPosition - path[currentPath].length;
         }
 
         // check if the player is passing any stop tiles or reaching the end of the board
@@ -157,48 +177,57 @@ export default class GameBoard extends Component{
                             var num = rowIndex*15 + colIndex;
                             if(this.state.careerPoints.includes(num)){
                                 return <Tile
+                                    onModalClose = {this.handleModalClose}
                                     key = {num}
                                     color = {"purple"}
                                     word = {"Career"}
                                     ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.emptyPoints.includes(num)){
                                 return <Tile
+                                    onModalClose = {this.handleModalClose}
                                     key = {num} 
                                     color = {"yellow"}
                                     word = {""}
                                     ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.paydayPoints.includes(num)){
                                 return <Tile
+                                    onModalClose = {this.handleModalClose}
                                     key = {num} 
                                     color = {"darkgreen"}
                                     word = {"PayDay"}
                                     ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.stopPoints.includes(num)){
                                 return <Tile
+                                    onModalClose = {this.handleModalClose}
                                     key = {num} 
                                     color = {"red"}
                                     word = {"STOP"}
+                                    stopID = {num}
                                     ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.startPoints.includes(num)){
                                 return <Tile
+                                    onModalClose = {this.handleModalClose}
                                     key = {num} 
                                     color = {"orange"}
                                     word = {"Start"}
                                     ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.endPoints.includes(num)){
                                 return <Tile
+                                    onModalClose = {this.handleModalClose}
                                     key = {num} 
                                     color = {"orange"}
                                     word = {"Retirement!"}
                                     ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.housePoints.includes(num)){
                                 return <Tile
+                                    onModalClose = {this.handleModalClose}
                                     key = {num} 
                                     color = {"blue"}
                                     word = {"House"}
                                     ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.skillPoints.includes(num)){
                                 return <Tile
+                                    onModalClose = {this.handleModalClose}
                                     key = {num} 
                                     color = {"#fb3199"}
                                     word = {"Skills"}

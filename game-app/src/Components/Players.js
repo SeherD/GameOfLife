@@ -6,6 +6,6 @@ export const getPlayerData = () => {
 
 export const updatePlayerPosition = (players, playerID, newPath, newPosition) => {
     return players.map((player) => 
-        player.pid === playerID ? {...player, path: newPath, position: newPosition} : player
+        player.pid === playerID ? {...player, currentPath: newPath, position: newPosition} : player
         );
 };

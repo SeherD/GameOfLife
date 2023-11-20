@@ -7,13 +7,15 @@ import apartment from '../assets/apartment.jpg';
 import webdev from '../assets/webdev.png';
 import startup from '../assets/startup.png';
 import "react-responsive-carousel/lib/styles/carousel.min.css";
+import StopModal1 from './StopModal1';
 
 export default class ModalContent extends Component {
     constructor(props) {
         super(props)
         this.state = {
             type: props.type,
-            close: props.handleClose
+            stopID: props.stopID,
+            slide: 0
         }
     }
 
@@ -28,7 +30,7 @@ export default class ModalContent extends Component {
                         <HouseCard name = {'House'} image={house} />
                         <HouseCard name = {'Apartment'} image={apartment} />
                     </Carousel>  
-                    <button onClick={this.state.close}>Select</button>
+                    <button onClick={this.props.handleClose}>Select</button>
                 </div>
             );
         } else if (this.state.type === "Career") {
@@ -41,8 +43,12 @@ export default class ModalContent extends Component {
                         <CareerCard name = {'Web Developer'} image={webdev} />
                         <CareerCard name = {'Startup CEO'} image={startup} />
                     </Carousel>
-                    <button onClick={this.state.close}>Select</button>
+                    <button onClick={this.props.handleClose}>Select</button>
                 </div>
+            );
+        } else if (this.state.type === "STOP" && this.state.stopID === 119) {
+            return(
+                <StopModal1 handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
             );
         }
     }
