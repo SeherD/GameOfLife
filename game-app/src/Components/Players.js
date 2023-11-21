@@ -1,6 +1,6 @@
 export const getPlayerData = () => {
     return [
-        { pid: 0, currentPath: "mainPath", position: 0, career: "Barista", balance: 0, languages: ["Java","Python"], houses: ["none"], color: 'pink' },
+        { pid: 0, currentPath: "mainPath", position: 0, career: "Barista", balance: 0, languages: ["Java","Python"], houses: [], color: 'pink' },
     ]
 };
 
@@ -24,18 +24,18 @@ export const updatePlayerBalance = (players, playerID, balanceChange) => {
 
 export const addPlayerLanguage = (players, playerID, language) => {
     return players.map((player) =>
-    player.pid === playerID ? {...player, languages: player.languages.push(language)} : player
+    player.pid === playerID ? {...player, languages: [...player.languages, language]} : player
     );
 };
 
 export const addPlayerHouse = (players, playerID, house) => {
     return players.map((player) =>
-    player.pid === playerID ? {...player, houses: player.houses.push(house)} : player
+    player.pid === playerID ? {...player, houses: [...player.houses, house]} : player
     );
 };
 
 export const removePlayerHouse = (players, playerID, house) => {
     return players.map((player) =>
-    player.pid === playerID ? {...player, houses: player.houses.splice(player.houses.indexOf(house), 1)} : player
+    player.pid === playerID ? {...player, houses: player.houses.filter(h => h !== house)} : player
     );
 };

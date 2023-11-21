@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import Tile from '../Components/Tile';
-import { getPlayerData, updatePlayerPosition, updatePlayerCareer } from '../Components/Players';
+import { getPlayerData, updatePlayerPosition, updatePlayerCareer, addPlayerHouse } from '../Components/Players';
 import Piece from '../Components/Piece';
 import WheelComponent from 'react-wheel-of-prizes';
 
@@ -115,6 +115,25 @@ export default class GameBoard extends Component{
             };
             this.props.updatePlayerInfo(newPlayerInfo);
         }
+        // if currently on a house point
+        if (this.state.housePoints.includes(this.state.path[currentPlayer.currentPath][currentPlayer.position])) {
+            this.setState(
+                (prevState) => ({
+                    players: addPlayerHouse(prevState.players, currentPlayer.pid, newValue),
+                }),
+                () => {
+                    this.updatePlayerPieces();
+                }
+            );
+            const housesList = this.props.playerInfo.houses;
+            housesList.push(newValue);
+            console.log(housesList);
+            const newPlayerInfo = {
+                ...this.props.playerInfo,
+                houses: housesList,
+            };
+            this.props.updatePlayerInfo(newPlayerInfo);
+        }
         // if currently on tile 119 - a stop point
         else if (currentPlayer.currentPath === 'mainPath' && currentPlayer.position === 12) {
             // if player chose side path
@@ -190,7 +209,7 @@ export default class GameBoard extends Component{
 
     calculateNewPosition = (currentPath, currentPosition, increment) => {
         // calculate a tentative new position by increasing the position by the result of the spinner
-        const tempPosition = parseInt(currentPosition) + parseInt(increment);
+        const tempPosition = parseInt(currentPosition) + parseInt(5);
         let newPath = currentPath;
         let newPosition = tempPosition;
         // if the player finishes a side path, merge into the main path

@@ -11,7 +11,7 @@ render(){
             <p>Career: {this.props.career}</p>
             <p>Balance: ${this.props.balance}</p>
             <p>Programming Languages: {this.props.languages.toString()}</p>
-            <p>Houses: {this.props.houses}</p>
+            <p>Houses: {this.props.houses.toString()}</p>
             </div>
         )
     }

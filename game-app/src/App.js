@@ -10,7 +10,7 @@ function App() {
     career: "Barista",
     balance: 0,
     languages: ["Java", "Python"],
-    houses: ["none"],
+    houses: [],
     color: "pink"
   });
 
