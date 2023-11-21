@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import Tile from '../Components/Tile';
-import { getPlayerData, updatePlayerPosition } from '../Components/Players';
+import { getPlayerData, updatePlayerPosition, updatePlayerCareer } from '../Components/Players';
 import Piece from '../Components/Piece';
 import WheelComponent from 'react-wheel-of-prizes';
 
@@ -96,11 +96,27 @@ export default class GameBoard extends Component{
         });
     };
 
-    handleModalClose = (slideIndex) => {
+    handleModalClose = (slideIndex, newValue) => {
         console.log('Slide index received in GameBoard:', slideIndex);
         const currentPlayer = this.state.players[this.state.currentPlayer];
+        // if currently on a career point
+        if (this.state.careerPoints.includes(this.state.path[currentPlayer.currentPath][currentPlayer.position])) {
+            this.setState(
+                (prevState) => ({
+                    players: updatePlayerCareer(prevState.players, currentPlayer.pid, newValue),
+                }),
+                () => {
+                    this.updatePlayerPieces();
+                }
+            );
+            const newPlayerInfo = {
+                ...this.props.playerInfo,
+                career: newValue,
+            };
+            this.props.updatePlayerInfo(newPlayerInfo);
+        }
         // if currently on tile 119 - a stop point
-        if (currentPlayer.currentPath === 'mainPath' && currentPlayer.position === 12) {
+        else if (currentPlayer.currentPath === 'mainPath' && currentPlayer.position === 12) {
             // if player chose side path
             if (slideIndex === 0) {
                 const newPath = 'sidePath1';

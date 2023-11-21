@@ -1,27 +1,29 @@
 import React, { Component } from 'react';
 import { Carousel } from 'react-responsive-carousel';
-import sidepath from '../assets/sidepath.png';
-import mainpath from '../assets/mainpath.png';
-import PathCard from './PathCard.js';
+import webdev from '../assets/webdev.png';
+import startup from '../assets/startup.png';
+import CareerCard from './CareerCard.js';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
-export default class StopModal1 extends Component {
+export default class CareerModal extends Component {
+    careers = ['Web Developer','Startup CEO'];
     constructor(props) {
         super(props);
         this.state = {
-            currentSlide: 0
+            currentSlide: 0,
+            currentCareer: 'Web Developer'
         };
     }
   
     handleSlideChange = (index) => {
-        this.setState({ currentSlide: index });
+        this.setState({ currentSlide: index, currentCareer: this.careers[index] });
     };
 
     handleClose = () => {
         const { handleClose, onModalClose } = this.props;
-        // Use the callback to send the current slide index to GameBoard.js
+        // Use the callback to send the current slide index and current career to GameBoard.js
         if (onModalClose) {
-            onModalClose(this.state.currentSlide);
+            onModalClose(this.state.currentSlide, this.state.currentCareer);
         }
         // Close the modal
         handleClose();
@@ -31,8 +33,8 @@ export default class StopModal1 extends Component {
         return (
             <div>
                 <Carousel onChange={this.handleSlideChange} onSlideChange={this.props.onSlideChange} showThumbs={false} showArrows={true}>
-                    <PathCard name = {'Side path 1'} image={sidepath} />
-                    <PathCard name = {'Main path'} image={mainpath} />
+                    <CareerCard name = {'Web Developer'} image={webdev} />
+                    <CareerCard name = {'Startup CEO'} image={startup} />
                 </Carousel>
                 <button onClick={this.handleClose}>Select</button>
             </div>

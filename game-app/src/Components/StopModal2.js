@@ -21,7 +21,7 @@ export default class StopModal2 extends Component {
         const { handleClose, onModalClose } = this.props;
         // Use the callback to send the current slide index to GameBoard.js
         if (onModalClose) {
-            onModalClose(this.state.currentSlide, this.state.open);
+            onModalClose(this.state.currentSlide);
         }
         // Close the modal
         handleClose();
