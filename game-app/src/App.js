@@ -9,7 +9,7 @@ function App() {
     image: avatar,
     career: "Barista",
     balance: 0,
-    languages: ["Java", "Python"],
+    languages: [],
     houses: [],
     color: "pink"
   });

@@ -1,6 +1,6 @@
 export const getPlayerData = () => {
     return [
-        { pid: 0, currentPath: "mainPath", position: 0, career: "Barista", balance: 0, languages: ["Java","Python"], houses: [], color: 'pink' },
+        { pid: 0, currentPath: "mainPath", position: 0, career: "Barista", balance: 0, languages: [], houses: [], color: 'pink' },
     ]
 };
 

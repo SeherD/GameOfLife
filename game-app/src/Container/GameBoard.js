@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import Tile from '../Components/Tile';
-import { getPlayerData, updatePlayerPosition, updatePlayerCareer, addPlayerHouse } from '../Components/Players';
+import { getPlayerData, updatePlayerPosition, updatePlayerCareer, addPlayerHouse, addPlayerLanguage } from '../Components/Players';
 import Piece from '../Components/Piece';
 import WheelComponent from 'react-wheel-of-prizes';
 
@@ -97,7 +97,6 @@ export default class GameBoard extends Component{
     };
 
     handleModalClose = (slideIndex, newValue) => {
-        console.log('Slide index received in GameBoard:', slideIndex);
         const currentPlayer = this.state.players[this.state.currentPlayer];
         // if currently on a career point
         if (this.state.careerPoints.includes(this.state.path[currentPlayer.currentPath][currentPlayer.position])) {
@@ -116,7 +115,7 @@ export default class GameBoard extends Component{
             this.props.updatePlayerInfo(newPlayerInfo);
         }
         // if currently on a house point
-        if (this.state.housePoints.includes(this.state.path[currentPlayer.currentPath][currentPlayer.position])) {
+        else if (this.state.housePoints.includes(this.state.path[currentPlayer.currentPath][currentPlayer.position])) {
             this.setState(
                 (prevState) => ({
                     players: addPlayerHouse(prevState.players, currentPlayer.pid, newValue),
@@ -204,7 +203,26 @@ export default class GameBoard extends Component{
         const index = this.state.path[onPath][atPosition];
         console.log(`player ${this.state.currentPlayer} is now on tile ${index}`);
         const tile = this.tiles[index];
-        tile.handleClick();
+        const newValue = tile.handleClick();
+        // if handleClick returned a value
+        if (newValue) {
+            this.setState(
+                (prevState) => ({
+                    players: addPlayerLanguage(prevState.players, this.state.currentPlayer, newValue),
+                }),
+                () => {
+                    this.updatePlayerPieces();
+                    const languagesList = this.props.playerInfo.languages;
+                    languagesList.push(newValue);
+                    console.log(languagesList);
+                    const newPlayerInfo = {
+                        ...this.props.playerInfo,
+                        languagesList: languagesList,
+                    };
+                    this.props.updatePlayerInfo(newPlayerInfo);
+                }
+            );
+        }
     }
 
     calculateNewPosition = (currentPath, currentPosition, increment) => {
