@@ -37,6 +37,11 @@
   }
 }
 
+.LandingPage{
+  height: 100%;
+  width: 100vw;
+}
+
 
 .board {
    width: 90%;
@@ -85,6 +90,16 @@
   border-radius: 50%;
 }
 
+.waitingAvatar{
+  width: 50%;
+  height: 100%;
+  border-radius: 50%;
+  border: dashed;
+  margin: auto;
+  align-items: center;
+  display: grid;
+}
+
 .playerPiece {
   position: absolute;
   width: 40px;
@@ -95,6 +110,34 @@
   background-color: white;
 }
 
+.startButton{
+  width: 150px;
+  height: 75px;
+  font-size: large;
+  border-radius: 5%;
+  border: none;
+  margin: auto;
+  align-items: center;
+  display: grid;
+  background: whitesmoke;
+}
+
+.startButton a{
+  text-decoration: none;
+  color: black;
+
+}
+
 .ReactModal__Overlay {
   z-index: 100;
+}
+
+.playerIcon{
+  width: 350px;
+  height: 175px;
+  margin: auto;
+}
+
+.playerIconDiv{
+  display: inline-flex;
 }
