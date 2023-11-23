@@ -1,22 +1,29 @@
-import logo from './logo.svg';
+import React, { useState } from 'react';
 import './App.css';
+import GameBoard from './Container/GameBoard';
+import PlayerInfo from './Components/PlayerInfo';
+import avatar from './assets/avatar1.png';
 
 function App() {
+  const [playerInfo, setPlayerInfo] = useState({
+    image: avatar,
+    career: "Barista",
+    balance: 0,
+    languages: [],
+    houses: [],
+    color: "pink"
+  });
+
+  const updatePlayerInfo = (newPlayerInfo) => {
+    setPlayerInfo(newPlayerInfo);
+  };
+
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+      {/*TODO: Get player info from database and pass as props */}
+        <PlayerInfo {...playerInfo} />
+        <GameBoard playerInfo={playerInfo} updatePlayerInfo={updatePlayerInfo} />
       </header>
     </div>
   );
