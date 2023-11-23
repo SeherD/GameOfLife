@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
-import Tile from '../Components/Tile';
-import { getPlayerData, updatePlayerPosition, updatePlayerCareer, addPlayerHouse, addPlayerLanguage } from '../Components/Players';
-import Piece from '../Components/Piece';
+import Tile from './Tile';
+import { getPlayerData, updatePlayerPosition, updatePlayerCareer, addPlayerHouse, addPlayerLanguage } from './Players';
+import Piece from './Piece';
 import WheelComponent from 'react-wheel-of-prizes';
 
 
