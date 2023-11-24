@@ -5,7 +5,7 @@ import bootcamp from '../assets/bootcamp.png';
 import PathCard from './PathCard.js';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
-export default class StopModal1 extends Component {
+export default class UniversityModal extends Component {
     constructor(props) {
         super(props);
         this.state = {
