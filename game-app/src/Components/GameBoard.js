@@ -153,6 +153,22 @@ export default class GameBoard extends Component{
             };
             this.props.updatePlayerInfo(newPlayerInfo);
         }
+        // if currently on tile 175 - graduation
+        else if (currentPlayer.currentPath === 'universityPath' && currentPlayer.position === 7) {
+            this.setState(
+                (prevState) => ({
+                    players: updatePlayerCareer(prevState.players, currentPlayer.pid, newValue),
+                }),
+                () => {
+                    this.updatePlayerPieces();
+                }
+            );
+            const newPlayerInfo = {
+                ...this.props.playerInfo,
+                career: newValue,
+            };
+            this.props.updatePlayerInfo(newPlayerInfo);
+        }
         // if currently on tile 119 - a stop point
         else if (currentPlayer.currentPath === 'mainPath' && currentPlayer.position === 12) {
             // if player chose side path
@@ -250,24 +266,35 @@ export default class GameBoard extends Component{
         const tempPosition = parseInt(currentPosition) + parseInt(increment);
         let newPath = currentPath;
         let newPosition = tempPosition;
-        // if the player finishes a side path, merge into the main path
         const path = this.state.path;
-        if (currentPath === "sidePath1" && tempPosition >= path[currentPath].length) {
+        const tilesPassed = path[currentPath].slice(currentPosition+1, newPosition);
+        // if the player finishes a side path, merge into the main path
+        if (currentPath === "universityPath" && tempPosition >= path[currentPath].length) {
+            newPath = "mainPath";
+            newPosition = 3 + tempPosition - path[currentPath].length;
+            tilesPassed.push.apply(tilesPassed, path[newPath].slice(3,newPosition));
+        } else if (currentPath === "sidePath1" && tempPosition >= path[currentPath].length) {
             newPath = "mainPath";
             newPosition = 19 + tempPosition - path[currentPath].length;
+            tilesPassed.push.apply(tilesPassed, path[newPath].slice(19,newPosition));
         } else if (currentPath === "sidePath2" && tempPosition >= path[currentPath].length) {
             newPath = "mainPath";
             newPosition = 36 + tempPosition - path[currentPath].length;
+            tilesPassed.push.apply(tilesPassed, path[newPath].slice(36,newPosition));
         } else if (currentPath === "sidePath3" && tempPosition >= path[currentPath].length) {
             newPath = "mainPath";
             newPosition = 53 + tempPosition - path[currentPath].length;
+            tilesPassed.push.apply(tilesPassed, path[newPath].slice(53,newPosition));
         }
 
         // check if the player is passing any stop tiles or reaching the end of the board
-        const tilesPassed = path[currentPath].slice(currentPosition+1, newPosition);
+        console.log("Tiles passed:", tilesPassed);
         tilesPassed.forEach((tile) => {
             // stop for stop tiles
-            if (this.state.stopPoints.includes(tile)) newPosition = path[currentPath].indexOf(tile);
+            if (this.state.stopPoints.includes(tile)) {
+                newPosition = path[currentPath].indexOf(tile);
+                if (currentPath === "universityPath") newPath = "universityPath";
+            }
             // end on retirement tile
             if (this.state.endPoints.includes(tile)) newPosition = path["mainPath"].indexOf(tile);
         });     

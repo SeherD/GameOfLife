@@ -26,6 +26,10 @@ export default class ModalContent extends Component {
             return(
                 <CareerModal handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
             );
+        } else if (this.state.type === "STOP" && this.state.stopID === 175) {
+            return(
+                <CareerModal handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
+            );
         } else if (this.state.type === "STOP" && this.state.stopID === 119) {
             return(
                 <StopModal1 handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
