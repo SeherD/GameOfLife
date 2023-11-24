@@ -7,7 +7,7 @@ function GamePage() {
   const [playerInfo, setPlayerInfo] = useState({
     image: avatar,
     career: "Barista",
-    cash: 0,
+    cash: 200000,
     languages: [],
     houses: [],
     color: "pink"

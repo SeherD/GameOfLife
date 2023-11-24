@@ -17,11 +17,13 @@ export default class Tile extends Component {
         this.handleClick = this.handleClick.bind(this)
     }
 
-    handleClick = () =>{
+    handleClick = (player) =>{
         if (this.props.word === "House" || this.props.word === "Career" || this.props.word === "STOP") {
             this.setState({open: true})
         } else if (this.props.word === "Skills") {
             return getRandomLanguage();
+        } else if (this.props.word === "PayDay") {
+            return 2 * player.salary;
         }
     }
 

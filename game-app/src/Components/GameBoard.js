@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import Modal from 'react-modal'
 import ModalContent from './ModalContent'
 import Tile from './Tile';
-import { getPlayerData, updatePlayerPosition, updatePlayerCareer, addPlayerHouse, addPlayerLanguage } from './Players';
+import { getPlayerData, updatePlayerPosition, updatePlayerCareer, addPlayerHouse, addPlayerLanguage, updatePlayerCash } from './Players';
 import Piece from './Piece';
 import WheelComponent from 'react-wheel-of-prizes';
 
@@ -239,31 +239,48 @@ export default class GameBoard extends Component{
         const index = this.state.path[onPath][atPosition];
         console.log(`player ${this.state.currentPlayer} is now on tile ${index}`);
         const tile = this.tiles[index];
-        const newValue = tile.handleClick();
+        const newValue = tile.handleClick(this.state.players[this.state.currentPlayer]);
         // if handleClick returned a value
         if (newValue) {
-            this.setState(
-                (prevState) => ({
-                    players: addPlayerLanguage(prevState.players, this.state.currentPlayer, newValue),
-                }),
-                () => {
-                    this.updatePlayerPieces();
-                    const languagesList = this.props.playerInfo.languages;
-                    languagesList.push(newValue);
-                    console.log(languagesList);
-                    const newPlayerInfo = {
-                        ...this.props.playerInfo,
-                        languagesList: languagesList,
-                    };
-                    this.props.updatePlayerInfo(newPlayerInfo);
-                }
-            );
+            if (newValue instanceof String) {
+                this.setState(
+                    (prevState) => ({
+                        players: addPlayerLanguage(prevState.players, this.state.currentPlayer, newValue),
+                    }),
+                    () => {
+                        this.updatePlayerPieces();
+                        const languagesList = this.props.playerInfo.languages;
+                        languagesList.push(newValue);
+                        console.log(languagesList);
+                        const newPlayerInfo = {
+                            ...this.props.playerInfo,
+                            languagesList: languagesList,
+                        };
+                        this.props.updatePlayerInfo(newPlayerInfo);
+                    }
+                );
+            } else {
+                this.setState(
+                    (prevState) => ({
+                        players: updatePlayerCash(prevState.players, this.state.currentPlayer, newValue),
+                    }),
+                    () => {
+                        console.log(this.state.players[this.state.currentPlayer]);
+                        this.updatePlayerPieces();
+                        const newPlayerInfo = {
+                            ...this.props.playerInfo,
+                            cash: this.state.players[this.state.currentPlayer].cash,
+                        };
+                        this.props.updatePlayerInfo(newPlayerInfo);
+                    }
+                )
+            }
         }
     }
 
     calculateNewPosition = (currentPath, currentPosition, increment) => {
         // calculate a tentative new position by increasing the position by the result of the spinner
-        const tempPosition = parseInt(currentPosition) + parseInt(increment);
+        const tempPosition = parseInt(currentPosition) + parseInt(2);
         let newPath = currentPath;
         let newPosition = tempPosition;
         const path = this.state.path;
@@ -289,15 +306,34 @@ export default class GameBoard extends Component{
 
         // check if the player is passing any stop tiles or reaching the end of the board
         console.log("Tiles passed:", tilesPassed);
-        tilesPassed.forEach((tile) => {
+        for (let tile of tilesPassed) {
             // stop for stop tiles
             if (this.state.stopPoints.includes(tile)) {
                 newPosition = path[currentPath].indexOf(tile);
                 if (currentPath === "universityPath") newPath = "universityPath";
+                break;
+            // receive salary when passing payday tiles
+            } else if (this.state.paydayPoints.includes(tile)) {
+                console.log("passing a payday");
+                const salary = this.state.players[this.state.currentPlayer].salary;
+                this.setState(
+                    (prevState) => ({
+                        players: updatePlayerCash(prevState.players, this.state.currentPlayer, salary),
+                    }),
+                    () => {
+                        console.log(this.state.players[this.state.currentPlayer]);
+                        this.updatePlayerPieces();
+                        const newPlayerInfo = {
+                            ...this.props.playerInfo,
+                            cash: this.state.players[this.state.currentPlayer].cash,
+                        };
+                        this.props.updatePlayerInfo(newPlayerInfo);
+                    }
+                )
             }
             // end on retirement tile
             if (this.state.endPoints.includes(tile)) newPosition = path["mainPath"].indexOf(tile);
-        });     
+        };     
 
         return [newPath, newPosition];
     }
