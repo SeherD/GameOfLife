@@ -1,6 +1,6 @@
 export const getPlayerData = () => {
     return [
-        { pid: 0, currentPath: "mainPath", position: 0, career: "Barista", balance: 0, languages: [], houses: [], color: 'pink' },
+        { pid: 0, currentPath: "mainPath", position: 0, career: "Barista", cash: 0, languages: [], houses: [], color: 'pink' },
     ]
 };
 
@@ -16,9 +16,9 @@ export const updatePlayerCareer = (players, playerID, newCareer) => {
     );
 };
 
-export const updatePlayerBalance = (players, playerID, balanceChange) => {
+export const updatePlayerCash = (players, playerID, cashChange) => {
     return players.map((player) =>
-    player.pid === playerID ? {...player, balance: player.balance + balanceChange} : player
+    player.pid === playerID ? {...player, cash: player.cash + cashChange} : player
     );
 };
 
