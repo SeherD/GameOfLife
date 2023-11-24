@@ -441,6 +441,8 @@ export default class GameBoard extends Component{
                     ariaHideApp={false}
                     isOpen = {this.state.universityModalOpen}
                     onRequestClose={() => this.setState({universityModalOpen: false})}
+                    shouldCloseOnEsc={false}
+                    shouldCloseOnOverlayClick={false}
                     style={customStyles}>
                     <ModalContent type={"University"} handleClose={() => this.setState({universityModalOpen: false})} onModalClose={this.handleModalClose} />
                 </Modal>
