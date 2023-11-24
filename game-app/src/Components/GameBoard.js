@@ -1,4 +1,6 @@
 import React, {Component} from 'react';
+import Modal from 'react-modal'
+import ModalContent from './ModalContent'
 import Tile from './Tile';
 import { getPlayerData, updatePlayerPosition, updatePlayerCareer, addPlayerHouse, addPlayerLanguage } from './Players';
 import Piece from './Piece';
@@ -46,7 +48,9 @@ export default class GameBoard extends Component{
             currentPlayer: 0,
             playerPieces: [],
             // the number of pixels the board is offset from the left side of the page
-            boardOffsetLeft: 0
+            boardOffsetLeft: 0,
+            // for tracking the initial path choice modal
+            universityModalOpen: true
         }
     
     // used for determining boardOffsetLeft
@@ -58,6 +62,7 @@ export default class GameBoard extends Component{
 
     componentDidMount() {
         this.getBoardOffset();
+        
         this.updatePlayerPieces();
     }
 
@@ -98,6 +103,21 @@ export default class GameBoard extends Component{
 
     handleModalClose = (slideIndex, newValue) => {
         const currentPlayer = this.state.players[this.state.currentPlayer];
+        // if it's the beginning of the game (i.e. the current player isn't on a path yet)
+        if (currentPlayer.currentPath === 'mainPath' && currentPlayer.position === 0) {
+            // if player chose university path
+            let newPath = null;
+            slideIndex === 0 ? newPath = 'universityPath' : newPath = 'mainPath';
+            const newPosition = 0;
+            this.setState(
+                (prevState) => ({
+                    players: updatePlayerPosition(prevState.players, currentPlayer.pid, newPath, newPosition),
+                }),
+                () => {
+                    this.updatePlayerPieces();
+                }
+            );
+        }
         // if currently on a career point
         if (this.state.careerPoints.includes(this.state.path[currentPlayer.currentPath][currentPlayer.position])) {
             this.setState(
@@ -227,7 +247,7 @@ export default class GameBoard extends Component{
 
     calculateNewPosition = (currentPath, currentPosition, increment) => {
         // calculate a tentative new position by increasing the position by the result of the spinner
-        const tempPosition = parseInt(currentPosition) + parseInt(5);
+        const tempPosition = parseInt(currentPosition) + parseInt(increment);
         let newPath = currentPath;
         let newPosition = tempPosition;
         // if the player finishes a side path, merge into the main path
@@ -361,7 +381,18 @@ export default class GameBoard extends Component{
         );
     }
   
-    render() {return (
+    render() {
+        const customStyles = {
+            content: {
+              top: '50%',
+              left: '50%',
+              right: 'auto',
+              bottom: 'auto',
+              marginRight: '-50%',
+              transform: 'translate(-50%, -50%)',
+            },
+        };
+        return (
         <div>
             {/* used for determining boardOffsetLeft */}
             <div ref={this.boardRef} style={{ position: 'absolute', top: '-9999px' }} />
@@ -377,6 +408,16 @@ export default class GameBoard extends Component{
                         downDuration={500} />
                 </div>
             </div> 
+            {/* modal for choosing initial path - open at beginning of game */}
+            <div>
+                <Modal
+                    ariaHideApp={false}
+                    isOpen = {this.state.universityModalOpen}
+                    onRequestClose={() => this.setState({universityModalOpen: false})}
+                    style={customStyles}>
+                    <ModalContent type={"University"} handleClose={() => this.setState({universityModalOpen: false})} onModalClose={this.handleModalClose} />
+                </Modal>
+            </div>
         </div>
     );}
 }
