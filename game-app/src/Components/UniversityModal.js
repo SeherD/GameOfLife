@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { Carousel } from 'react-responsive-carousel';
-import sidepath from '../assets/sidepath.png';
-import mainpath from '../assets/mainpath.png';
+import university from '../assets/university.png';
+import bootcamp from '../assets/bootcamp.png';
 import PathCard from './PathCard.js';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
-export default class StopModal2 extends Component {
+export default class UniversityModal extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -32,8 +32,8 @@ export default class StopModal2 extends Component {
             <div>
                 <h1>Choose a path</h1>
                 <Carousel onChange={this.handleSlideChange} onSlideChange={this.props.onSlideChange} showThumbs={false} showArrows={true}>
-                    <PathCard name = {'Side path 2'} image={sidepath} />
-                    <PathCard name = {'Main path'} image={mainpath} />
+                    <PathCard name = {'University Path'} image={university} />
+                    <PathCard name = {'Bootcamp Path'} image={bootcamp} />
                 </Carousel>
                 <button onClick={this.handleClose}>Select</button>
             </div>

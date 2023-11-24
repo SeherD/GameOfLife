@@ -6,6 +6,7 @@ import StopModal1 from './StopModal1';
 import StopModal2 from './StopModal2';
 import StopModal3 from './StopModal3';
 import StopModal4 from './StopModal4';
+import UniversityModal from './UniversityModal';
 
 export default class ModalContent extends Component {
     constructor(props) {
@@ -25,6 +26,10 @@ export default class ModalContent extends Component {
             return(
                 <CareerModal handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
             );
+        } else if (this.state.type === "STOP" && this.state.stopID === 175) {
+            return(
+                <CareerModal handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
+            );
         } else if (this.state.type === "STOP" && this.state.stopID === 119) {
             return(
                 <StopModal1 handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
@@ -40,6 +45,10 @@ export default class ModalContent extends Component {
         } else if (this.state.type === "STOP" && this.state.stopID === 184) {
             return(
                 <StopModal4 handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
+            );
+        } else if (this.state.type === "University") {
+            return(
+                <UniversityModal handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
             );
         }
     }

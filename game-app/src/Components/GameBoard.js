@@ -1,4 +1,6 @@
 import React, {Component} from 'react';
+import Modal from 'react-modal'
+import ModalContent from './ModalContent'
 import Tile from './Tile';
 import { getPlayerData, updatePlayerPosition, updatePlayerCareer, addPlayerHouse, addPlayerLanguage } from './Players';
 import Piece from './Piece';
@@ -46,7 +48,9 @@ export default class GameBoard extends Component{
             currentPlayer: 0,
             playerPieces: [],
             // the number of pixels the board is offset from the left side of the page
-            boardOffsetLeft: 0
+            boardOffsetLeft: 0,
+            // for tracking the initial path choice modal
+            universityModalOpen: true
         }
     
     // used for determining boardOffsetLeft
@@ -58,6 +62,7 @@ export default class GameBoard extends Component{
 
     componentDidMount() {
         this.getBoardOffset();
+        
         this.updatePlayerPieces();
     }
 
@@ -98,6 +103,21 @@ export default class GameBoard extends Component{
 
     handleModalClose = (slideIndex, newValue) => {
         const currentPlayer = this.state.players[this.state.currentPlayer];
+        // if it's the beginning of the game (i.e. the current player isn't on a path yet)
+        if (currentPlayer.currentPath === 'mainPath' && currentPlayer.position === 0) {
+            // if player chose university path
+            let newPath = null;
+            slideIndex === 0 ? newPath = 'universityPath' : newPath = 'mainPath';
+            const newPosition = 0;
+            this.setState(
+                (prevState) => ({
+                    players: updatePlayerPosition(prevState.players, currentPlayer.pid, newPath, newPosition),
+                }),
+                () => {
+                    this.updatePlayerPieces();
+                }
+            );
+        }
         // if currently on a career point
         if (this.state.careerPoints.includes(this.state.path[currentPlayer.currentPath][currentPlayer.position])) {
             this.setState(
@@ -130,6 +150,22 @@ export default class GameBoard extends Component{
             const newPlayerInfo = {
                 ...this.props.playerInfo,
                 houses: housesList,
+            };
+            this.props.updatePlayerInfo(newPlayerInfo);
+        }
+        // if currently on tile 175 - graduation
+        else if (currentPlayer.currentPath === 'universityPath' && currentPlayer.position === 7) {
+            this.setState(
+                (prevState) => ({
+                    players: updatePlayerCareer(prevState.players, currentPlayer.pid, newValue),
+                }),
+                () => {
+                    this.updatePlayerPieces();
+                }
+            );
+            const newPlayerInfo = {
+                ...this.props.playerInfo,
+                career: newValue,
             };
             this.props.updatePlayerInfo(newPlayerInfo);
         }
@@ -227,27 +263,38 @@ export default class GameBoard extends Component{
 
     calculateNewPosition = (currentPath, currentPosition, increment) => {
         // calculate a tentative new position by increasing the position by the result of the spinner
-        const tempPosition = parseInt(currentPosition) + parseInt(5);
+        const tempPosition = parseInt(currentPosition) + parseInt(increment);
         let newPath = currentPath;
         let newPosition = tempPosition;
-        // if the player finishes a side path, merge into the main path
         const path = this.state.path;
-        if (currentPath === "sidePath1" && tempPosition >= path[currentPath].length) {
+        const tilesPassed = path[currentPath].slice(currentPosition+1, newPosition);
+        // if the player finishes a side path, merge into the main path
+        if (currentPath === "universityPath" && tempPosition >= path[currentPath].length) {
+            newPath = "mainPath";
+            newPosition = 3 + tempPosition - path[currentPath].length;
+            tilesPassed.push.apply(tilesPassed, path[newPath].slice(3,newPosition));
+        } else if (currentPath === "sidePath1" && tempPosition >= path[currentPath].length) {
             newPath = "mainPath";
             newPosition = 19 + tempPosition - path[currentPath].length;
+            tilesPassed.push.apply(tilesPassed, path[newPath].slice(19,newPosition));
         } else if (currentPath === "sidePath2" && tempPosition >= path[currentPath].length) {
             newPath = "mainPath";
             newPosition = 36 + tempPosition - path[currentPath].length;
+            tilesPassed.push.apply(tilesPassed, path[newPath].slice(36,newPosition));
         } else if (currentPath === "sidePath3" && tempPosition >= path[currentPath].length) {
             newPath = "mainPath";
             newPosition = 53 + tempPosition - path[currentPath].length;
+            tilesPassed.push.apply(tilesPassed, path[newPath].slice(53,newPosition));
         }
 
         // check if the player is passing any stop tiles or reaching the end of the board
-        const tilesPassed = path[currentPath].slice(currentPosition+1, newPosition);
+        console.log("Tiles passed:", tilesPassed);
         tilesPassed.forEach((tile) => {
             // stop for stop tiles
-            if (this.state.stopPoints.includes(tile)) newPosition = path[currentPath].indexOf(tile);
+            if (this.state.stopPoints.includes(tile)) {
+                newPosition = path[currentPath].indexOf(tile);
+                if (currentPath === "universityPath") newPath = "universityPath";
+            }
             // end on retirement tile
             if (this.state.endPoints.includes(tile)) newPosition = path["mainPath"].indexOf(tile);
         });     
@@ -361,7 +408,18 @@ export default class GameBoard extends Component{
         );
     }
   
-    render() {return (
+    render() {
+        const customStyles = {
+            content: {
+              top: '50%',
+              left: '50%',
+              right: 'auto',
+              bottom: 'auto',
+              marginRight: '-50%',
+              transform: 'translate(-50%, -50%)',
+            },
+        };
+        return (
         <div>
             {/* used for determining boardOffsetLeft */}
             <div ref={this.boardRef} style={{ position: 'absolute', top: '-9999px' }} />
@@ -377,6 +435,18 @@ export default class GameBoard extends Component{
                         downDuration={500} />
                 </div>
             </div> 
+            {/* modal for choosing initial path - open at beginning of game */}
+            <div>
+                <Modal
+                    ariaHideApp={false}
+                    isOpen = {this.state.universityModalOpen}
+                    onRequestClose={() => this.setState({universityModalOpen: false})}
+                    shouldCloseOnEsc={false}
+                    shouldCloseOnOverlayClick={false}
+                    style={customStyles}>
+                    <ModalContent type={"University"} handleClose={() => this.setState({universityModalOpen: false})} onModalClose={this.handleModalClose} />
+                </Modal>
+            </div>
         </div>
     );}
 }

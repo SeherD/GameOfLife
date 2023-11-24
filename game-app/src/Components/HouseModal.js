@@ -32,6 +32,7 @@ export default class HouseModal extends Component {
     render() {
         return (
             <div>
+            <h1>Choose a house</h1>
                 <Carousel onChange={this.handleSlideChange} onSlideChange={this.props.onSlideChange} showThumbs={false} showArrows={true}>
                     <HouseCard name = {'House'} image={house} />
                     <HouseCard name = {'Apartment'} image={apartment} />

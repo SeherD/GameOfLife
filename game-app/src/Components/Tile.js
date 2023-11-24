@@ -50,6 +50,8 @@ render()
                         ariaHideApp={false}
                         isOpen = {this.state.open}
                         onRequestClose={this.handleClose}
+                        shouldCloseOnEsc={false}
+                        shouldCloseOnOverlayClick={false}
                         style={customStyles}>
                         <ModalContent type={this.props.word} stopID={this.state.stopID} handleClose={this.handleClose} onModalClose={this.props.onModalClose} />
                     </Modal>

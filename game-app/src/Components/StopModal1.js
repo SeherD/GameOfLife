@@ -30,6 +30,7 @@ export default class StopModal1 extends Component {
     render() {
         return (
             <div>
+                <h1>Choose a path</h1>
                 <Carousel onChange={this.handleSlideChange} onSlideChange={this.props.onSlideChange} showThumbs={false} showArrows={true}>
                     <PathCard name = {'Side path 1'} image={sidepath} />
                     <PathCard name = {'Main path'} image={mainpath} />

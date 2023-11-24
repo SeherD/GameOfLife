@@ -8,6 +8,7 @@ import avatar3 from '../assets/avatar3.jpg';
 import avatar4 from '../assets/avatar4.jpg';
 
 function LandingPage() {
+  // eslint-disable-next-line
     const [waiting, setWaiting] = useState(false);
 
   return (

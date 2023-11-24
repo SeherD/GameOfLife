@@ -32,6 +32,7 @@ export default class CareerModal extends Component {
     render() {
         return (
             <div>
+            <h1>Choose a career</h1>
                 <Carousel onChange={this.handleSlideChange} onSlideChange={this.props.onSlideChange} showThumbs={false} showArrows={true}>
                     <CareerCard name = {'Web Developer'} image={webdev} />
                     <CareerCard name = {'Startup CEO'} image={startup} />
