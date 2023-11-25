@@ -8,6 +8,7 @@ render(){
             <div className = "card">
             <img className="cardImage" src={this.props.image} alt="house display"/>
             <p>{this.props.name}</p>
+            <p>${this.props.price}</p>
             </div>
         )
     }
