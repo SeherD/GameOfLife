@@ -5,7 +5,7 @@ import apartment from '../assets/apartment.jpg';
 import HouseCard from './HouseCard.js';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
-export default class HouseModal extends Component {
+export default class HouseModal2 extends Component {
     houses = ['House','Apartment'];
     constructor(props) {
         super(props);
@@ -36,6 +36,7 @@ export default class HouseModal extends Component {
                 <Carousel onChange={this.handleSlideChange} onSlideChange={this.props.onSlideChange} showThumbs={false} showArrows={true}>
                     <HouseCard name = {'House'} image={house} />
                     <HouseCard name = {'Apartment'} image={apartment} />
+                    <div><h1>None</h1></div>
                 </Carousel>
                 <button onClick={this.handleClose}>Select</button>
             </div>
