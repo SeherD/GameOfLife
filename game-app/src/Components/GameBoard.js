@@ -308,6 +308,16 @@ export default class GameBoard extends Component{
 
     //update respin and certification state when player chooses to spin for risky skill
     handleRisk = (certification) =>{
+        toast('Spin again to see if you passed the certification!', {
+            position: "top-center",
+            autoClose: 2500,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false,
+            progress: undefined,
+            theme: "dark",
+            });
         this.setState({cert: certification, respin: true})
     }
    
@@ -323,7 +333,7 @@ export default class GameBoard extends Component{
                     //TODO: call flask endpoint to add this.state.cert to player assets
                     toast.success('You passed the certification!', {
                         position: "top-center",
-                        autoClose: 5000,
+                        autoClose: 2500,
                         hideProgressBar: true,
                         closeOnClick: true,
                         pauseOnHover: true,
@@ -335,7 +345,7 @@ export default class GameBoard extends Component{
                 }else {
                     toast('You did not pass the certification!', {
                         position: "top-center",
-                        autoClose: 5000,
+                        autoClose: 2500,
                         hideProgressBar: true,
                         closeOnClick: true,
                         pauseOnHover: true,
