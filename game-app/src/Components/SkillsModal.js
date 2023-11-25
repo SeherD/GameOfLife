@@ -1,15 +1,10 @@
 import React, { Component } from 'react';
 import SkillsCard from './SkillsCard';
-import go from "../assets/go.png";
 import python from "../assets/python.png";
 import java from "../assets/java.png";
 
 
 export default class SkillsModal extends Component {
-
-    constructor(props) {
-        super(props);
-    }
 
     handleFreeSkill = () =>{
         //TODO: call flask endpoint to add this.props.freeSkill to player assets
