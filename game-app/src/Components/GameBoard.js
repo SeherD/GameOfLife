@@ -52,6 +52,7 @@ export default class GameBoard extends Component{
             boardOffsetLeft: 0,
             // for tracking the initial path choice modal
             universityModalOpen: true,
+            initialCareerModalOpen: false,
             // respin for chance to win a certification
             certSpin: false,
             cert: "",
@@ -114,16 +115,21 @@ export default class GameBoard extends Component{
         if (currentPlayer.currentPath === 'mainPath' && currentPlayer.position === 0) {
             // if player chose university path
             let newPath = null;
-            slideIndex === 0 ? newPath = 'universityPath' : newPath = 'mainPath';
-            const newPosition = 0;
-            this.setState(
-                (prevState) => ({
-                    players: updatePlayerPosition(prevState.players, currentPlayer.pid, newPath, newPosition),
-                }),
-                () => {
-                    this.updatePlayerPieces();
-                }
-            );
+            if (slideIndex === 0) {
+                newPath = 'universityPath';
+                const newPosition = 0;
+                this.setState(
+                    (prevState) => ({
+                        players: updatePlayerPosition(prevState.players, currentPlayer.pid, newPath, newPosition),
+                    }),
+                    () => {
+                        this.updatePlayerPieces();
+                    }
+                );
+            } else {
+                newPath = 'mainPath';
+                this.setState({initialCareerModalOpen: true});
+            }
         }
         // if currently on a career point
         if (this.state.careerPoints.includes(this.state.path[currentPlayer.currentPath][currentPlayer.position])) {
@@ -381,6 +387,23 @@ export default class GameBoard extends Component{
             });
         this.setState({houseToSell: house, houseSpin: true})
     }
+
+    handleInitialCareerModalClose = (slideIndex, newCareer) => {
+        this.setState(
+            (prevState) => ({
+                players: updatePlayerCareer(prevState.players, this.state.currentPlayer, newCareer),
+            }),
+            () => {
+                this.updatePlayerPieces();
+            }
+        );
+        const newPlayerInfo = {
+            ...this.props.playerInfo,
+            career: newCareer,
+            // TODO: call flask endpoint to find salary of new career and set player's salary
+        };
+        this.props.updatePlayerInfo(newPlayerInfo);
+    }
    
     //function that is called after the spinner is done spinning
     onFinished = (winner) => {
@@ -592,6 +615,18 @@ export default class GameBoard extends Component{
                     shouldCloseOnOverlayClick={false}
                     style={customStyles}>
                     <ModalContent type={"University"} handleClose={() => this.setState({universityModalOpen: false})} onModalClose={this.handleModalClose} />
+                </Modal>
+            </div>
+            {/* modal for choosing initial career if player begins on bootcamp path */}
+            <div>
+                <Modal
+                    ariaHideApp={false}
+                    isOpen = {this.state.initialCareerModalOpen}
+                    onRequestClose={() => this.setState({initialCareerModalOpen: false})}
+                    shouldCloseOnEsc={false}
+                    shouldCloseOnOverlayClick={false}
+                    style={customStyles}>
+                    <ModalContent type={"Career"} handleClose={() => this.setState({initialCareerModalOpen: false})} onModalClose={this.handleInitialCareerModalClose} />
                 </Modal>
             </div>
         </div>
