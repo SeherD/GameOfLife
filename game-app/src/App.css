@@ -141,3 +141,35 @@
 .playerIconDiv{
   display: inline-flex;
 }
+
+.skillOptionsDiv{
+  display: flex;
+}
+
+.optionDiv{
+  margin: 10px;
+  display: grid;
+}
+
+.skillCard{
+  width: 200px;
+    height: 250px;
+    border: thin;
+    border-color: black;
+    border-style: solid;
+    border-radius: 5px;
+    padding: 10px;
+    margin: auto;
+}
+
+.skillCard img{
+  width:200px;
+}
+
+.optionDiv button{
+  margin-top: 10px;
+}
+
+.popup{
+  font-size: medium;
+}

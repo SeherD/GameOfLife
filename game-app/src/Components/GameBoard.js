@@ -5,7 +5,8 @@ import Tile from './Tile';
 import { getPlayerData, updatePlayerPosition, updatePlayerCareer, addPlayerHouse, addPlayerLanguage, updatePlayerCash } from './Players';
 import Piece from './Piece';
 import WheelComponent from 'react-wheel-of-prizes';
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default class GameBoard extends Component{
     boardRef = React.createRef(); // used to get the left offset for the board - very hacky
@@ -50,7 +51,10 @@ export default class GameBoard extends Component{
             // the number of pixels the board is offset from the left side of the page
             boardOffsetLeft: 0,
             // for tracking the initial path choice modal
-            universityModalOpen: true
+            universityModalOpen: true,
+            // respin for chance to win
+            respin: false,
+            cert: ""
         }
     
     // used for determining boardOffsetLeft
@@ -337,12 +341,59 @@ export default class GameBoard extends Component{
 
         return [newPath, newPosition];
     }
+
+    //update respin and certification state when player chooses to spin for risky skill
+    handleRisk = (certification) =>{
+        toast('Spin again to see if you passed the certification!', {
+            position: "top-center",
+            autoClose: 2500,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false,
+            progress: undefined,
+            theme: "dark",
+            bodyClassName: "popup"
+            });
+        this.setState({cert: certification, respin: true})
+    }
    
     //function that is called after the spinner is done spinning
     onFinished = (winner) => {
+        
         const currentPlayer = this.state.players.find(player => player.pid === this.state.currentPlayer);
         const currentPath = currentPlayer.currentPath;
         const currentPosition = currentPlayer.position;
+        if(this.state.respin){
+            if(this.state.skillPoints.includes(this.state.path[currentPath][currentPosition])){
+                if(winner % 2 === 0){
+                    //TODO: call flask endpoint to add this.state.cert to player assets
+                    toast.success('You passed the certification!', {
+                        position: "top-center",
+                        autoClose: 2500,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: false,
+                        progress: undefined,
+                        theme: "dark",
+                        });
+
+                }else {
+                    toast('You did not pass the certification!', {
+                        position: "top-center",
+                        autoClose: 2500,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: false,
+                        progress: undefined,
+                        theme: "dark",
+                        });
+                }
+                this.setState({respin: false, cert: ""});
+            }
+        } else{
         const newPathAndPosition = this.calculateNewPosition(currentPath, currentPosition, winner);
         const newPath = newPathAndPosition[0];
         const newPosition = newPathAndPosition[1];
@@ -351,6 +402,7 @@ export default class GameBoard extends Component{
         console.log(`new path: ${newPath}, new position: ${newPosition}`);
         this.handleTile(newPath, newPosition);
         this.updateCurrentPlayer();
+        }
       }  
 
     //create game board
@@ -417,7 +469,7 @@ export default class GameBoard extends Component{
                                     ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.skillPoints.includes(num)){
                                 return <Tile
-                                    onModalClose = {this.handleModalClose}
+                                    onModalClose = {this.handleRisk}
                                     key = {num} 
                                     color = {"#fb3199"}
                                     word = {"Skills"}
@@ -457,6 +509,7 @@ export default class GameBoard extends Component{
         };
         return (
         <div>
+        <ToastContainer/>
             {/* used for determining boardOffsetLeft */}
             <div ref={this.boardRef} style={{ position: 'absolute', top: '-9999px' }} />
             {/* game board */}
