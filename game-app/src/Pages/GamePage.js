@@ -9,7 +9,7 @@ function GamePage() {
     career: "Barista",
     balance: 0,
     languages: [],
-    houses: [],
+    houses: ["First house"],
     color: "pink"
   });
 

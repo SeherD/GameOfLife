@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import "react-responsive-carousel/lib/styles/carousel.min.css";
-import HouseModal1 from './HouseModal1';
+import HouseModal from './HouseModal';
 import CareerModal from './CareerModal';
 import StopModal1 from './StopModal1';
 import StopModal2 from './StopModal2';
@@ -23,7 +23,7 @@ export default class ModalContent extends Component {
     render() {
         if (this.state.type === "House") {
             return(
-                <HouseModal1 handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
+                <HouseModal handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
             );
         } else if (this.state.type === "Career") {
             return(

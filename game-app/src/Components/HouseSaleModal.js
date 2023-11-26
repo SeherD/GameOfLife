@@ -6,7 +6,7 @@ import nohouse from '../assets/nohouse.png';
 import HouseCard from './HouseCard.js';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
-export default class HouseModal2 extends Component {
+export default class HouseSaleModal extends Component {
     houses = ['House','Apartment'];
     constructor(props) {
         super(props);
@@ -33,7 +33,8 @@ export default class HouseModal2 extends Component {
     render() {
         return (
             <div>
-            <h1>Choose a house</h1>
+            <h1>Choose a house to sell</h1>
+                {/* TODO: call a flask endpoint to display all the current player's owned houses */}
                 <Carousel onChange={this.handleSlideChange} onSlideChange={this.props.onSlideChange} showThumbs={false} showArrows={true}>
                     <HouseCard name = {'House'} image={house} price={200000} />
                     <HouseCard name = {'Apartment'} image={apartment} price={100000} />
