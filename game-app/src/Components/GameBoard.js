@@ -270,7 +270,7 @@ export default class GameBoard extends Component{
 
     calculateNewPosition = (currentPath, currentPosition, increment) => {
         // calculate a tentative new position by increasing the position by the result of the spinner
-        const tempPosition = parseInt(currentPosition) + parseInt(10);
+        const tempPosition = parseInt(currentPosition) + parseInt(increment);
         let newPath = currentPath;
         let newPosition = tempPosition;
         const path = this.state.path;
