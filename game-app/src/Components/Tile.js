@@ -10,17 +10,17 @@ export default class Tile extends Component {
         this.state = {
             stopID: props.stopID,
             open: false,
-            currentSlide: 0
+            currentSlide: 0,
         }
 
         this.handleClick = this.handleClick.bind(this)
     }
 
-    handleClick = () =>{
+    handleClick = (player) =>{
         if (this.props.word !== "" && this.props.word !== "PayDay") {
             this.setState({open: true});
         } else if (this.props.word === "PayDay") {
-            return 2 * this.state.players[this.state.currentPlayer].salary;
+            return 2 * player.salary;
         }
     }
 

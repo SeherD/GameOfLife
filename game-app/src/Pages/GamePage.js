@@ -8,6 +8,7 @@ function GamePage() {
     image: avatar,
     career: "Barista",
     cash: 200000,
+    salary: 3000,
     languages: [],
     houses: [],
     color: "pink"

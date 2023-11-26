@@ -138,6 +138,7 @@ export default class GameBoard extends Component{
             const newPlayerInfo = {
                 ...this.props.playerInfo,
                 career: newValue,
+                // TODO: call flask endpoint to find salary of new career and set player's salary
             };
             this.props.updatePlayerInfo(newPlayerInfo);
         }
@@ -173,6 +174,7 @@ export default class GameBoard extends Component{
             const newPlayerInfo = {
                 ...this.props.playerInfo,
                 career: newValue,
+                // TODO: call flask endpoint to find salary of new career and set player's salary
             };
             this.props.updatePlayerInfo(newPlayerInfo);
         }
@@ -249,6 +251,7 @@ export default class GameBoard extends Component{
         const newValue = tile.handleClick(this.state.players[this.state.currentPlayer]);
         // if handleClick returned a value
         if (newValue) {
+            // if that value is a string, it is a new skill
             if (newValue instanceof String) {
                 this.setState(
                     (prevState) => ({
@@ -266,7 +269,9 @@ export default class GameBoard extends Component{
                         this.props.updatePlayerInfo(newPlayerInfo);
                     }
                 );
+            // if the returned value is a number, it is 2 * the player's salary
             } else {
+                // TODO: call a flask endpoint to add newValue to the player's cash
                 this.setState(
                     (prevState) => ({
                         players: updatePlayerCash(prevState.players, this.state.currentPlayer, newValue),
@@ -287,7 +292,7 @@ export default class GameBoard extends Component{
 
     calculateNewPosition = (currentPath, currentPosition, increment) => {
         // calculate a tentative new position by increasing the position by the result of the spinner
-        const tempPosition = parseInt(currentPosition) + parseInt(2);
+        const tempPosition = parseInt(currentPosition) + parseInt(increment);
         let newPath = currentPath;
         let newPosition = tempPosition;
         const path = this.state.path;
@@ -323,6 +328,7 @@ export default class GameBoard extends Component{
             } else if (this.state.paydayPoints.includes(tile)) {
                 console.log("passing a payday");
                 const salary = this.state.players[this.state.currentPlayer].salary;
+                // TODO: call a flask endpoint to add the player's salary to their cash
                 this.setState(
                     (prevState) => ({
                         players: updatePlayerCash(prevState.players, this.state.currentPlayer, salary),
