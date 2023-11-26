@@ -52,9 +52,12 @@ export default class GameBoard extends Component{
             boardOffsetLeft: 0,
             // for tracking the initial path choice modal
             universityModalOpen: true,
-            // respin for chance to win
-            respin: false,
-            cert: ""
+            // respin for chance to win a certification
+            certSpin: false,
+            cert: "",
+            // respin for sale price of house
+            houseSpin: false,
+            houseToSell: ""
         }
     
     // used for determining boardOffsetLeft
@@ -355,7 +358,22 @@ export default class GameBoard extends Component{
             theme: "dark",
             bodyClassName: "popup"
             });
-        this.setState({cert: certification, respin: true})
+        this.setState({cert: certification, certSpin: true})
+    }
+
+    handleSale = (house) => {
+        toast('Spin again to see whether the price of the house went up or down!', {
+            position: "top-center",
+            autoClose: 2500,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false,
+            progress: undefined,
+            theme: "dark",
+            bodyClassName: "popup"
+            });
+        this.setState({houseToSell: house, houseSpin: true})
     }
    
     //function that is called after the spinner is done spinning
@@ -364,7 +382,41 @@ export default class GameBoard extends Component{
         const currentPlayer = this.state.players.find(player => player.pid === this.state.currentPlayer);
         const currentPath = currentPlayer.currentPath;
         const currentPosition = currentPlayer.position;
-        if(this.state.respin){
+        // If the player is spinning to determine the sale price of a house
+        if(this.state.houseSpin){
+            if(this.state.housePoints.includes(this.state.path[currentPath][currentPosition])){
+                // TODO: call flask endpoint to get the original price of the house - let salePrice = this value
+                if(winner % 2 === 0){
+                    toast('The price of your house went up!', {
+                        position: "top-center",
+                        autoClose: 2500,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: false,
+                        progress: undefined,
+                        theme: "dark",
+                    });
+                    // TODO: increase the price of the house by 20K
+                }else {
+                    toast('The price of your house went down!', {
+                        position: "top-center",
+                        autoClose: 2500,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: false,
+                        progress: undefined,
+                        theme: "dark",
+                    });
+                    // TODO: decrease the price of the house by 20K
+                }
+                //TODO: call flask endpoint to remove this.state.houseToSell from player assets
+                // TODO: call flask endpoint to add salePrice to player assets
+                this.setState({houseSpin: false, houseToSell: ""});
+            }
+        // If the player is spinning to determine if they get a certification
+        } else if(this.state.certSpin){
             if(this.state.skillPoints.includes(this.state.path[currentPath][currentPosition])){
                 if(winner % 2 === 0){
                     //TODO: call flask endpoint to add this.state.cert to player assets
@@ -391,9 +443,9 @@ export default class GameBoard extends Component{
                         theme: "dark",
                         });
                 }
-                this.setState({respin: false, cert: ""});
+                this.setState({certSpin: false, cert: ""});
             }
-        } else{
+        } else {
         const newPathAndPosition = this.calculateNewPosition(currentPath, currentPosition, winner);
         const newPath = newPathAndPosition[0];
         const newPosition = newPathAndPosition[1];
@@ -462,7 +514,7 @@ export default class GameBoard extends Component{
                                     ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.housePoints.includes(num)){
                                 return <Tile
-                                    onModalClose = {this.handleModalClose}
+                                    onModalClose = {this.handleSale}
                                     key = {num} 
                                     color = {"blue"}
                                     word = {"House"}
