@@ -102,6 +102,30 @@ CREATE TABLE Games (
 INSERT INTO Games (GameID, BoardState, HostID, Players, Finished)
 VALUES
     ('G1', 'Cell7, Cell8, Cell21, Cell4, Cell9', 'P1', 'P1,P2,P3,P4,P5', 0);
-    
+
+-- Create accounts    
+CREATE TABLE Accounts (
+    AccountID TEXT PRIMARY KEY,
+    Username TEXT,
+    Password TEXT,
+    FirstName TEXT,
+    LastName TEXT
+);
+
+INSERT INTO Accounts (AccountID, Username, Password, FirstName, LastName)
+VALUES
+    ('A1', 'bestLifeGamePlayer2000', 'thisShouldBeSHA256d', 'Alice', 'Bob');
+    ('A2', 'bestLifeGamePlayer2001', 'thisShouldBeSHA512d', 'Alice', 'Bob');
 
 
+-- Create user account data
+CREATE TABLE UserData (
+    UserID TEXT PRIMARY KEY,
+    PlayerName TEXT,
+    HighestScore REAL,
+    AccountIDs TEXT
+);
+
+INSERT INTO UserData (UserID, PlayerName, HighestScore, AccountIDs)
+VALUES
+    ('UD1', 'bestLifeGamePlayer2000', 1500000, 'A1,A2');
