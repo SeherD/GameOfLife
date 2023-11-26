@@ -118,12 +118,16 @@ export default class GameBoard extends Component{
             if (slideIndex === 0) {
                 newPath = 'universityPath';
                 const newPosition = 0;
-                this.setState(
-                    (prevState) => ({
-                        players: updatePlayerPosition(prevState.players, currentPlayer.pid, newPath, newPosition),
-                    }),
+                let updatedPlayersArray = updatePlayerPosition(this.state.players, currentPlayer.pid, newPath, newPosition);
+                updatedPlayersArray = updatePlayerCash(this.state.players, currentPlayer.pid, -100000);
+                this.setState({players: updatedPlayersArray,},
                     () => {
                         this.updatePlayerPieces();
+                        const newPlayerInfo = {
+                            ...this.props.playerInfo,
+                            cash: this.state.players[this.state.currentPlayer].cash,
+                        };
+                        this.props.updatePlayerInfo(newPlayerInfo);
                     }
                 );
             } else {
