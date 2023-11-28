@@ -119,7 +119,7 @@ export default class GameBoard extends Component{
                 newPath = 'universityPath';
                 const newPosition = 0;
                 let updatedPlayersArray = updatePlayerPosition(this.state.players, currentPlayer.pid, newPath, newPosition);
-                updatedPlayersArray = updatePlayerCash(this.state.players, currentPlayer.pid, -100000);
+                updatedPlayersArray = updatePlayerCash(updatedPlayersArray, currentPlayer.pid, -100000);
                 this.setState({players: updatedPlayersArray,},
                     () => {
                         this.updatePlayerPieces();
