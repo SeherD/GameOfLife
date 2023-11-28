@@ -7,6 +7,7 @@ export default class CareerCard extends Component {
             <div className = "card">
                 <img className="cardImage" src={this.props.image} alt="career display"/>
                 <p>{this.props.name}</p>
+                <p>Salary: ${this.props.salary}</p>
             </div>
         )
     }
