@@ -2,10 +2,11 @@ import React, {Component} from 'react';
 import Modal from 'react-modal'
 import ModalContent from './ModalContent'
 import Tile from './Tile';
-import { getPlayerData, updatePlayerPosition, updatePlayerCareer, addPlayerHouse, addPlayerLanguage } from './Players';
+import { getPlayerData, updatePlayerPosition, updatePlayerCareer, addPlayerHouse, addPlayerLanguage, updatePlayerCash } from './Players';
 import Piece from './Piece';
 import WheelComponent from 'react-wheel-of-prizes';
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default class GameBoard extends Component{
     // used to access specific tiles by index
@@ -50,6 +51,12 @@ export default class GameBoard extends Component{
             universityModalOpen: true
         }
     
+    // used for determining boardOffsetLeft
+    getBoardOffset = () => {
+        const tileElement = this.boardRef.current;
+        const rect = tileElement.getBoundingClientRect();
+        this.setState({ boardOffsetLeft: rect.left });
+    };
 
     componentDidMount() {
         this.updatePlayerPieces();
@@ -96,16 +103,25 @@ export default class GameBoard extends Component{
         if (currentPlayer.currentPath === 'mainPath' && currentPlayer.position === 0) {
             // if player chose university path
             let newPath = null;
-            slideIndex === 0 ? newPath = 'universityPath' : newPath = 'mainPath';
-            const newPosition = 0;
-            this.setState(
-                (prevState) => ({
-                    players: updatePlayerPosition(prevState.players, currentPlayer.pid, newPath, newPosition),
-                }),
-                () => {
-                    this.updatePlayerPieces();
-                }
-            );
+            if (slideIndex === 0) {
+                newPath = 'universityPath';
+                const newPosition = 0;
+                let updatedPlayersArray = updatePlayerPosition(this.state.players, currentPlayer.pid, newPath, newPosition);
+                updatedPlayersArray = updatePlayerCash(updatedPlayersArray, currentPlayer.pid, -100000);
+                this.setState({players: updatedPlayersArray,},
+                    () => {
+                        this.updatePlayerPieces();
+                        const newPlayerInfo = {
+                            ...this.props.playerInfo,
+                            cash: this.state.players[this.state.currentPlayer].cash,
+                        };
+                        this.props.updatePlayerInfo(newPlayerInfo);
+                    }
+                );
+            } else {
+                newPath = 'mainPath';
+                this.setState({initialCareerModalOpen: true});
+            }
         }
         // if currently on a career point
         if (this.state.careerPoints.includes(this.state.path[currentPlayer.currentPath][currentPlayer.position])) {
@@ -115,13 +131,15 @@ export default class GameBoard extends Component{
                 }),
                 () => {
                     this.updatePlayerPieces();
+                    const newPlayerInfo = {
+                        ...this.props.playerInfo,
+                        career: newValue,
+                        salary: this.state.players[this.state.currentPlayer].salary,
+                        // TODO: call flask endpoint to find salary of new career and set player's salary
+                    };
+                    this.props.updatePlayerInfo(newPlayerInfo);
                 }
             );
-            const newPlayerInfo = {
-                ...this.props.playerInfo,
-                career: newValue,
-            };
-            this.props.updatePlayerInfo(newPlayerInfo);
         }
         // if currently on a house point
         else if (this.state.housePoints.includes(this.state.path[currentPlayer.currentPath][currentPlayer.position])) {
@@ -150,13 +168,15 @@ export default class GameBoard extends Component{
                 }),
                 () => {
                     this.updatePlayerPieces();
+                    const newPlayerInfo = {
+                        ...this.props.playerInfo,
+                        career: newValue,
+                        salary: this.state.players[this.state.currentPlayer].salary,
+                        // TODO: call flask endpoint to find salary of new career and set player's salary
+                    };
+                    this.props.updatePlayerInfo(newPlayerInfo);
                 }
             );
-            const newPlayerInfo = {
-                ...this.props.playerInfo,
-                career: newValue,
-            };
-            this.props.updatePlayerInfo(newPlayerInfo);
         }
         // if currently on tile 119 - a stop point
         else if (currentPlayer.currentPath === 'mainPath' && currentPlayer.position === 12) {
@@ -228,25 +248,45 @@ export default class GameBoard extends Component{
         const index = this.state.path[onPath][atPosition];
         console.log(`player ${this.state.currentPlayer} is now on tile ${index}`);
         const tile = this.tiles[index];
-        const newValue = tile.handleClick();
+        const newValue = tile.handleClick(this.state.players[this.state.currentPlayer]);
         // if handleClick returned a value
         if (newValue) {
-            this.setState(
-                (prevState) => ({
-                    players: addPlayerLanguage(prevState.players, this.state.currentPlayer, newValue),
-                }),
-                () => {
-                    this.updatePlayerPieces();
-                    const languagesList = this.props.playerInfo.languages;
-                    languagesList.push(newValue);
-                    console.log(languagesList);
-                    const newPlayerInfo = {
-                        ...this.props.playerInfo,
-                        languagesList: languagesList,
-                    };
-                    this.props.updatePlayerInfo(newPlayerInfo);
-                }
-            );
+            // if that value is a string, it is a new skill
+            if (newValue instanceof String) {
+                this.setState(
+                    (prevState) => ({
+                        players: addPlayerLanguage(prevState.players, this.state.currentPlayer, newValue),
+                    }),
+                    () => {
+                        this.updatePlayerPieces();
+                        const languagesList = this.props.playerInfo.languages;
+                        languagesList.push(newValue);
+                        console.log(languagesList);
+                        const newPlayerInfo = {
+                            ...this.props.playerInfo,
+                            languagesList: languagesList,
+                        };
+                        this.props.updatePlayerInfo(newPlayerInfo);
+                    }
+                );
+            // if the returned value is a number, it is 2 * the player's salary
+            } else {
+                // TODO: call a flask endpoint to add newValue to the player's cash
+                this.setState(
+                    (prevState) => ({
+                        players: updatePlayerCash(prevState.players, this.state.currentPlayer, newValue),
+                    }),
+                    () => {
+                        console.log(this.state.players[this.state.currentPlayer]);
+                        this.updatePlayerPieces();
+                        const newPlayerInfo = {
+                            ...this.props.playerInfo,
+                            cash: this.state.players[this.state.currentPlayer].cash,
+                        };
+                        this.props.updatePlayerInfo(newPlayerInfo);
+                    }
+                )
+            }
         }
     }
 
@@ -278,24 +318,158 @@ export default class GameBoard extends Component{
 
         // check if the player is passing any stop tiles or reaching the end of the board
         console.log("Tiles passed:", tilesPassed);
-        tilesPassed.forEach((tile) => {
+        for (let tile of tilesPassed) {
             // stop for stop tiles
             if (this.state.stopPoints.includes(tile)) {
                 newPosition = path[currentPath].indexOf(tile);
                 if (currentPath === "universityPath") newPath = "universityPath";
+                break;
+            // receive salary when passing payday tiles
+            } else if (this.state.paydayPoints.includes(tile)) {
+                console.log("passing a payday");
+                const salary = this.state.players[this.state.currentPlayer].salary;
+                // TODO: call a flask endpoint to add the player's salary to their cash
+                this.setState(
+                    (prevState) => ({
+                        players: updatePlayerCash(prevState.players, this.state.currentPlayer, salary),
+                    }),
+                    () => {
+                        console.log(this.state.players[this.state.currentPlayer]);
+                        this.updatePlayerPieces();
+                        const newPlayerInfo = {
+                            ...this.props.playerInfo,
+                            cash: this.state.players[this.state.currentPlayer].cash,
+                        };
+                        this.props.updatePlayerInfo(newPlayerInfo);
+                    }
+                )
             }
             // end on retirement tile
             if (this.state.endPoints.includes(tile)) newPosition = path["mainPath"].indexOf(tile);
-        });     
+        };     
 
         return [newPath, newPosition];
+    }
+
+    //update respin and certification state when player chooses to spin for risky skill
+    handleRisk = (certification) =>{
+        toast('Spin again to see if you passed the certification!', {
+            position: "top-center",
+            autoClose: 2500,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false,
+            progress: undefined,
+            theme: "dark",
+            bodyClassName: "popup"
+            });
+        this.setState({cert: certification, certSpin: true})
+    }
+
+    handleSale = (house) => {
+        toast('Spin again to see whether the price of the house went up or down!', {
+            position: "top-center",
+            autoClose: 2500,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false,
+            progress: undefined,
+            theme: "dark",
+            bodyClassName: "popup"
+            });
+        this.setState({houseToSell: house, houseSpin: true})
+    }
+
+    handleInitialCareerModalClose = (slideIndex, newCareer) => {
+        this.setState(
+            (prevState) => ({
+                players: updatePlayerCareer(prevState.players, this.state.currentPlayer, newCareer),
+            }),
+            () => {
+                this.updatePlayerPieces();
+                const newPlayerInfo = {
+                    ...this.props.playerInfo,
+                    career: newCareer,
+                    salary: this.state.players[this.state.currentPlayer].salary,
+                    // TODO: call flask endpoint to find salary of new career and set player's salary
+                };
+                this.props.updatePlayerInfo(newPlayerInfo);
+            }
+        );
     }
    
     //function that is called after the spinner is done spinning
     onFinished = (winner) => {
+        
         const currentPlayer = this.state.players.find(player => player.pid === this.state.currentPlayer);
         const currentPath = currentPlayer.currentPath;
         const currentPosition = currentPlayer.position;
+        // If the player is spinning to determine the sale price of a house
+        if(this.state.houseSpin){
+            if(this.state.housePoints.includes(this.state.path[currentPath][currentPosition])){
+                // TODO: call flask endpoint to get the original price of the house - let salePrice = this value
+                if(winner % 2 === 0){
+                    toast('The price of your house went up!', {
+                        position: "top-center",
+                        autoClose: 2500,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: false,
+                        progress: undefined,
+                        theme: "dark",
+                    });
+                    // TODO: increase the price of the house by 20K
+                }else {
+                    toast('The price of your house went down!', {
+                        position: "top-center",
+                        autoClose: 2500,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: false,
+                        progress: undefined,
+                        theme: "dark",
+                    });
+                    // TODO: decrease the price of the house by 20K
+                }
+                //TODO: call flask endpoint to remove this.state.houseToSell from player assets
+                // TODO: call flask endpoint to add salePrice to player assets
+                this.setState({houseSpin: false, houseToSell: ""});
+            }
+        // If the player is spinning to determine if they get a certification
+        } else if(this.state.certSpin){
+            if(this.state.skillPoints.includes(this.state.path[currentPath][currentPosition])){
+                if(winner % 2 === 0){
+                    //TODO: call flask endpoint to add this.state.cert to player assets
+                    toast.success('You passed the certification!', {
+                        position: "top-center",
+                        autoClose: 2500,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: false,
+                        progress: undefined,
+                        theme: "dark",
+                        });
+
+                }else {
+                    toast('You did not pass the certification!', {
+                        position: "top-center",
+                        autoClose: 2500,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: false,
+                        progress: undefined,
+                        theme: "dark",
+                        });
+                }
+                this.setState({certSpin: false, cert: ""});
+            }
+        } else {
         const newPathAndPosition = this.calculateNewPosition(currentPath, currentPosition, winner);
         const newPath = newPathAndPosition[0];
         const newPosition = newPathAndPosition[1];
@@ -304,6 +478,7 @@ export default class GameBoard extends Component{
         console.log(`new path: ${newPath}, new position: ${newPosition}`);
         this.handleTile(newPath, newPosition);
         this.updateCurrentPlayer();
+        }
       }  
 
     //create game board
@@ -363,14 +538,14 @@ export default class GameBoard extends Component{
                                     ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.housePoints.includes(num)){
                                 return <Tile
-                                    onModalClose = {this.handleModalClose}
+                                    onModalClose = {this.handleSale}
                                     key = {num} 
                                     color = {"blue"}
                                     word = {"House"}
                                     ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.skillPoints.includes(num)){
                                 return <Tile
-                                    onModalClose = {this.handleModalClose}
+                                    onModalClose = {this.handleRisk}
                                     key = {num} 
                                     color = {"#fb3199"}
                                     word = {"Skills"}
@@ -409,6 +584,9 @@ export default class GameBoard extends Component{
         };
         return (
         <div>
+        <ToastContainer/>
+            {/* used for determining boardOffsetLeft */}
+            <div ref={this.boardRef} style={{ position: 'absolute', top: '-9999px' }} />
             {/* game board */}
             <div className='board'>
                 {this.createBoard()}
@@ -431,6 +609,18 @@ export default class GameBoard extends Component{
                     shouldCloseOnOverlayClick={false}
                     style={customStyles}>
                     <ModalContent type={"University"} handleClose={() => this.setState({universityModalOpen: false})} onModalClose={this.handleModalClose} />
+                </Modal>
+            </div>
+            {/* modal for choosing initial career if player begins on bootcamp path */}
+            <div>
+                <Modal
+                    ariaHideApp={false}
+                    isOpen = {this.state.initialCareerModalOpen}
+                    onRequestClose={() => this.setState({initialCareerModalOpen: false})}
+                    shouldCloseOnEsc={false}
+                    shouldCloseOnOverlayClick={false}
+                    style={customStyles}>
+                    <ModalContent type={"Career"} handleClose={() => this.setState({initialCareerModalOpen: false})} onModalClose={this.handleInitialCareerModalClose} />
                 </Modal>
             </div>
         </div>

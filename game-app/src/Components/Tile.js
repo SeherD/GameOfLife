@@ -1,7 +1,6 @@
 import React, {Component} from 'react'
 import Modal from 'react-modal'
 import ModalContent from './ModalContent'
-import { getRandomLanguage } from '../Components/Languages';
 
 export default class Tile extends Component {
     tileRef = React.createRef();
@@ -11,17 +10,17 @@ export default class Tile extends Component {
         this.state = {
             stopID: props.stopID,
             open: false,
-            currentSlide: 0
+            currentSlide: 0,
         }
 
         this.handleClick = this.handleClick.bind(this)
     }
 
-    handleClick = () =>{
-        if (this.props.word === "House" || this.props.word === "Career" || this.props.word === "STOP") {
-            this.setState({open: true})
-        } else if (this.props.word === "Skills") {
-            return getRandomLanguage();
+    handleClick = (player) =>{
+        if (this.props.word !== "" && this.props.word !== "PayDay") {
+            this.setState({open: true});
+        } else if (this.props.word === "PayDay") {
+            return 2 * player.salary;
         }
     }
 

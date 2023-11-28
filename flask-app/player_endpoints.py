@@ -14,6 +14,7 @@ parser.add_argument("Host", type=bool, default=False)
 parser.add_argument("Homes", type=str, default=[])
 parser.add_argument("Languages", type=str, default=[])
 parser.add_argument("Stocks", type=str, default=[])
+parser.add_argument("Salary", type=float, required=True)
 
 
 def format_player_response(player_data):
@@ -29,9 +30,12 @@ def format_player_response(player_data):
         "Homes": player_data[8].split(",") if player_data[8] else [],
         "Languages": player_data[9].split(",") if player_data[9] else [],
         "Stocks": player_data[10].split(",") if player_data[10] else [],
+        "Salary": player_data[11],
     }
 
 
+# TODO:
+# languages/certs,
 class IndividualPlayerResource(Resource):
     def get(self, player_id):
         db = get_db()
@@ -79,7 +83,7 @@ class PlayerResource(Resource):
         args = parser.parse_args()
         db = get_db()
         cur = db.execute(
-            "INSERT INTO Players (PlayerID, Money, Debt, CareerID, ColorOfPiece, Avatar, University, Host, Homes, Languages, Stocks) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?,?,?)",
+            "INSERT INTO Players (PlayerID, Money, Debt, CareerID, ColorOfPiece, Avatar, University, Host, Homes, Languages, Stocks, Salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 args["PlayerID"],
                 args["Money"],
@@ -92,11 +96,11 @@ class PlayerResource(Resource):
                 args["Homes"],
                 args["Languages"],
                 args["Stocks"],
+                args["Salary"],
             ),
         )
         db.commit()
-        return "done"#format_player_response(cur.lastrowid)
-    
+        return "done"  # format_player_response(cur.lastrowid)
 
     def delete(self):
         db = get_db()
@@ -105,6 +109,75 @@ class PlayerResource(Resource):
         return {"message": "Players deleted successfully"}
 
 
+class IncreaseSalaryResource(Resource):
+    def put(self, player_id):
+        parser = reqparse.RequestParser()
+        parser.add_argument("increase_amount", type=float, required=True)
+        args = parser.parse_args()
+
+        db = get_db()
+        cur = db.execute("SELECT Salary FROM Players WHERE PlayerID = ?", (player_id,))
+        player = cur.fetchone()
+
+        if player is None:
+            return {"message": "Player not found"}, 404
+
+        # Increase the salary by the specified amount
+        new_salary = player[0] + args["increase_amount"]
+
+        # Update the salary in the database
+        db.execute(
+            "UPDATE Players SET Salary=? WHERE PlayerID=?", (new_salary, player_id)
+        )
+        db.commit()
+
+        # Retrieve the updated player data
+        cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
+        updated_player = cur.fetchone()
+
+        return format_player_response(updated_player)
+
+
+class PaydayResource(Resource):
+    def put(self, player_id):
+        parser = reqparse.RequestParser()
+        parser.add_argument("double_earning", type=bool, default=False)
+        args = parser.parse_args()
+
+        db = get_db()
+        cur = db.execute("SELECT Salary, Money FROM Players WHERE PlayerID = ?", (player_id,))
+        player = cur.fetchone()
+
+        if player is None:
+            return {"message": "Player not found"}, 404
+
+        # Increase the salary by the specified amount
+        increase_amount = 1
+        if args["double_earning"]:
+                increase_amount = 2
+        new_salary = player[0] * increase_amount
+        
+        money = player[1] + new_salary
+        # Update the salary in the database
+        db.execute(
+            "UPDATE Players SET Money=? WHERE PlayerID=?", (money, player_id)
+        )
+        db.commit()
+
+        # Retrieve the updated player data
+        cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
+        updated_player = cur.fetchone()
+
+        return format_player_response(updated_player)
+        
+
+
+# Add the new resource to the API
+api.add_resource(PaydayResource, "/players/payday/<string:player_id>")
+
+
+# Add the new resource to the API
+api.add_resource(IncreaseSalaryResource, "/players/increase-salary/<string:player_id>")
 
 api.add_resource(IndividualPlayerResource, "/players/<string:player_id>")
 api.add_resource(PlayerResource, "/players")
