@@ -11,8 +11,9 @@ export const updatePlayerPosition = (players, playerID, newPath, newPosition) =>
 };
 
 export const updatePlayerCareer = (players, playerID, newCareer) => {
+    let newSalary = newCareer === "Web Developer" ? 70000 : 80000;
     return players.map((player) =>
-    player.pid === playerID ? {...player, career: newCareer} : player
+    player.pid === playerID ? {...player, career: newCareer, salary: newSalary} : player
     );
 };
 

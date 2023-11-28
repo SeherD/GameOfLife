@@ -143,14 +143,15 @@ export default class GameBoard extends Component{
                 }),
                 () => {
                     this.updatePlayerPieces();
+                    const newPlayerInfo = {
+                        ...this.props.playerInfo,
+                        career: newValue,
+                        salary: this.state.players[this.state.currentPlayer].salary,
+                        // TODO: call flask endpoint to find salary of new career and set player's salary
+                    };
+                    this.props.updatePlayerInfo(newPlayerInfo);
                 }
             );
-            const newPlayerInfo = {
-                ...this.props.playerInfo,
-                career: newValue,
-                // TODO: call flask endpoint to find salary of new career and set player's salary
-            };
-            this.props.updatePlayerInfo(newPlayerInfo);
         }
         // if currently on a house point
         else if (this.state.housePoints.includes(this.state.path[currentPlayer.currentPath][currentPlayer.position])) {
@@ -179,14 +180,15 @@ export default class GameBoard extends Component{
                 }),
                 () => {
                     this.updatePlayerPieces();
+                    const newPlayerInfo = {
+                        ...this.props.playerInfo,
+                        career: newValue,
+                        salary: this.state.players[this.state.currentPlayer].salary,
+                        // TODO: call flask endpoint to find salary of new career and set player's salary
+                    };
+                    this.props.updatePlayerInfo(newPlayerInfo);
                 }
             );
-            const newPlayerInfo = {
-                ...this.props.playerInfo,
-                career: newValue,
-                // TODO: call flask endpoint to find salary of new career and set player's salary
-            };
-            this.props.updatePlayerInfo(newPlayerInfo);
         }
         // if currently on tile 119 - a stop point
         else if (currentPlayer.currentPath === 'mainPath' && currentPlayer.position === 12) {
@@ -399,14 +401,15 @@ export default class GameBoard extends Component{
             }),
             () => {
                 this.updatePlayerPieces();
+                const newPlayerInfo = {
+                    ...this.props.playerInfo,
+                    career: newCareer,
+                    salary: this.state.players[this.state.currentPlayer].salary,
+                    // TODO: call flask endpoint to find salary of new career and set player's salary
+                };
+                this.props.updatePlayerInfo(newPlayerInfo);
             }
         );
-        const newPlayerInfo = {
-            ...this.props.playerInfo,
-            career: newCareer,
-            // TODO: call flask endpoint to find salary of new career and set player's salary
-        };
-        this.props.updatePlayerInfo(newPlayerInfo);
     }
    
     //function that is called after the spinner is done spinning
