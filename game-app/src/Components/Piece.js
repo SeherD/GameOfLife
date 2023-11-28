@@ -6,12 +6,12 @@ export default class Piece extends Component {
 
     render() {
 
-        const { color, tile, boardOffsetLeft } = this.props;
+        const { color, tile } = this.props;
         const rowIndex = Math.floor(tile/15);
-        const x = rowIndex * 50;
         const columnIndex = tile % 15;
-        const y = columnIndex * 50 + boardOffsetLeft;
-
+        const x = columnIndex > 7 ? (columnIndex - 7) * 50 - 25 : (columnIndex - 7)* 50 - 25;
+        const y = rowIndex > 7 ? (rowIndex - 7) * 50 - 25 : (rowIndex - 7)* 50 - 25;
+        
         return(
             // <Motion style={{x: spring(x), y: spring(y)}}>
             //     {interpolatedStyle =>
@@ -20,8 +20,8 @@ export default class Piece extends Component {
                         style={{
                             backgroundColor: color,
                             // transform: `translate3d(${interpolatedStyle[x]}px, ${interpolatedStyle[y]}px, 0)`,
-                            top: `${x}px`,
-                            left: `${y}px`,
+                            top: `calc(50vh + ${y}px)`,
+                            left: `calc(50vw + ${x}px)`,
                         }}
                     />
             //     }

@@ -9,7 +9,6 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export default class GameBoard extends Component{
-    boardRef = React.createRef(); // used to get the left offset for the board - very hacky
     // used to access specific tiles by index
     tiles = Array.from({ length: 225 });
     state = {
@@ -48,29 +47,12 @@ export default class GameBoard extends Component{
             players: getPlayerData(),
             currentPlayer: 0,
             playerPieces: [],
-            // the number of pixels the board is offset from the left side of the page
-            boardOffsetLeft: 0,
             // for tracking the initial path choice modal
-            universityModalOpen: true,
-            initialCareerModalOpen: false,
-            // respin for chance to win a certification
-            certSpin: false,
-            cert: "",
-            // respin for sale price of house
-            houseSpin: false,
-            houseToSell: ""
+            universityModalOpen: true
         }
-    
-    // used for determining boardOffsetLeft
-    getBoardOffset = () => {
-        const tileElement = this.boardRef.current;
-        const rect = tileElement.getBoundingClientRect();
-        this.setState({ boardOffsetLeft: rect.left });
-    };
+
 
     componentDidMount() {
-        this.getBoardOffset();
-        
         this.updatePlayerPieces();
     }
 
@@ -577,7 +559,6 @@ export default class GameBoard extends Component{
                         key={player.key}
                         color={player.color}
                         tile={player.tile}
-                        boardOffsetLeft={this.state.boardOffsetLeft}
                     />
                 ))}
             </div>
@@ -598,8 +579,6 @@ export default class GameBoard extends Component{
         return (
         <div>
         <ToastContainer/>
-            {/* used for determining boardOffsetLeft */}
-            <div ref={this.boardRef} style={{ position: 'absolute', top: '-9999px' }} />
             {/* game board */}
             <div className='board'>
                 {this.createBoard()}
