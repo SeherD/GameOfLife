@@ -114,7 +114,7 @@ CREATE TABLE Accounts (
 
 INSERT INTO Accounts (AccountID, Username, Password, FirstName, LastName)
 VALUES
-    ('A1', 'bestLifeGamePlayer2000', 'thisShouldBeSHA256d', 'Alice', 'Bob');
+    ('A1', 'bestLifeGamePlayer2000', 'thisShouldBeSHA256d', 'Alice', 'Bob'),
     ('A2', 'bestLifeGamePlayer2001', 'thisShouldBeSHA512d', 'Alice', 'Bob');
 
 
@@ -129,3 +129,33 @@ CREATE TABLE UserData (
 INSERT INTO UserData (UserID, PlayerName, HighestScore, AccountIDs)
 VALUES
     ('UD1', 'bestLifeGamePlayer2000', 1500000, 'A1,A2');
+
+-- Create languages and certifications table
+CREATE TABLE Certifications (
+    CertID TEXT PRIMARY KEY,
+    CertName TEXT,
+    IsCert BOOLEAN
+);
+
+INSERT INTO Certifications (CertID, CertName, IsCert)
+VALUES
+    ('L1', 'Python', 1),
+    ('L2', 'C++', 1),
+    ('L3', 'JavaScript', 1),
+    ('L4', 'Java', 1),
+    ('L5', 'HTML & CSS', 1),
+    ('L6', 'Assembly', 1),
+    ('L7', 'C', 1),
+    ('L8', 'Swift', 1),
+    ('L9', 'R', 1),
+    ('L10', 'Microsoft Azure', 0),
+    ('L11', 'Oracle Java SE', 0),
+    ('L12', 'Amazon Web Services', 0),
+    ('L13', 'Microsoft Office Suite', 0),
+    ('L14', 'Cisco Networks', 0),
+    ('L15', 'LinkedIn Proficiency', 0),
+    ('L16', 'IBM Machine Learning', 0),
+    ('L17', 'Hackathon 1st Place', 0),
+    ('L18', 'Salesforce', 0),
+    ('L19', 'Certified Internet Webmaster (CIW)', 0),
+    ('L20', 'Information Systems Security Professional', 0);
