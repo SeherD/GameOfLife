@@ -50,13 +50,7 @@ export default class GameBoard extends Component{
             // for tracking the initial path choice modal
             universityModalOpen: true
         }
-    
-    // used for determining boardOffsetLeft
-    getBoardOffset = () => {
-        const tileElement = this.boardRef.current;
-        const rect = tileElement.getBoundingClientRect();
-        this.setState({ boardOffsetLeft: rect.left });
-    };
+
 
     componentDidMount() {
         this.updatePlayerPieces();
@@ -585,8 +579,6 @@ export default class GameBoard extends Component{
         return (
         <div>
         <ToastContainer/>
-            {/* used for determining boardOffsetLeft */}
-            <div ref={this.boardRef} style={{ position: 'absolute', top: '-9999px' }} />
             {/* game board */}
             <div className='board'>
                 {this.createBoard()}
