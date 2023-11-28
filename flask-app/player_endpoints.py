@@ -139,40 +139,41 @@ class IncreaseSalaryResource(Resource):
 
 
 class PaydayResource(Resource):
-    def put(self):
+    def put(self, player_id):
         parser = reqparse.RequestParser()
         parser.add_argument("double_earning", type=bool, default=False)
         args = parser.parse_args()
 
         db = get_db()
-        cur = db.execute("SELECT PlayerID, Salary FROM Players")
-        all_players = cur.fetchall()
+        cur = db.execute("SELECT Salary, Money FROM Players WHERE PlayerID = ?", (player_id,))
+        player = cur.fetchone()
 
-        for player in all_players:
-            player_id, salary = player
-            increase_amount = salary
+        if player is None:
+            return {"message": "Player not found"}, 404
 
-            if args["double_earning"]:
-                increase_amount *= 2
-
-            # Increase the money for each player
-            db.execute(
-                "UPDATE Players SET Money=Money+? WHERE PlayerID=?",
-                (increase_amount, player_id),
-            )
-
+        # Increase the salary by the specified amount
+        increase_amount = 1
+        if args["double_earning"]:
+                increase_amount = 2
+        new_salary = player[0] * increase_amount
+        
+        money = player[1] + new_salary
+        # Update the salary in the database
+        db.execute(
+            "UPDATE Players SET Money=? WHERE PlayerID=?", (money, player_id)
+        )
         db.commit()
 
-        # Retrieve the updated player data after the payday
-        cur = db.execute("SELECT * FROM Players")
-        updated_players = cur.fetchall()
+        # Retrieve the updated player data
+        cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
+        updated_player = cur.fetchone()
 
-        result = [format_player_response(player) for player in updated_players]
-        return {"updated_players": result}
+        return format_player_response(updated_player)
+        
 
 
 # Add the new resource to the API
-api.add_resource(PaydayResource, "/players/payday")
+api.add_resource(PaydayResource, "/players/payday/<string:player_id>")
 
 
 # Add the new resource to the API

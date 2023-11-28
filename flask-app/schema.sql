@@ -81,7 +81,7 @@ END;
 
 
 -- Inserting 5 players
-INSERT INTO Players (PlayerID, Money, Debt, CareerID, ColorOfPiece, Avatar, University, Host, Homes, Languages, Stocks)
+INSERT INTO Players (PlayerID, Money, Debt, CareerID, ColorOfPiece, Avatar, University, Host, Homes, Languages, Stocks, Salary)
 VALUES
     ('P1', 10000, 0, 'C1', 'Red', 'Avatar1', 0, 0, 'H1,H2', 'Python,Java', 'AAPL,GOOGL', 0),
     ('P2', 15000, 500, 'C2', 'Blue', 'Avatar2', 0, 1, 'H3,H4', 'C++,JavaScript', 'MSFT,AMZN', 0),
