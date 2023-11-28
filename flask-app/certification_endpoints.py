@@ -30,7 +30,7 @@ class CertResource(Resource):
     def put(self, cert_id):
         args = parser.parse_args()
         db = get_db()
-        cur = db.execute('SELECT * FROM Certfiications WHERE CertID = ?', (cert_id,))
+        cur = db.execute('SELECT * FROM Certifications WHERE CertID = ?', (cert_id,))
         cert = cur.fetchone()
         if cert is None:
             return {'message': 'Cerfitication or Language not found'}, 404
