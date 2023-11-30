@@ -86,6 +86,6 @@ class PlayerAllowedCareerResource(Resource):
 api.add_resource(CareerCardResource, '/career/<string:career_id>')
 api.add_resource(CareerCardListResource, '/career')
 api.add_resource(UnusedCareerCardListResource, '/career/unused')
-api.add_resource(PlayerAllowedCareerResource, '/career/filterByUniverity')
+api.add_resource(PlayerAllowedCareerResource, '/career/filterByUniversity/<string:player_id>')
 
 
