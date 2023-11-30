@@ -225,13 +225,13 @@ class CareerResource(Resource):
             return {"message": "Career is already taken"}, 405
         else:
             db.execute(
-            "UPDATE CareerCards SET Used=? WHERE CareerID=?", (1, args["career"],)
+            "UPDATE CareerCards SET Used=1 WHERE CareerID=?", (args["career"],)
         )
         db.commit()
 
         #Set old career to not used
         db.execute(
-            "UPDATE CareerCards SET Used=? WHERE CareerID=?", (0, player[0],)
+            "UPDATE CareerCards SET Used=0 WHERE CareerID=?", (player[0],)
         )
         db.commit()
 
