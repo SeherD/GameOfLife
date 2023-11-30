@@ -140,6 +140,7 @@ export default class GameBoard extends Component{
             if (slideIndex === 0) {
                 newPath = 'universityPath';
                 const newPosition = 0;
+                //update location
                 axios({
                     method: "PUT",
                     url:"/players/location/P" + (this.state.playerIndex + 1),
@@ -154,6 +155,7 @@ export default class GameBoard extends Component{
                         ()=>{
                             this.updatePlayerPieces()})
                   });
+                  //TODO: replace with axios call
                 let updatedPlayersArray = updatePlayerPosition(this.state.players, this.state.playerIndex, newPath, newPosition);
                 updatedPlayersArray = updatePlayerCash(updatedPlayersArray, this.state.playerIndex, -100000);
                 this.setState({players: updatedPlayersArray,},
@@ -173,6 +175,7 @@ export default class GameBoard extends Component{
         }
         // if currently on a career point
         if (this.state.careerPoints.includes(this.state.path[currentPlayer.Path][currentPlayer.Location])) {
+            // TODO: call flask endpoint to find salary of new career and set player's salary
             this.setState(
                 (prevState) => ({
                     players: updatePlayerCareer(prevState.players, this.state.playerIndex, newValue),
@@ -183,7 +186,6 @@ export default class GameBoard extends Component{
             ...this.props.playerInfo,
             career: newValue,
             salary: this.state.players[this.state.playerIndex].salary,
-            // TODO: call flask endpoint to find salary of new career and set player's salary
             };
             this.props.updatePlayerInfo(newPlayerInfo);
             }
@@ -191,12 +193,13 @@ export default class GameBoard extends Component{
         }
         // if currently on a house point
         else if (this.state.housePoints.includes(this.state.path[currentPlayer.Path][currentPlayer.Location])) {
+            //TODO: call flask endpoint to add house
             this.setState(
                 (prevState) => ({
                     players: addPlayerHouse(prevState.players, this.state.playerIndex, newValue),
                 }),
                 () => {
-                                        this.updatePlayerPieces();
+                    this.updatePlayerPieces();
             }
             );
             const housesList = this.props.playerInfo.houses;
@@ -209,7 +212,8 @@ export default class GameBoard extends Component{
             this.props.updatePlayerInfo(newPlayerInfo);
         }
         // if currently on tile 175 - graduation
-        else if (currentPlayer.Path === 'universityPath' && currentPlayer.Location === 7) {          
+        else if (currentPlayer.Path === 'universityPath' && currentPlayer.Location === 7) { 
+            // TODO: call flask endpoint to find salary of new career and set player's salary         
             this.setState(
                 (prevState) => ({
                     players: updatePlayerCareer(prevState.players, this.state.playerIndex, newValue),
@@ -220,7 +224,6 @@ export default class GameBoard extends Component{
             ...this.props.playerInfo,
             career: newValue,
             salary: this.state.players[this.state.playerIndex].salary,
-            // TODO: call flask endpoint to find salary of new career and set player's salary
             };
             this.props.updatePlayerInfo(newPlayerInfo);
             }
@@ -232,6 +235,7 @@ export default class GameBoard extends Component{
             if (slideIndex === 0) {
                 const newPath = 'sidePath1';
                 const newPosition = 0;
+                //update location
                 axios({
                     method: "PUT",
                     url:"/players/location/P" + (this.state.playerIndex + 1),
@@ -253,6 +257,7 @@ export default class GameBoard extends Component{
             if (slideIndex === 0) {
                 const newPath = 'sidePath2';
                 const newPosition = 0;
+                 //update location
                 axios({
                     method: "PUT",
                     url:"/players/location/P" + (this.state.playerIndex + 1),
@@ -273,6 +278,7 @@ export default class GameBoard extends Component{
             if (slideIndex === 0) {
                 const newPath = 'sidePath3';
                 const newPosition = 0;
+                 //update location
                 axios({
                     method: "PUT",
                     url:"/players/location/P" + (this.state.playerIndex + 1),
@@ -294,6 +300,7 @@ export default class GameBoard extends Component{
             if (slideIndex === 0) {
                 const newPath = 'mainPath';
                 const newPosition = 64;
+                 //update location
                 axios({
                     method: "PUT",
                     url:"/players/location/P" + (this.state.playerIndex + 1),
@@ -320,6 +327,7 @@ export default class GameBoard extends Component{
         if (newValue) {
             // if that value is a string, it is a new skill
             if (newValue instanceof String) {
+                //TODO: add flask endpoint to add free skill to player assets
                 this.setState(
                     (prevState) => ({
                         players: addPlayerLanguage(prevState.players, this.state.playerIndex, newValue),
@@ -348,7 +356,9 @@ export default class GameBoard extends Component{
                   })
                   .then((response) => {
                   console.log('PUT request successful:', response.data);
-
+                  this.setState({currentPlayer: response.data})
+                  //this.props.updatePlayerInfo(response.data)
+                //TODO: delete setstate below
                   })
                 this.setState(
                 (prevState) => ({
@@ -416,6 +426,9 @@ export default class GameBoard extends Component{
                       })
                       .then((response) => {
                       console.log('PUT request successful:', response.data);
+                      this.setState({currentPlayer: response.data})
+                      //this.props.updatePlayerInfo(response.data)
+                      //TODO: delete setstate below
 
                       })
                 this.setState(
@@ -472,6 +485,8 @@ export default class GameBoard extends Component{
     }
 
     handleInitialCareerModalClose = (slideIndex, newCareer) => {
+         // TODO: call flask endpoint to find salary of new career and set player's salary
+
         this.setState(
             (prevState) => ({
                 players: updatePlayerCareer(prevState.players, this.state.playerIndex, newCareer),
@@ -482,7 +497,6 @@ export default class GameBoard extends Component{
                     ...this.props.playerInfo,
                     career: newCareer,
                     salary: this.state.players[this.state.playerIndex].salary,
-                    // TODO: call flask endpoint to find salary of new career and set player's salary
                 };
                 this.props.updatePlayerInfo(newPlayerInfo);
             }
@@ -574,8 +588,6 @@ export default class GameBoard extends Component{
             console.log('PUT request successful:', response.data);
             this.setState({currentPlayer: response.data})
           });
-        this.setState({players: updatePlayerPosition(this.state.players, this.state.playerIndex, newPath, newPosition)});
-        console.log(`new path: ${newPath}, new position: ${newPosition}`);
         this.handleTile(newPath, newPosition);
         this.updateCurrentPlayer();
         }
