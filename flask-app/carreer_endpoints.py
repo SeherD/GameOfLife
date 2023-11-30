@@ -55,9 +55,37 @@ class UnusedCareerCardListResource(Resource):
         result = [{'CareerID': card[0], 'Name': card[1], 'Salary': card[2],
                    'University_Required': bool(card[3]), 'Image': card[4], 'Used': bool(card[5])} for card in unused_career_cards]
         return {'unused_career_cards': result}
+    
+class PlayerAllowedCareerResource(Resource):
+    def get(self, player_id):
+        db = get_db()
+        cur = db.execute("SELECT University FROM Players WHERE PlayerID = ?", (player_id,))
+        player = cur.fetchone()
+        if player is None:
+            return {"message": "Player not found"}, 404
+        
+        #Determine whether the player can choose careers available to those who went to university
+        if player[0]:
+            #Code to select any unused career from the list
+            cur = db.execute('SELECT * FROM CareerCards WHERE Used = 0')
+            uni_available_career_cards = cur.fetchall()
+            result = [{'CareerID': card[0], 'Name': card[1], 'Salary': card[2],
+                   'University_Required': bool(card[3]), 'Image': card[4], 'Used': bool(card[5])} for card in uni_available_career_cards]
+            return {'uni_available_career_cards': result}
+        else:
+            #Code to select non-uni, unused careers only
+            cur = db.execute('SELECT * FROM CareerCards WHERE Used = 0 AND Univeristy_Required = 0')
+            non_uni_available_career_cards = cur.fetchall()
+            result = [{'CareerID': card[0], 'Name': card[1], 'Salary': card[2],
+                   'University_Required': bool(card[3]), 'Image': card[4], 'Used': bool(card[5])} for card in non_uni_available_career_cards]
+            return {'non_uni_available_career_cards': result}
+        
+
+        
 
 api.add_resource(CareerCardResource, '/career/<string:career_id>')
 api.add_resource(CareerCardListResource, '/career')
 api.add_resource(UnusedCareerCardListResource, '/career/unused')
+api.add_resource(PlayerAllowedCareerResource, '/career/filterByUniverity')
 
 
