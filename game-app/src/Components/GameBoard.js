@@ -63,7 +63,7 @@ export default class GameBoard extends Component{
           .then((response) => {
             const res =response.data;
             const i = this.state.playerIndex;
-            this.setState({playersCopy: res.all_players, currentPlayer: res.all_players[i]}, this.showPlayerPieces());
+                        this.setState({playersCopy: res.all_players, currentPlayer: res.all_players[i]}, this.showPlayerPieces());
 
           })
     }
@@ -95,9 +95,9 @@ export default class GameBoard extends Component{
             return
 
         const playerPieces = this.state.playersCopy.map((player) => ({
-          key: player.PlayerID,
-                color: player.ColorOfPiece,
-                tile: this.state.path[player.Path][player.Location],
+          key: player.playerid,
+                color: player.color,
+                tile: this.state.path[player.path][player.location],
         }));
     
         this.setState({ playerPieces: playerPieces }, () => {
@@ -108,19 +108,19 @@ export default class GameBoard extends Component{
      * updates the current player's piece stored in the state
      */
     updatePlayerPieces = () => {
-        if(this.state.playerPieces == undefined || this.state.playerPieces.length === 0){
+        if(this.state.playerPieces === undefined || this.state.playerPieces.length === 0){
             return;
         }
         const player = this.state.currentPlayer;
-        console.log("updating player tile to " + player.Location)
+        console.log("updating player tile to " + player.location)
 
 
         const playerPieces = this.state.playerPieces.map((piece) => {
-            if(piece.key === player.PlayerID)
+            if(piece.key === player.playerid)
             return {
-                    key: player.PlayerID,
-                  color: player.ColorOfPiece,
-                  tile: this.state.path[player.Path][player.Location]
+                    key: player.playerid,
+                  color: player.color,
+                  tile: this.state.path[player.path][player.location]
             }
             else
             return piece;
@@ -134,7 +134,7 @@ export default class GameBoard extends Component{
     handleModalClose = (slideIndex, newValue) => {
         const currentPlayer = this.state.currentPlayer;
         // if it's the beginning of the game (i.e. the current player isn't on a path yet)
-        if (currentPlayer.Path === 'mainPath' && currentPlayer.Location === 0) {
+        if (currentPlayer.path === 'mainPath' && currentPlayer.location === 0) {
             // if player chose university path
             let newPath = null;
             if (slideIndex === 0) {
@@ -174,25 +174,21 @@ export default class GameBoard extends Component{
             }
         }
         // if currently on a career point
-        if (this.state.careerPoints.includes(this.state.path[currentPlayer.Path][currentPlayer.Location])) {
-            // TODO: call flask endpoint to find salary of new career and set player's salary
-            this.setState(
-                (prevState) => ({
-                    players: updatePlayerCareer(prevState.players, this.state.playerIndex, newValue),
-                }),
-                () => {
-                                        this.updatePlayerPieces();
-            const newPlayerInfo = {
-            ...this.props.playerInfo,
-            career: newValue,
-            salary: this.state.players[this.state.playerIndex].salary,
-            };
-            this.props.updatePlayerInfo(newPlayerInfo);
-            }
-            );
+        if (this.state.careerPoints.includes(this.state.path[currentPlayer.path][currentPlayer.location])) {
+            // call flask endpoint to find salary of new career and set player's salary
+            axios({
+                method: "PUT",
+                url:"/players/career/P" + (this.state.playerIndex + 1),
+                data:{
+                    "career": newValue
+                } 
+              })
+              .then((response) => {
+                console.log('PUT request successful:', response.data);
+                this.setState({currentPlayer: response.data})});
         }
         // if currently on a house point
-        else if (this.state.housePoints.includes(this.state.path[currentPlayer.Path][currentPlayer.Location])) {
+        else if (this.state.housePoints.includes(this.state.path[currentPlayer.path][currentPlayer.location])) {
             //TODO: call flask endpoint to add house
             this.setState(
                 (prevState) => ({
@@ -212,25 +208,23 @@ export default class GameBoard extends Component{
             this.props.updatePlayerInfo(newPlayerInfo);
         }
         // if currently on tile 175 - graduation
-        else if (currentPlayer.Path === 'universityPath' && currentPlayer.Location === 7) { 
-            // TODO: call flask endpoint to find salary of new career and set player's salary         
-            this.setState(
-                (prevState) => ({
-                    players: updatePlayerCareer(prevState.players, this.state.playerIndex, newValue),
-                }),
-                () => {
-                                        this.updatePlayerPieces();
-            const newPlayerInfo = {
-            ...this.props.playerInfo,
-            career: newValue,
-            salary: this.state.players[this.state.playerIndex].salary,
-            };
-            this.props.updatePlayerInfo(newPlayerInfo);
-            }
-            );
+        else if (currentPlayer.path === 'universityPath' && currentPlayer.location === 7) { 
+            // TODO: call flask endpoint to find salary of new career and set player's salary   
+            axios({
+                method: "PUT",
+                url:"/players/career/P" + (this.state.playerIndex + 1),
+                data:{
+                    "career": newValue
+                } 
+              })
+              .then((response) => {
+                console.log('PUT request successful:', response.data);
+                this.setState({currentPlayer: response.data})
+              });
+
         }
         // if currently on tile 119 - a stop point
-        else if (currentPlayer.Path === 'mainPath' && currentPlayer.Location === 12) {
+        else if (currentPlayer.path === 'mainPath' && currentPlayer.location === 12) {
             // if player chose side path
             if (slideIndex === 0) {
                 const newPath = 'sidePath1';
@@ -252,7 +246,7 @@ export default class GameBoard extends Component{
             }
         }
         // if currently on tile 5 - a stop point
-        else if (currentPlayer.Path === 'mainPath' && currentPlayer.Location === 28) {
+        else if (currentPlayer.path === 'mainPath' && currentPlayer.location === 28) {
             // if player chose side path
             if (slideIndex === 0) {
                 const newPath = 'sidePath2';
@@ -273,7 +267,7 @@ export default class GameBoard extends Component{
             }
         }
         // if currently on tile 127 - a stop point
-        else if (currentPlayer.Path === 'mainPath' && currentPlayer.Location === 48) {
+        else if (currentPlayer.path === 'mainPath' && currentPlayer.location === 48) {
             // if player chose side path
             if (slideIndex === 0) {
                 const newPath = 'sidePath3';
@@ -295,7 +289,7 @@ export default class GameBoard extends Component{
             }
         }
         // if currently on tile 184 - a stop point
-        else if (currentPlayer.Path === 'mainPath' && currentPlayer.Location === 55) {
+        else if (currentPlayer.path === 'mainPath' && currentPlayer.location === 55) {
             // if player chose to retire early
             if (slideIndex === 0) {
                 const newPath = 'mainPath';
@@ -485,29 +479,25 @@ export default class GameBoard extends Component{
     }
 
     handleInitialCareerModalClose = (slideIndex, newCareer) => {
-         // TODO: call flask endpoint to find salary of new career and set player's salary
-
-        this.setState(
-            (prevState) => ({
-                players: updatePlayerCareer(prevState.players, this.state.playerIndex, newCareer),
-            }),
-            () => {
-                                this.updatePlayerPieces();
-                const newPlayerInfo = {
-                    ...this.props.playerInfo,
-                    career: newCareer,
-                    salary: this.state.players[this.state.playerIndex].salary,
-                };
-                this.props.updatePlayerInfo(newPlayerInfo);
-            }
-        );
+         //call flask endpoint to find salary of new career and set player's salary
+         axios({
+            method: "PUT",
+            url:"/players/career/P" + (this.state.playerIndex + 1),
+            data:{
+                "career": newCareer
+            } 
+          })
+          .then((response) => {
+            console.log('PUT request successful:', response.data);
+            this.setState({currentPlayer: response.data})});
+        
     }
    
     //function that is called after the spinner is done spinning
     onFinished = (winner) => {
         
-        const currentPath = this.state.currentPlayer.Path;
-        const currentPosition = this.state.currentPlayer.Location;
+        const currentPath = this.state.currentPlayer.path;
+        const currentPosition = this.state.currentPlayer.location;
         // If the player is spinning to determine the sale price of a house
         if(this.state.houseSpin){
             if(this.state.housePoints.includes(this.state.path[currentPath][currentPosition])){
@@ -607,6 +597,7 @@ export default class GameBoard extends Component{
                             var num = rowIndex*15 + colIndex;
                             if(this.state.careerPoints.includes(num)){
                                 return <Tile
+                                playerIndex={this.state.playerIndex}
                                     onModalClose = {this.handleModalClose}
                                     key = {num}
                                     color = {"purple"}
@@ -628,6 +619,7 @@ export default class GameBoard extends Component{
                                     ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.stopPoints.includes(num)){
                                 return <Tile
+                                playerIndex={this.state.playerIndex}
                                     onModalClose = {this.handleModalClose}
                                     key = {num} 
                                     color = {"red"}
@@ -718,7 +710,7 @@ export default class GameBoard extends Component{
                     shouldCloseOnEsc={false}
                     shouldCloseOnOverlayClick={false}
                     style={customStyles}>
-                    <ModalContent type={"University"} handleClose={() => this.setState({universityModalOpen: false})} onModalClose={this.handleModalClose} />
+                    <ModalContent playerIndex={this.state.playerIndex} type={"University"} handleClose={() => this.setState({universityModalOpen: false})} onModalClose={this.handleModalClose} />
                 </Modal>
             </div>
             {/* modal for choosing initial career if player begins on bootcamp path */}
@@ -730,7 +722,7 @@ export default class GameBoard extends Component{
                     shouldCloseOnEsc={false}
                     shouldCloseOnOverlayClick={false}
                     style={customStyles}>
-                    <ModalContent type={"Career"} handleClose={() => this.setState({initialCareerModalOpen: false})} onModalClose={this.handleInitialCareerModalClose} />
+                    <ModalContent playerIndex={this.state.playerIndex} type={"Career"} handleClose={() => this.setState({initialCareerModalOpen: false})} onModalClose={this.handleInitialCareerModalClose} />
                 </Modal>
             </div>
         </div>

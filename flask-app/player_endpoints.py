@@ -231,7 +231,7 @@ class LocationResource(Resource):
 class CareerResource(Resource):
     def put(self, player_id):
         parser = reqparse.RequestParser()
-        parser.add_argument("cert", type=str)
+        parser.add_argument("career", type=str, required=True)
         args = parser.parse_args()
 
         db = get_db()
