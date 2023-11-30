@@ -276,7 +276,18 @@ export default class GameBoard extends Component{
                 );
             // if the returned value is a number, it is 2 * the player's salary
             } else {
-                // TODO: call a flask endpoint to add newValue to the player's cash
+                // call a flask endpoint to add newValue to the player's cash
+                axios({
+                    method: "PUT",
+                    url:"/players/payday/P" + (this.state.playerIndex + 1),
+                    data: {
+                        "double-earning": true
+                      }
+                  })
+                  .then((response) => {
+                  console.log('PUT request successful:', response.data);
+
+                  })
                 this.setState(
                     (prevState) => ({
                         players: updatePlayerCash(prevState.players, this.state.playerIndex, newValue),
@@ -333,7 +344,18 @@ export default class GameBoard extends Component{
             } else if (this.state.paydayPoints.includes(tile)) {
                 console.log("passing a payday");
                 const salary = this.state.players[this.state.playerIndex].salary;
-                // TODO: call a flask endpoint to add the player's salary to their cash
+                // call a flask endpoint to add the player's salary to their cash
+                    axios({
+                        method: "PUT",
+                        url:"/players/payday/P" + (this.state.playerIndex + 1),
+                        data: {
+                            "double-earning": false
+                          }
+                      })
+                      .then((response) => {
+                      console.log('PUT request successful:', response.data);
+
+                      })
                 this.setState(
                     (prevState) => ({
                         players: updatePlayerCash(prevState.players, this.state.playerIndex, salary),
