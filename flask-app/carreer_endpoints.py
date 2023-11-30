@@ -74,7 +74,7 @@ class PlayerAllowedCareerResource(Resource):
             return {'uni_available_career_cards': result}
         else:
             #Code to select non-uni, unused careers only
-            cur = db.execute('SELECT * FROM CareerCards WHERE Used = 0 AND Univeristy_Required = 0')
+            cur = db.execute('SELECT * FROM CareerCards WHERE Used = 0 AND University_Required = 0')
             non_uni_available_career_cards = cur.fetchall()
             result = [{'CareerID': card[0], 'Name': card[1], 'Salary': card[2],
                    'University_Required': bool(card[3]), 'Image': card[4], 'Used': bool(card[5])} for card in non_uni_available_career_cards]
