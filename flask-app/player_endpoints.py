@@ -235,7 +235,7 @@ class AddCertReource(Resource):
 # Add the new resource to the API
 api.add_resource(PaydayResource, "/players/payday/<string:player_id>")
 api.add_resource(LocationResource, "/players/location/<string:player_id>")
-api.add_resource(AddCertReource, "/players/AddCertificate/<string:player_id>")
+api.add_resource(AddCertReource, "/players/add-certificate/<string:player_id>")
 
 
 # Add the new resource to the API
