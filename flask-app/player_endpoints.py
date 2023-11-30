@@ -202,12 +202,34 @@ class LocationResource(Resource):
         updated_player = cur.fetchone()
 
         return format_player_response(updated_player)        
-        
-class CareerResource(Resource):
-    def put(self, player_id):
+
+class AddCertReource(Resource):
+    def put(self, player_id):    
         parser = reqparse.RequestParser()
-        parser.add_argument("career", type=str, required=True)
+        parser.add_argument("cert", type=str)
         args = parser.parse_args()
+
+        db = get_db()
+        cur = db.execute("SELECT Languages FROM Players WHERE PlayerID = ?", (player_id,))
+        player = cur.fetchone()
+
+        if player is None:
+            return {"message": "Player not found"}, 404
+        
+        #Add language/certification to the player list
+        updatedCerts = player[0] + "," + args["cert"]
+
+        #Update the certificates in the database
+        db.execute(
+            "UPDATE Players SET Languages=? WHERE PlayerID=?", (updatedCerts, player_id)
+        )
+        db.commit()
+
+        # Retrieve the updated player data
+        cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
+        updated_player = cur.fetchone()
+
+        return format_player_response(updated_player)            
 
         db = get_db()
         cur = db.execute("SELECT CareerID, Salary FROM Players WHERE PlayerID = ?", (player_id,))
@@ -250,7 +272,7 @@ class CareerResource(Resource):
 # Add the new resource to the API
 api.add_resource(PaydayResource, "/players/payday/<string:player_id>")
 api.add_resource(LocationResource, "/players/location/<string:player_id>")
-api.add_resource(CareerResource, "/players/career/<string:player_id>")
+api.add_resource(AddCertReource, "/players/AddCertificate/<string:player_id>")
 
 
 # Add the new resource to the API
