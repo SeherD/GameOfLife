@@ -7,6 +7,7 @@ import Piece from './Piece';
 import WheelComponent from 'react-wheel-of-prizes';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
 
 export default class GameBoard extends Component{
     // used to access specific tiles by index
@@ -45,14 +46,24 @@ export default class GameBoard extends Component{
                         ],
             // player data
             players: getPlayerData(),
-            currentPlayer: 0,
+            playerIndex: 0,
             playerPieces: [],
             // for tracking the initial path choice modal
-            universityModalOpen: true
+            universityModalOpen: true,
+            playersCopy: []
         }
 
 
     componentDidMount() {
+        axios({
+            method: "GET",
+            url:"/players",
+          })
+          .then((response) => {
+            const res =response.data;
+            console.log(res.all_players);
+            this.setState({playersCopy: res.all_players});
+          })
         this.updatePlayerPieces();
     }
 
@@ -65,13 +76,13 @@ export default class GameBoard extends Component{
 
     // cycle through the players in this.state.players
     updateCurrentPlayer = () => {
-        if (this.state.currentPlayer === this.state.players.length - 1) {
+        if (this.state.playerIndex === this.state.playersCopy.length - 1) {
             this.setState({
                 currentPlayer: 0,
             });
         } else {
             this.setState((prevState) => ({
-                currentPlayer: prevState.currentPlayer + 1,
+                currentPlayer: prevState.playerIndex + 1,
             }));
         }
     }
@@ -92,7 +103,7 @@ export default class GameBoard extends Component{
     };
 
     handleModalClose = (slideIndex, newValue) => {
-        const currentPlayer = this.state.players[this.state.currentPlayer];
+        const currentPlayer = this.state.players[this.state.playerIndex];
         // if it's the beginning of the game (i.e. the current player isn't on a path yet)
         if (currentPlayer.currentPath === 'mainPath' && currentPlayer.position === 0) {
             // if player chose university path
@@ -107,7 +118,7 @@ export default class GameBoard extends Component{
                         this.updatePlayerPieces();
                         const newPlayerInfo = {
                             ...this.props.playerInfo,
-                            cash: this.state.players[this.state.currentPlayer].cash,
+                            cash: this.state.players[this.state.playerIndex].cash,
                         };
                         this.props.updatePlayerInfo(newPlayerInfo);
                     }
@@ -128,7 +139,7 @@ export default class GameBoard extends Component{
                     const newPlayerInfo = {
                         ...this.props.playerInfo,
                         career: newValue,
-                        salary: this.state.players[this.state.currentPlayer].salary,
+                        salary: this.state.players[this.state.playerIndex].salary,
                         // TODO: call flask endpoint to find salary of new career and set player's salary
                     };
                     this.props.updatePlayerInfo(newPlayerInfo);
@@ -165,7 +176,7 @@ export default class GameBoard extends Component{
                     const newPlayerInfo = {
                         ...this.props.playerInfo,
                         career: newValue,
-                        salary: this.state.players[this.state.currentPlayer].salary,
+                        salary: this.state.players[this.state.playerIndex].salary,
                         // TODO: call flask endpoint to find salary of new career and set player's salary
                     };
                     this.props.updatePlayerInfo(newPlayerInfo);
@@ -240,16 +251,16 @@ export default class GameBoard extends Component{
 
     handleTile = (onPath, atPosition) => {
         const index = this.state.path[onPath][atPosition];
-        console.log(`player ${this.state.currentPlayer} is now on tile ${index}`);
+        console.log(`player ${this.state.playerIndex} is now on tile ${index}`);
         const tile = this.tiles[index];
-        const newValue = tile.handleClick(this.state.players[this.state.currentPlayer]);
+        const newValue = tile.handleClick(this.state.players[this.state.playerIndex]);
         // if handleClick returned a value
         if (newValue) {
             // if that value is a string, it is a new skill
             if (newValue instanceof String) {
                 this.setState(
                     (prevState) => ({
-                        players: addPlayerLanguage(prevState.players, this.state.currentPlayer, newValue),
+                        players: addPlayerLanguage(prevState.players, this.state.playerIndex, newValue),
                     }),
                     () => {
                         this.updatePlayerPieces();
@@ -268,14 +279,14 @@ export default class GameBoard extends Component{
                 // TODO: call a flask endpoint to add newValue to the player's cash
                 this.setState(
                     (prevState) => ({
-                        players: updatePlayerCash(prevState.players, this.state.currentPlayer, newValue),
+                        players: updatePlayerCash(prevState.players, this.state.playerIndex, newValue),
                     }),
                     () => {
-                        console.log(this.state.players[this.state.currentPlayer]);
+                        console.log(this.state.players[this.state.playerIndex]);
                         this.updatePlayerPieces();
                         const newPlayerInfo = {
                             ...this.props.playerInfo,
-                            cash: this.state.players[this.state.currentPlayer].cash,
+                            cash: this.state.players[this.state.playerIndex].cash,
                         };
                         this.props.updatePlayerInfo(newPlayerInfo);
                     }
@@ -321,18 +332,18 @@ export default class GameBoard extends Component{
             // receive salary when passing payday tiles
             } else if (this.state.paydayPoints.includes(tile)) {
                 console.log("passing a payday");
-                const salary = this.state.players[this.state.currentPlayer].salary;
+                const salary = this.state.players[this.state.playerIndex].salary;
                 // TODO: call a flask endpoint to add the player's salary to their cash
                 this.setState(
                     (prevState) => ({
-                        players: updatePlayerCash(prevState.players, this.state.currentPlayer, salary),
+                        players: updatePlayerCash(prevState.players, this.state.playerIndex, salary),
                     }),
                     () => {
-                        console.log(this.state.players[this.state.currentPlayer]);
+                        console.log(this.state.players[this.state.playerIndex]);
                         this.updatePlayerPieces();
                         const newPlayerInfo = {
                             ...this.props.playerInfo,
-                            cash: this.state.players[this.state.currentPlayer].cash,
+                            cash: this.state.players[this.state.playerIndex].cash,
                         };
                         this.props.updatePlayerInfo(newPlayerInfo);
                     }
@@ -379,14 +390,14 @@ export default class GameBoard extends Component{
     handleInitialCareerModalClose = (slideIndex, newCareer) => {
         this.setState(
             (prevState) => ({
-                players: updatePlayerCareer(prevState.players, this.state.currentPlayer, newCareer),
+                players: updatePlayerCareer(prevState.players, this.state.playerIndex, newCareer),
             }),
             () => {
                 this.updatePlayerPieces();
                 const newPlayerInfo = {
                     ...this.props.playerInfo,
                     career: newCareer,
-                    salary: this.state.players[this.state.currentPlayer].salary,
+                    salary: this.state.players[this.state.playerIndex].salary,
                     // TODO: call flask endpoint to find salary of new career and set player's salary
                 };
                 this.props.updatePlayerInfo(newPlayerInfo);
@@ -397,7 +408,7 @@ export default class GameBoard extends Component{
     //function that is called after the spinner is done spinning
     onFinished = (winner) => {
         
-        const currentPlayer = this.state.players.find(player => player.pid === this.state.currentPlayer);
+        const currentPlayer = this.state.players.find(player => player.pid === this.state.playerIndex);
         const currentPath = currentPlayer.currentPath;
         const currentPosition = currentPlayer.position;
         // If the player is spinning to determine the sale price of a house
