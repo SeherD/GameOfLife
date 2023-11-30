@@ -15,6 +15,7 @@ parser.add_argument("Homes", type=str, default=[])
 parser.add_argument("Languages", type=str, default=[])
 parser.add_argument("Stocks", type=str, default=[])
 parser.add_argument("Salary", type=float, required=True)
+parser.add_argument("Location", type=int, default=219)
 
 
 def format_player_response(player_data):
@@ -31,11 +32,11 @@ def format_player_response(player_data):
         "Languages": player_data[9].split(",") if player_data[9] else [],
         "Stocks": player_data[10].split(",") if player_data[10] else [],
         "Salary": player_data[11],
+        "Location": player_data[12],
     }
 
 
-# TODO:
-# languages/certs,
+
 class IndividualPlayerResource(Resource):
     def get(self, player_id):
         db = get_db()
@@ -83,7 +84,7 @@ class PlayerResource(Resource):
         args = parser.parse_args()
         db = get_db()
         cur = db.execute(
-            "INSERT INTO Players (PlayerID, Money, Debt, CareerID, ColorOfPiece, Avatar, University, Host, Homes, Languages, Stocks, Salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO Players (PlayerID, Money, Debt, CareerID, ColorOfPiece, Avatar, University, Host, Homes, Languages, Stocks, Salary, Location) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 args["PlayerID"],
                 args["Money"],
@@ -97,6 +98,7 @@ class PlayerResource(Resource):
                 args["Languages"],
                 args["Stocks"],
                 args["Salary"],
+                args["Location"],
             ),
         )
         db.commit()
@@ -169,11 +171,38 @@ class PaydayResource(Resource):
         updated_player = cur.fetchone()
 
         return format_player_response(updated_player)
+
+class LocationResource(Resource):
+    def put(self, player_id):
+        parser = reqparse.RequestParser()
+        parser.add_argument("location", type=int, default=219)
+        args = parser.parse_args()
+
+        db = get_db()
+        cur = db.execute("SELECT Location FROM Players WHERE PlayerID = ?", (player_id,))
+        player = cur.fetchone()
+
+        if player is None:
+            return {"message": "Player not found"}, 404
+        
+        location = args["location"]
+        # Update the location in the database
+        db.execute(
+            "UPDATE Players SET Location=? WHERE PlayerID=?", (location, player_id)
+        )
+        db.commit()
+
+        # Retrieve the updated player data
+        cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
+        updated_player = cur.fetchone()
+
+        return format_player_response(updated_player)        
         
 
 
 # Add the new resource to the API
 api.add_resource(PaydayResource, "/players/payday/<string:player_id>")
+api.add_resource(LocationResource, "/players/location/<string:player_id>")
 
 
 # Add the new resource to the API
