@@ -68,17 +68,17 @@ class PlayerAllowedCareerResource(Resource):
         if player[0]:
             #Code to select any unused career from the list
             cur = db.execute('SELECT * FROM CareerCards WHERE Used = 0')
-            uni_available_career_cards = cur.fetchall()
+            available_career_cards = cur.fetchall()
             result = [{'CareerID': card[0], 'Name': card[1], 'Salary': card[2],
-                   'University_Required': bool(card[3]), 'Image': card[4], 'Used': bool(card[5])} for card in uni_available_career_cards]
+                   'University_Required': bool(card[3]), 'Image': card[4], 'Used': bool(card[5])} for card in available_career_cards]
             return {'uni_available_career_cards': result}
         else:
             #Code to select non-uni, unused careers only
             cur = db.execute('SELECT * FROM CareerCards WHERE Used = 0 AND University_Required = 0')
-            non_uni_available_career_cards = cur.fetchall()
+            available_career_cards = cur.fetchall()
             result = [{'CareerID': card[0], 'Name': card[1], 'Salary': card[2],
-                   'University_Required': bool(card[3]), 'Image': card[4], 'Used': bool(card[5])} for card in non_uni_available_career_cards]
-            return {'non_uni_available_career_cards': result}
+                   'University_Required': bool(card[3]), 'Image': card[4], 'Used': bool(card[5])} for card in available_career_cards]
+            return {'available_career_cards': result}
         
 
         
