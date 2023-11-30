@@ -63,14 +63,14 @@ export default class GameBoard extends Component{
           .then((response) => {
             const res =response.data;
             const i = this.state.playerIndex;
-            this.setState({playersCopy: res.all_players, currentPlayer: res.all_players[i]});
+            this.setState({playersCopy: res.all_players, currentPlayer: res.all_players[i]}, this.showPlayerPieces());
+
           })
-        this.updatePlayerPieces();
     }
 
     componentDidUpdate(prevProps, prevState) {
         // check if the state that affects the pieces has changed
-        if (prevState.players !== this.state.players) {
+        if (prevState.currentPlayer !== this.state.currentPlayer) {
           this.updatePlayerPieces();
         }
     }
@@ -89,20 +89,47 @@ export default class GameBoard extends Component{
         // }
     }
 
-    /**
-     * updates the array of player pieces stored in the state
-     * this array might not be necessary anymore. remove it?
-     */
-    updatePlayerPieces = () => {
-        const playerPieces = this.state.players.map((player) => ({
-          key: player.pid,
-                color: player.color,
-                tile: this.state.path[player.currentPath][player.position],
+//initialize player pieces
+    showPlayerPieces = () => {
+        if(this.state.playersCopy === undefined)
+            return
+
+        const playerPieces = this.state.playersCopy.map((player) => ({
+          key: player.PlayerID,
+                color: player.ColorOfPiece,
+                tile: this.state.path[player.Path][player.Location],
         }));
     
-        this.setState({ playerPieces }, () => {
+        this.setState({ playerPieces: playerPieces }, () => {
         });
     };
+
+    /**
+     * updates the current player's piece stored in the state
+     */
+    updatePlayerPieces = () => {
+        if(this.state.playerPieces == undefined || this.state.playerPieces.length === 0){
+            return;
+        }
+        const player = this.state.currentPlayer;
+        console.log("updating player tile to " + player.Location)
+
+
+        const playerPieces = this.state.playerPieces.map((piece) => {
+            if(piece.key === player.PlayerID)
+            return {
+                    key: player.PlayerID,
+                  color: player.ColorOfPiece,
+                  tile: this.state.path[player.Path][player.Location]
+            }
+            else
+            return piece;
+          });
+      
+          this.setState({ playerPieces: playerPieces }, () => {
+          });
+    };
+
 
     handleModalClose = (slideIndex, newValue) => {
         const currentPlayer = this.state.currentPlayer;
@@ -123,7 +150,9 @@ export default class GameBoard extends Component{
                   })
                   .then((response) => {
                     console.log('PUT request successful:', response.data);
-                    this.setState({currentPlayer: response.data})
+                    this.setState({currentPlayer: response.data}, 
+                        ()=>{
+                            this.updatePlayerPieces()})
                   });
                 let updatedPlayersArray = updatePlayerPosition(this.state.players, this.state.playerIndex, newPath, newPosition);
                 updatedPlayersArray = updatePlayerCash(updatedPlayersArray, this.state.playerIndex, -100000);
@@ -149,7 +178,7 @@ export default class GameBoard extends Component{
                     players: updatePlayerCareer(prevState.players, this.state.playerIndex, newValue),
                 }),
                 () => {
-                    this.updatePlayerPieces();
+                                        this.updatePlayerPieces();
             const newPlayerInfo = {
             ...this.props.playerInfo,
             career: newValue,
@@ -167,7 +196,7 @@ export default class GameBoard extends Component{
                     players: addPlayerHouse(prevState.players, this.state.playerIndex, newValue),
                 }),
                 () => {
-                    this.updatePlayerPieces();
+                                        this.updatePlayerPieces();
             }
             );
             const housesList = this.props.playerInfo.houses;
@@ -186,7 +215,7 @@ export default class GameBoard extends Component{
                     players: updatePlayerCareer(prevState.players, this.state.playerIndex, newValue),
                 }),
                 () => {
-                    this.updatePlayerPieces();
+                                        this.updatePlayerPieces();
             const newPlayerInfo = {
             ...this.props.playerInfo,
             career: newValue,
@@ -216,14 +245,6 @@ export default class GameBoard extends Component{
                     this.setState({currentPlayer: response.data})
                   });
 
-                this.setState(
-                    (prevState) => ({
-                        players: updatePlayerPosition(prevState.players, this.state.playerIndex, newPath, newPosition),
-                    }),
-                    () => {
-                        this.updatePlayerPieces();
-                }
-                );
             }
         }
         // if currently on tile 5 - a stop point
@@ -244,15 +265,6 @@ export default class GameBoard extends Component{
                     console.log('PUT request successful:', response.data);
                     this.setState({currentPlayer: response.data})
                   });
-
-                this.setState(
-                    (prevState) => ({
-                        players: updatePlayerPosition(prevState.players, this.state.playerIndex, newPath, newPosition),
-                    }),
-                    () => {
-                        this.updatePlayerPieces();
-                }
-                );
             }
         }
         // if currently on tile 127 - a stop point
@@ -274,14 +286,6 @@ export default class GameBoard extends Component{
                     this.setState({currentPlayer: response.data})
                   });
 
-                this.setState(
-                    (prevState) => ({
-                        players: updatePlayerPosition(prevState.players, this.state.playerIndex, newPath, newPosition),
-                    }),
-                    () => {
-                        this.updatePlayerPieces();
-                    }
-                );
             }
         }
         // if currently on tile 184 - a stop point
@@ -303,14 +307,6 @@ export default class GameBoard extends Component{
                     this.setState({currentPlayer: response.data})
                   });
 
-                this.setState(
-                    (prevState) => ({
-                        players: updatePlayerPosition(prevState.players, this.state.playerIndex, newPath, newPosition),
-                    }),
-                    () => {
-                        this.updatePlayerPieces();
-                }
-                );
             }
         }
     };
@@ -329,7 +325,7 @@ export default class GameBoard extends Component{
                         players: addPlayerLanguage(prevState.players, this.state.playerIndex, newValue),
                     }),
                     () => {
-                        this.updatePlayerPieces();
+                                                this.updatePlayerPieces();
                         const languagesList = this.props.playerInfo.languages;
                         languagesList.push(newValue);
                         console.log(languagesList);
@@ -481,7 +477,7 @@ export default class GameBoard extends Component{
                 players: updatePlayerCareer(prevState.players, this.state.playerIndex, newCareer),
             }),
             () => {
-                this.updatePlayerPieces();
+                                this.updatePlayerPieces();
                 const newPlayerInfo = {
                     ...this.props.playerInfo,
                     career: newCareer,
