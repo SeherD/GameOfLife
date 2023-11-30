@@ -2,20 +2,41 @@ from flask import Flask, request
 from flask_restful import Api, Resource, reqparse
 from database_init import *
 
+def get_career_title(career_id):
+    # Replace 'your_database_file.db' with the actual path to your SQLite database file
+    db = get_db()
+    # Establish a connection to the database
+
+    cursor = db.cursor()
+
+    # Execute a query to fetch the career title based on the career ID
+    cursor.execute("SELECT Name FROM CareerCards WHERE CareerID = ?", (career_id,))
+
+    # Fetch the result
+    result = cursor.fetchone()
+
+    # Close the database connection
+
+    # Return the career title if found, otherwise return None
+    return result[0] if result else None
+
 def format_player_response(player_data):
+    career_id = player_data[3]
+    career_title = get_career_title(career_id)
+
     return {
-        "PlayerID": player_data[0],
-        "Money": player_data[1],
-        "Debt": player_data[2],
-        "CareerID": player_data[3],
-        "ColorOfPiece": player_data[4],
-        "Avatar": player_data[5],
-        "University": player_data[6],
-        "Host": player_data[7],
-        "Homes": player_data[8].split(",") if player_data[8] else [],
-        "Languages": player_data[9].split(",") if player_data[9] else [],
-        "Stocks": player_data[10].split(",") if player_data[10] else [],
-        "Salary": player_data[11],
+        "playerid": player_data[0],
+        "image": player_data[5],  # Assuming 'Avatar' corresponds to the player's image
+        "career": career_title,
+        "cash": player_data[1],  # Assuming 'Money' corresponds to the player's cash
+        "salary": player_data[11],
+        "languages": player_data[9].split(",") if player_data[9] else [],
+        "houses": player_data[8].split(",") if player_data[8] else [],
+        "color": player_data[
+            4
+        ],  # Assuming 'ColorOfPiece' corresponds to the player's color
+        "path": player_data[13],  # Using the 'Path' variable from player data
+        "location": player_data[12],  # Using the 'Location' variable from player data
     }
 
 class BuyHouseResource(Resource):

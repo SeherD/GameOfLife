@@ -85,11 +85,11 @@ END;
 -- Inserting 5 players
 INSERT INTO Players (PlayerID, Money, Debt, CareerID, ColorOfPiece, Avatar, University, Host, Homes, Languages, Stocks, Salary, Location, Path)
 VALUES
-    ('P1', 10000, 0, 'C1', 'Red', 'Avatar1', 0, 0, 'H1,H2', 'Python,Java', 'AAPL,GOOGL', 0, 0, 'mainPath'),
-    ('P2', 15000, 500, 'C2', 'Blue', 'Avatar2', 0, 1, 'H3,H4', 'C++,JavaScript', 'MSFT,AMZN', 0, 0, 'mainPath'),
-    ('P3', 20000, 1000, 'C3', 'Green', 'Avatar3', 1, 0, 'H5,H6', 'Java,Python', 'AAPL,GOOGL',0, 0, 'mainPath'),
-    ('P4', 25000, 1500, 'C4', 'Yellow', 'Avatar4', 0, 0, 'H7,H8', 'JavaScript,Python', 'MSFT,AMZN', 0, 0, 'mainPath'),
-    ('P5', 30000, 2000, 'C5', 'Purple', 'Avatar5', 1, 0, 'H9,H10', 'Python,C++', 'AAPL,GOOGL', 0, 0, 'mainPath');
+    ('P1', 200000, 0, '', 'Red', 'Avatar1', 0, 1, '', '', '', 0, 0, 'mainPath'),
+    ('P2', 200000, 0, '', 'Blue', 'Avatar2', 0, 0, '', '', '', 0, 0, 'mainPath'),
+    ('P3', 200000, 0, '', 'Green', 'Avatar3', 0, 0, '', '', '',0, 0, 'mainPath'),
+    ('P4', 200000, 0, '', 'Yellow', 'Avatar4', 0, 0, '', '', '', 0, 0, 'mainPath'),
+    ('P5', 200000, 0, '', 'Purple', 'Avatar5', 0, 0, '', '', '', 0, 0, 'mainPath');
 
 
 
