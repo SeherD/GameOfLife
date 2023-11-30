@@ -15,7 +15,7 @@ parser.add_argument("Homes", type=str, default=[])
 parser.add_argument("Languages", type=str, default=[])
 parser.add_argument("Stocks", type=str, default=[])
 parser.add_argument("Salary", type=float, required=True)
-parser.add_argument("Location", type=int, default=219)
+parser.add_argument("Location", type=int, default=0)
 
 
 def format_player_response(player_data):
