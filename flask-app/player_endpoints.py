@@ -36,8 +36,7 @@ def format_player_response(player_data):
     }
 
 
-# TODO:
-# languages/certs,
+
 class IndividualPlayerResource(Resource):
     def get(self, player_id):
         db = get_db()
