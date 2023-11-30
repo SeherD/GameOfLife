@@ -203,11 +203,54 @@ class LocationResource(Resource):
 
         return format_player_response(updated_player)        
         
+class CareerResource(Resource):
+    def put(self, player_id):
+        parser = reqparse.RequestParser()
+        parser.add_argument("career", type=str, required=True)
+        args = parser.parse_args()
 
+        db = get_db()
+        cur = db.execute("SELECT CareerID, Salary FROM Players WHERE PlayerID = ?", (player_id,))
+        player = cur.fetchone()
+
+        if player is None:
+            return {"message": "Player not found"}, 404
+
+        #Check to see if requested career is taken. If not, update it so that it is now used
+        car = db.execute("SELECT Used, Salary FROM CareerCards WHERE CareerID = ?", (args["career"],))
+        career = car.fetchone()
+        if career is None:
+            return {"message": "Career not found"}, 404
+        elif career[0]:
+            return {"message": "Career is already taken"}, 405
+        else:
+            db.execute(
+            "UPDATE CareerCards SET Used=1 WHERE CareerID=?", (args["career"],)
+        )
+        db.commit()
+
+        #Set old career to not used
+        db.execute(
+            "UPDATE CareerCards SET Used=0 WHERE CareerID=?", (player[0],)
+        )
+        db.commit()
+
+        # Update the salary and career for the player in the database
+        db.execute(
+            "UPDATE Players SET CareerID=?, Salary=? WHERE PlayerID=?", (args["career"], career[1], player_id,)
+        )
+        db.commit()
+
+        # Retrieve the updated player data
+        cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
+        updated_player = cur.fetchone()
+
+        return format_player_response(updated_player)
 
 # Add the new resource to the API
 api.add_resource(PaydayResource, "/players/payday/<string:player_id>")
 api.add_resource(LocationResource, "/players/location/<string:player_id>")
+api.add_resource(CareerResource, "/players/career/<string:player_id>")
 
 
 # Add the new resource to the API
