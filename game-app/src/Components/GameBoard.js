@@ -50,7 +50,8 @@ export default class GameBoard extends Component{
             playerPieces: [],
             // for tracking the initial path choice modal
             universityModalOpen: true,
-            playersCopy: []
+            playersCopy: [],
+            currentPlayer: null
         }
 
 
@@ -61,8 +62,8 @@ export default class GameBoard extends Component{
           })
           .then((response) => {
             const res =response.data;
-            console.log(res.all_players);
-            this.setState({playersCopy: res.all_players});
+            const i = this.state.playerIndex;
+            this.setState({playersCopy: res.all_players, currentPlayer: res.all_players[i]});
           })
         this.updatePlayerPieces();
     }
@@ -76,15 +77,16 @@ export default class GameBoard extends Component{
 
     // cycle through the players in this.state.players
     updateCurrentPlayer = () => {
-        if (this.state.playerIndex === this.state.playersCopy.length - 1) {
-            this.setState({
-                currentPlayer: 0,
-            });
-        } else {
-            this.setState((prevState) => ({
-                currentPlayer: prevState.playerIndex + 1,
-            }));
-        }
+        return;
+        // if (this.state.playerIndex === this.state.playersCopy.length - 1) {
+        //     this.setState({
+        //         playerIndex: 0,
+        //     });
+        // } else {
+        //     this.setState((prevState) => ({
+        //         playerIndex: prevState.playerIndex + 1,
+        //     }));
+        // }
     }
 
     /**
@@ -94,8 +96,8 @@ export default class GameBoard extends Component{
     updatePlayerPieces = () => {
         const playerPieces = this.state.players.map((player) => ({
           key: player.pid,
-          color: player.color,
-          tile: this.state.path[player.currentPath][player.position],
+                color: player.color,
+                tile: this.state.path[player.currentPath][player.position],
         }));
     
         this.setState({ playerPieces }, () => {
@@ -103,25 +105,37 @@ export default class GameBoard extends Component{
     };
 
     handleModalClose = (slideIndex, newValue) => {
-        const currentPlayer = this.state.players[this.state.playerIndex];
+        const currentPlayer = this.state.currentPlayer;
         // if it's the beginning of the game (i.e. the current player isn't on a path yet)
-        if (currentPlayer.currentPath === 'mainPath' && currentPlayer.position === 0) {
+        if (currentPlayer.Path === 'mainPath' && currentPlayer.Location === 0) {
             // if player chose university path
             let newPath = null;
             if (slideIndex === 0) {
                 newPath = 'universityPath';
                 const newPosition = 0;
-                let updatedPlayersArray = updatePlayerPosition(this.state.players, currentPlayer.pid, newPath, newPosition);
-                updatedPlayersArray = updatePlayerCash(updatedPlayersArray, currentPlayer.pid, -100000);
+                axios({
+                    method: "PUT",
+                    url:"/players/location/P" + (this.state.playerIndex + 1),
+                    data:{
+                        "location": newPosition,
+                        "path": newPath
+                    } 
+                  })
+                  .then((response) => {
+                    console.log('PUT request successful:', response.data);
+                    this.setState({currentPlayer: response.data})
+                  });
+                let updatedPlayersArray = updatePlayerPosition(this.state.players, this.state.playerIndex, newPath, newPosition);
+                updatedPlayersArray = updatePlayerCash(updatedPlayersArray, this.state.playerIndex, -100000);
                 this.setState({players: updatedPlayersArray,},
                     () => {
                         this.updatePlayerPieces();
-                        const newPlayerInfo = {
-                            ...this.props.playerInfo,
-                            cash: this.state.players[this.state.playerIndex].cash,
-                        };
-                        this.props.updatePlayerInfo(newPlayerInfo);
-                    }
+                const newPlayerInfo = {
+                ...this.props.playerInfo,
+                cash: this.state.players[this.state.playerIndex].cash,
+                };
+                this.props.updatePlayerInfo(newPlayerInfo);
+                }
                 );
             } else {
                 newPath = 'mainPath';
@@ -129,101 +143,140 @@ export default class GameBoard extends Component{
             }
         }
         // if currently on a career point
-        if (this.state.careerPoints.includes(this.state.path[currentPlayer.currentPath][currentPlayer.position])) {
+        if (this.state.careerPoints.includes(this.state.path[currentPlayer.Path][currentPlayer.Location])) {
             this.setState(
                 (prevState) => ({
-                    players: updatePlayerCareer(prevState.players, currentPlayer.pid, newValue),
+                    players: updatePlayerCareer(prevState.players, this.state.playerIndex, newValue),
                 }),
                 () => {
                     this.updatePlayerPieces();
-                    const newPlayerInfo = {
-                        ...this.props.playerInfo,
-                        career: newValue,
-                        salary: this.state.players[this.state.playerIndex].salary,
-                        // TODO: call flask endpoint to find salary of new career and set player's salary
-                    };
-                    this.props.updatePlayerInfo(newPlayerInfo);
-                }
+            const newPlayerInfo = {
+            ...this.props.playerInfo,
+            career: newValue,
+            salary: this.state.players[this.state.playerIndex].salary,
+            // TODO: call flask endpoint to find salary of new career and set player's salary
+            };
+            this.props.updatePlayerInfo(newPlayerInfo);
+            }
             );
         }
         // if currently on a house point
-        else if (this.state.housePoints.includes(this.state.path[currentPlayer.currentPath][currentPlayer.position])) {
+        else if (this.state.housePoints.includes(this.state.path[currentPlayer.Path][currentPlayer.Location])) {
             this.setState(
                 (prevState) => ({
-                    players: addPlayerHouse(prevState.players, currentPlayer.pid, newValue),
+                    players: addPlayerHouse(prevState.players, this.state.playerIndex, newValue),
                 }),
                 () => {
                     this.updatePlayerPieces();
-                }
+            }
             );
             const housesList = this.props.playerInfo.houses;
             housesList.push(newValue);
             console.log(housesList);
             const newPlayerInfo = {
-                ...this.props.playerInfo,
-                houses: housesList,
+            ...this.props.playerInfo,
+            houses: housesList,
             };
             this.props.updatePlayerInfo(newPlayerInfo);
         }
         // if currently on tile 175 - graduation
-        else if (currentPlayer.currentPath === 'universityPath' && currentPlayer.position === 7) {
+        else if (currentPlayer.Path === 'universityPath' && currentPlayer.Location === 7) {          
             this.setState(
                 (prevState) => ({
-                    players: updatePlayerCareer(prevState.players, currentPlayer.pid, newValue),
+                    players: updatePlayerCareer(prevState.players, this.state.playerIndex, newValue),
                 }),
                 () => {
                     this.updatePlayerPieces();
-                    const newPlayerInfo = {
-                        ...this.props.playerInfo,
-                        career: newValue,
-                        salary: this.state.players[this.state.playerIndex].salary,
-                        // TODO: call flask endpoint to find salary of new career and set player's salary
-                    };
-                    this.props.updatePlayerInfo(newPlayerInfo);
-                }
+            const newPlayerInfo = {
+            ...this.props.playerInfo,
+            career: newValue,
+            salary: this.state.players[this.state.playerIndex].salary,
+            // TODO: call flask endpoint to find salary of new career and set player's salary
+            };
+            this.props.updatePlayerInfo(newPlayerInfo);
+            }
             );
         }
         // if currently on tile 119 - a stop point
-        else if (currentPlayer.currentPath === 'mainPath' && currentPlayer.position === 12) {
+        else if (currentPlayer.Path === 'mainPath' && currentPlayer.Location === 12) {
             // if player chose side path
             if (slideIndex === 0) {
                 const newPath = 'sidePath1';
                 const newPosition = 0;
+                axios({
+                    method: "PUT",
+                    url:"/players/location/P" + (this.state.playerIndex + 1),
+                    data:{
+                        "location": newPosition,
+                        "path": newPath
+                    } 
+                  })
+                  .then((response) => {
+                    console.log('PUT request successful:', response.data);
+                    this.setState({currentPlayer: response.data})
+                  });
+
                 this.setState(
                     (prevState) => ({
-                        players: updatePlayerPosition(prevState.players, currentPlayer.pid, newPath, newPosition),
+                        players: updatePlayerPosition(prevState.players, this.state.playerIndex, newPath, newPosition),
                     }),
                     () => {
                         this.updatePlayerPieces();
-                    }
+                }
                 );
             }
         }
         // if currently on tile 5 - a stop point
-        else if (currentPlayer.currentPath === 'mainPath' && currentPlayer.position === 28) {
+        else if (currentPlayer.Path === 'mainPath' && currentPlayer.Location === 28) {
             // if player chose side path
             if (slideIndex === 0) {
                 const newPath = 'sidePath2';
                 const newPosition = 0;
+                axios({
+                    method: "PUT",
+                    url:"/players/location/P" + (this.state.playerIndex + 1),
+                    data:{
+                        "location": newPosition,
+                        "path": newPath
+                    } 
+                  })
+                  .then((response) => {
+                    console.log('PUT request successful:', response.data);
+                    this.setState({currentPlayer: response.data})
+                  });
+
                 this.setState(
                     (prevState) => ({
-                        players: updatePlayerPosition(prevState.players, currentPlayer.pid, newPath, newPosition),
+                        players: updatePlayerPosition(prevState.players, this.state.playerIndex, newPath, newPosition),
                     }),
                     () => {
                         this.updatePlayerPieces();
-                    }
+                }
                 );
             }
         }
         // if currently on tile 127 - a stop point
-        else if (currentPlayer.currentPath === 'mainPath' && currentPlayer.position === 48) {
+        else if (currentPlayer.Path === 'mainPath' && currentPlayer.Location === 48) {
             // if player chose side path
             if (slideIndex === 0) {
                 const newPath = 'sidePath3';
                 const newPosition = 0;
+                axios({
+                    method: "PUT",
+                    url:"/players/location/P" + (this.state.playerIndex + 1),
+                    data:{
+                        "location": newPosition,
+                        "path": newPath
+                    } 
+                  })
+                  .then((response) => {
+                    console.log('PUT request successful:', response.data);
+                    this.setState({currentPlayer: response.data})
+                  });
+
                 this.setState(
                     (prevState) => ({
-                        players: updatePlayerPosition(prevState.players, currentPlayer.pid, newPath, newPosition),
+                        players: updatePlayerPosition(prevState.players, this.state.playerIndex, newPath, newPosition),
                     }),
                     () => {
                         this.updatePlayerPieces();
@@ -232,18 +285,31 @@ export default class GameBoard extends Component{
             }
         }
         // if currently on tile 184 - a stop point
-        else if (currentPlayer.currentPath === 'mainPath' && currentPlayer.position === 55) {
+        else if (currentPlayer.Path === 'mainPath' && currentPlayer.Location === 55) {
             // if player chose to retire early
             if (slideIndex === 0) {
                 const newPath = 'mainPath';
                 const newPosition = 64;
+                axios({
+                    method: "PUT",
+                    url:"/players/location/P" + (this.state.playerIndex + 1),
+                    data:{
+                        "location": newPosition,
+                        "path": newPath
+                    } 
+                  })
+                  .then((response) => {
+                    console.log('PUT request successful:', response.data);
+                    this.setState({currentPlayer: response.data})
+                  });
+
                 this.setState(
                     (prevState) => ({
-                        players: updatePlayerPosition(prevState.players, currentPlayer.pid, newPath, newPosition),
+                        players: updatePlayerPosition(prevState.players, this.state.playerIndex, newPath, newPosition),
                     }),
                     () => {
                         this.updatePlayerPieces();
-                    }
+                }
                 );
             }
         }
@@ -289,18 +355,18 @@ export default class GameBoard extends Component{
 
                   })
                 this.setState(
-                    (prevState) => ({
-                        players: updatePlayerCash(prevState.players, this.state.playerIndex, newValue),
-                    }),
-                    () => {
-                        console.log(this.state.players[this.state.playerIndex]);
+                (prevState) => ({
+                players: updatePlayerCash(prevState.players, this.state.playerIndex, newValue),
+                }),
+                () => {
+                console.log(this.state.players[this.state.playerIndex]);
                         this.updatePlayerPieces();
-                        const newPlayerInfo = {
-                            ...this.props.playerInfo,
-                            cash: this.state.players[this.state.playerIndex].cash,
-                        };
-                        this.props.updatePlayerInfo(newPlayerInfo);
-                    }
+                const newPlayerInfo = {
+                ...this.props.playerInfo,
+                cash: this.state.players[this.state.playerIndex].cash,
+                };
+                this.props.updatePlayerInfo(newPlayerInfo);
+                }
                 )
             }
         }
@@ -315,7 +381,7 @@ export default class GameBoard extends Component{
         const tilesPassed = path[currentPath].slice(currentPosition+1, newPosition);
         // if the player finishes a side path, merge into the main path
         if (currentPath === "universityPath" && tempPosition >= path[currentPath].length) {
-            newPath = "mainPath";
+                        newPath = "mainPath";
             newPosition = 3 + tempPosition - path[currentPath].length;
             tilesPassed.push.apply(tilesPassed, path[newPath].slice(3,newPosition));
         } else if (currentPath === "sidePath1" && tempPosition >= path[currentPath].length) {
@@ -339,7 +405,7 @@ export default class GameBoard extends Component{
             if (this.state.stopPoints.includes(tile)) {
                 newPosition = path[currentPath].indexOf(tile);
                 if (currentPath === "universityPath") newPath = "universityPath";
-                break;
+                                break;
             // receive salary when passing payday tiles
             } else if (this.state.paydayPoints.includes(tile)) {
                 console.log("passing a payday");
@@ -430,9 +496,8 @@ export default class GameBoard extends Component{
     //function that is called after the spinner is done spinning
     onFinished = (winner) => {
         
-        const currentPlayer = this.state.players.find(player => player.pid === this.state.playerIndex);
-        const currentPath = currentPlayer.currentPath;
-        const currentPosition = currentPlayer.position;
+        const currentPath = this.state.currentPlayer.Path;
+        const currentPosition = this.state.currentPlayer.Location;
         // If the player is spinning to determine the sale price of a house
         if(this.state.houseSpin){
             if(this.state.housePoints.includes(this.state.path[currentPath][currentPosition])){
@@ -500,13 +565,25 @@ export default class GameBoard extends Component{
         const newPathAndPosition = this.calculateNewPosition(currentPath, currentPosition, winner);
         const newPath = newPathAndPosition[0];
         const newPosition = newPathAndPosition[1];
-
-        this.setState({players: updatePlayerPosition(this.state.players, currentPlayer.pid, newPath, newPosition)});
+        
+        axios({
+            method: "PUT",
+            url:"/players/location/P" + (this.state.playerIndex + 1),
+            data:{
+                "location": newPosition,
+                "path": newPath
+            } 
+          })
+          .then((response) => {
+            console.log('PUT request successful:', response.data);
+            this.setState({currentPlayer: response.data})
+          });
+        this.setState({players: updatePlayerPosition(this.state.players, this.state.playerIndex, newPath, newPosition)});
         console.log(`new path: ${newPath}, new position: ${newPosition}`);
         this.handleTile(newPath, newPosition);
         this.updateCurrentPlayer();
         }
-      }  
+          }
 
     //create game board
     createBoard = () =>{
