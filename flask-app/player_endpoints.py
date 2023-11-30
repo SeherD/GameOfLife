@@ -16,6 +16,7 @@ parser.add_argument("Languages", type=str, default=[])
 parser.add_argument("Stocks", type=str, default=[])
 parser.add_argument("Salary", type=float, required=True)
 parser.add_argument("Location", type=int, default=0)
+parser.add_argument("Path", type=str, default="mainPath")
 
 
 def format_player_response(player_data):
@@ -33,6 +34,7 @@ def format_player_response(player_data):
         "Stocks": player_data[10].split(",") if player_data[10] else [],
         "Salary": player_data[11],
         "Location": player_data[12],
+        "Path": player_data[13],
     }
 
 
@@ -84,7 +86,7 @@ class PlayerResource(Resource):
         args = parser.parse_args()
         db = get_db()
         cur = db.execute(
-            "INSERT INTO Players (PlayerID, Money, Debt, CareerID, ColorOfPiece, Avatar, University, Host, Homes, Languages, Stocks, Salary, Location) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO Players (PlayerID, Money, Debt, CareerID, ColorOfPiece, Avatar, University, Host, Homes, Languages, Stocks, Salary, Location, Path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 args["PlayerID"],
                 args["Money"],
@@ -99,6 +101,7 @@ class PlayerResource(Resource):
                 args["Stocks"],
                 args["Salary"],
                 args["Location"],
+                args["Path"],
             ),
         )
         db.commit()
@@ -175,20 +178,22 @@ class PaydayResource(Resource):
 class LocationResource(Resource):
     def put(self, player_id):
         parser = reqparse.RequestParser()
-        parser.add_argument("location", type=int, default=219)
+        parser.add_argument("location", type=int, default=0)
+        parser.add_argument("path", type=str, default="mainPath")
         args = parser.parse_args()
 
         db = get_db()
-        cur = db.execute("SELECT Location FROM Players WHERE PlayerID = ?", (player_id,))
+        cur = db.execute("SELECT Location, Path FROM Players WHERE PlayerID = ?", (player_id,))
         player = cur.fetchone()
 
         if player is None:
             return {"message": "Player not found"}, 404
         
         location = args["location"]
+        path = args["path"]
         # Update the location in the database
         db.execute(
-            "UPDATE Players SET Location=? WHERE PlayerID=?", (location, player_id)
+            "UPDATE Players SET Location=?, Path=? WHERE PlayerID=?", (location, path, player_id)
         )
         db.commit()
 
