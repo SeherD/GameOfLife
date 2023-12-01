@@ -7,10 +7,11 @@ from house_endpoints import *
 from carreer_endpoints import *
 from player_endpoints import *
 from game_endpoints import *
+from sale_house_endpoints import *
 
 from flask_cors import CORS
 CORS(app)
 
 if __name__ == '__main__':
-    #init_db()
+    init_db()
     app.run(port=5000)
