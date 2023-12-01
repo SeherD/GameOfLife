@@ -125,10 +125,6 @@ class SellHouseResource(Resource):
 # Add the new resource to the API
 api.add_resource(SellHouseResource, "/players/sell-house/<string:player_id>/<string:house_id>")
 
-if __name__ == "__main__":
-    app.run(debug=True)
 # Add the new resource to the API
 api.add_resource(BuyHouseResource, "/players/buy-house/<string:player_id>/<string:house_id>")
 
-if __name__ == "__main__":
-    app.run(debug=True)
