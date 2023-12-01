@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import Modal from 'react-modal'
 import ModalContent from './ModalContent'
 import Tile from './Tile';
-import { getPlayerData, updatePlayerPosition, addPlayerLanguage, updatePlayerCash } from './Players';
 import Piece from './Piece';
 import WheelComponent from 'react-wheel-of-prizes';
 import { ToastContainer, toast } from 'react-toastify';
@@ -44,13 +43,11 @@ export default class GameBoard extends Component{
                         '#fa1da9',
                         '#ba38b4'
                         ],
-            // player data
-            players: getPlayerData(),
             playerIndex: 0,
             playerPieces: [],
             // for tracking the initial path choice modal
             universityModalOpen: true,
-            playersCopy: [],
+            players: [],
             currentPlayer: null
         }
 
@@ -63,7 +60,7 @@ export default class GameBoard extends Component{
           .then((response) => {
             const res =response.data;
             const i = this.state.playerIndex;
-            this.setState({playersCopy: res.all_players, currentPlayer: res.all_players[i]}, this.showPlayerPieces());
+            this.setState({players: res.all_players, currentPlayer: res.all_players[i]}, this.showPlayerPieces());
 
           })
     }
@@ -78,7 +75,7 @@ export default class GameBoard extends Component{
     // cycle through the players in this.state.players
     updateCurrentPlayer = () => {
         return;
-        // if (this.state.playerIndex === this.state.playersCopy.length - 1) {
+        // if (this.state.playerIndex === this.state.players.length - 1) {
         //     this.setState({
         //         playerIndex: 0,
         //     });
@@ -91,10 +88,10 @@ export default class GameBoard extends Component{
 
 //initialize player pieces
     showPlayerPieces = () => {
-        if(this.state.playersCopy === undefined)
+        if(this.state.players === undefined)
             return
 
-        const playerPieces = this.state.playersCopy.map((player) => ({
+        const playerPieces = this.state.players.map((player) => ({
           key: player.playerid,
                 color: player.color,
                 tile: this.state.path[player.path][player.location]
@@ -111,9 +108,6 @@ export default class GameBoard extends Component{
             return;
         }
         const player = this.state.currentPlayer;
-        console.log("updating player tile to " + player.location)
-
-
         const playerPieces = this.state.playerPieces.map((piece) => {
             if(piece.key === player.playerid)
             return {
@@ -135,7 +129,6 @@ export default class GameBoard extends Component{
         // if it's the beginning of the game (i.e. the current player isn't on a path yet)
         if (currentPlayer.path === 'mainPath' && currentPlayer.location === 0) {
             // if player chose university path
-            let newPath = "mainPath";
             if (slideIndex === 0) {
                 //update location
                 axios({
@@ -169,8 +162,7 @@ export default class GameBoard extends Component{
         }
         // if currently on a house point
         else if (this.state.housePoints.includes(this.state.path[currentPlayer.path][currentPlayer.location])) {
-            //TODO: call flask endpoint to add house
-            console.log("house value is " + newValue)
+            //call flask endpoint to add house
             axios({
                 method: "PUT",
                 url:"http://localhost:5000/players/buy-house/P" + (this.state.playerIndex + 1) + "/" + newValue
@@ -286,7 +278,6 @@ export default class GameBoard extends Component{
 
     handleTile = (onPath, atPosition) => {
         const index = this.state.path[onPath][atPosition];
-        console.log(`player ${this.state.playerIndex} is now on tile ${index}`);
         const tile = this.tiles[index];
         const newValue = tile.handleClick();
         // if handleClick returned a value
@@ -294,22 +285,7 @@ export default class GameBoard extends Component{
             // if that value is a string, it is a new skill
             if (newValue instanceof String) {
                 //TODO: add flask endpoint to add free skill to player assets
-                this.setState(
-                    (prevState) => ({
-                        players: addPlayerLanguage(prevState.players, this.state.playerIndex, newValue),
-                    }),
-                    () => {
-                                                this.updatePlayerPieces();
-                        const languagesList = this.props.playerInfo.languages;
-                        languagesList.push(newValue);
-                        console.log(languagesList);
-                        const newPlayerInfo = {
-                            ...this.props.playerInfo,
-                            languagesList: languagesList,
-                        };
-                        this.props.updatePlayerInfo(this.state.playerIndex + 1);
-                    }
-                );
+
             // if the returned value is a number, it is 2 * the player's salary
             } else {
                 // call a flask endpoint to add newValue to the player's cash
@@ -357,7 +333,6 @@ export default class GameBoard extends Component{
         }
 
         // check if the player is passing any stop tiles or reaching the end of the board
-        console.log("Tiles passed:", tilesPassed);
         for (let tile of tilesPassed) {
             // stop for stop tiles
             if (this.state.stopPoints.includes(tile)) {
@@ -366,8 +341,6 @@ export default class GameBoard extends Component{
                                 break;
             // receive salary when passing payday tiles
             } else if (this.state.paydayPoints.includes(tile)) {
-                console.log("passing a payday");
-                const salary = this.state.players[this.state.playerIndex].salary;
                 // call a flask endpoint to add the player's salary to their cash
                     axios({
                         method: "PUT",
