@@ -135,18 +135,12 @@ export default class GameBoard extends Component{
         // if it's the beginning of the game (i.e. the current player isn't on a path yet)
         if (currentPlayer.path === 'mainPath' && currentPlayer.location === 0) {
             // if player chose university path
-            let newPath = null;
+            let newPath = "mainPath";
             if (slideIndex === 0) {
-                newPath = 'universityPath';
-                const newPosition = 0;
                 //update location
                 axios({
                     method: "PUT",
-                    url:"http://localhost:5000/players/location/P" + (this.state.playerIndex + 1),
-                    data:{
-                        "location": newPosition,
-                        "path": newPath
-                    } 
+                    url:"http://localhost:5000/players/university/P" + (this.state.playerIndex + 1)
                   })
                   .then((response) => {
                     console.log('PUT request successful:', response.data);
@@ -155,20 +149,7 @@ export default class GameBoard extends Component{
                             this.updatePlayerPieces()
                             this.props.updatePlayerInfo(this.state.playerIndex + 1)})
                   });
-                  //TODO: replace with axios call
-                let updatedPlayersArray = updatePlayerPosition(this.state.players, this.state.playerIndex, newPath, newPosition);
-                updatedPlayersArray = updatePlayerCash(updatedPlayersArray, this.state.playerIndex, -100000);
-                this.setState({players: updatedPlayersArray,},
-                    () => {
-                        this.updatePlayerPieces();
-                const newPlayerInfo = {
-                ...this.props.playerInfo,
-                cash: this.state.players[this.state.playerIndex].cash,
-                };
-                }
-                );
-            } else {
-                newPath = 'mainPath';
+              } else {
                 this.setState({initialCareerModalOpen: true});
             }
         }
@@ -351,7 +332,7 @@ export default class GameBoard extends Component{
 
     calculateNewPosition = (currentPath, currentPosition, increment) => {
         // calculate a tentative new position by increasing the position by the result of the spinner
-        const tempPosition = parseInt(currentPosition) + parseInt(10);
+        const tempPosition = parseInt(currentPosition) + parseInt(increment);
         let newPath = currentPath;
         let newPosition = tempPosition;
         const path = this.state.path;
