@@ -16,11 +16,11 @@ export default class Tile extends Component {
         this.handleClick = this.handleClick.bind(this)
     }
 
-    handleClick = (player) =>{
+    handleClick = () =>{
         if (this.props.word !== "" && this.props.word !== "PayDay") {
             this.setState({open: true});
         } else if (this.props.word === "PayDay") {
-            return 2 * player.salary;
+            return 2;
         }
     }
 

@@ -315,7 +315,7 @@ export default class GameBoard extends Component{
         const index = this.state.path[onPath][atPosition];
         console.log(`player ${this.state.playerIndex} is now on tile ${index}`);
         const tile = this.tiles[index];
-        const newValue = tile.handleClick(this.state.players[this.state.playerIndex]);
+        const newValue = tile.handleClick();
         // if handleClick returned a value
         if (newValue) {
             // if that value is a string, it is a new skill
@@ -344,29 +344,15 @@ export default class GameBoard extends Component{
                     method: "PUT",
                     url:"http://localhost:5000/players/payday/P" + (this.state.playerIndex + 1),
                     data: {
-                        "double-earning": true
+                        "double_earning": true
                       }
                   })
                   .then((response) => {
                   console.log('PUT request successful:', response.data);
                   this.setState({currentPlayer: response.data})
                   this.props.updatePlayerInfo(this.state.playerIndex + 1)
-                //TODO: delete setstate below
+
                   })
-                this.setState(
-                (prevState) => ({
-                players: updatePlayerCash(prevState.players, this.state.playerIndex, newValue),
-                }),
-                () => {
-                console.log(this.state.players[this.state.playerIndex]);
-                        this.updatePlayerPieces();
-                const newPlayerInfo = {
-                ...this.props.playerInfo,
-                cash: this.state.players[this.state.playerIndex].cash,
-                };
-                this.props.updatePlayerInfo(this.state.playerIndex + 1);
-                }
-                )
             }
         }
     }
@@ -414,7 +400,7 @@ export default class GameBoard extends Component{
                         method: "PUT",
                         url:"http://localhost:5000/players/payday/P" + (this.state.playerIndex + 1),
                         data: {
-                            "double-earning": false
+                            "double_earning": false
                           }
                       })
                       .then((response) => {
@@ -560,9 +546,10 @@ export default class GameBoard extends Component{
           })
           .then((response) => {
             console.log('PUT request successful:', response.data);
-            this.setState({currentPlayer: response.data}, this.props.updatePlayerInfo(this.state.playerIndex + 1))
+            this.setState({currentPlayer: response.data}, 
+                this.props.updatePlayerInfo(this.state.playerIndex + 1));
+                this.handleTile(newPath, newPosition);
           });
-        this.handleTile(newPath, newPosition);
         this.updateCurrentPlayer();
         }
           }
