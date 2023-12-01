@@ -2,14 +2,28 @@ import React, { Component } from 'react';
 import Modal from 'react-modal'
 import HousePurchaseModal from './HousePurchaseModal.js';
 import HouseSaleModal from './HouseSaleModal.js';
+import axios from 'axios';
 
 export default class HouseModal extends Component {
     constructor(props) {
         super(props);
         this.state = {
             purchaseModalOpen: false,
-            saleModalOpen: false
+            saleModalOpen: false,
+            sellOptions: []
         };
+    }
+
+
+    componentDidMount() {
+        axios({
+            method: "GET",
+            url:"http://localhost:5000/players/houses/P" + (this.props.playerIndex + 1)
+          })
+          .then((response) => {
+            this.setState({sellOptions: response.data.houses});
+
+          })
     }
 
     handleHousePurchase = () => {
@@ -40,7 +54,7 @@ export default class HouseModal extends Component {
             <div>
                 <h1>Buy or sell a house?</h1>
                 <button onClick={this.handleHousePurchase}>Buy a house</button>
-                <button onClick={this.handleHouseSale}>Sell a house</button>
+                {this.state.sellOptions.length > 0 ? <button onClick={this.handleHouseSale}>Sell a house</button>: <div/>}
                 <button onClick={this.handleClose}>No</button>
                 {/* Pass the functions in props to the house selection modal */}
                 {/* House purchase modal */}
@@ -51,9 +65,10 @@ export default class HouseModal extends Component {
                     shouldCloseOnEsc={false}
                     shouldCloseOnOverlayClick={false}
                     style={customStyles}>
-                    <HousePurchaseModal isOpen = {this.state.purchaseModalOpen} handleClose={this.props.handleClose} />
+                    <HousePurchaseModal isOpen = {this.state.purchaseModalOpen} handleClose={this.props.handleClose} onModalClose={this.props.onModalClose}/>
                 </Modal>
-                {/* House sale modal */}
+                {/* House sale modal 
+                TODO: add sale of house*/}
                 <Modal
                     ariaHideApp={false}
                     isOpen = {this.state.saleModalOpen}
@@ -61,7 +76,7 @@ export default class HouseModal extends Component {
                     shouldCloseOnEsc={false}
                     shouldCloseOnOverlayClick={false}
                     style={customStyles}>
-                    <HouseSaleModal isOpen = {this.state.saleModalOpen} handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
+                    <HouseSaleModal houseOptions={this.state.sellOptions} isOpen = {this.state.saleModalOpen} handleClose={this.props.handleClose}/>
                 </Modal>
             </div>
           );

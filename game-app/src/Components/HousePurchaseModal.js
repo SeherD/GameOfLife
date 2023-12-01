@@ -5,6 +5,7 @@ import apartment from '../assets/apartment.jpg';
 import nohouse from '../assets/nohouse.png';
 import HouseCard from './HouseCard.js';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
+import axios from 'axios';
 
 export default class HousePurchaseModal extends Component {
     houses = ['House','Apartment'];
@@ -12,22 +13,39 @@ export default class HousePurchaseModal extends Component {
         super(props);
         this.state = {
             currentSlide: 0,
-            currentHouse: 'House'
+            currentHouseId: 'H1',
+            houseOptions: []
         };
     }
   
+    componentDidMount() {
+        axios({
+            method: "GET",
+            url:"http://localhost:5000/house/unused"
+          })
+          .then((response) => {
+            this.setState({houseOptions: response.data.unused_house_cards});
+
+          })
+    }
     handleSlideChange = (index) => {
-        this.setState({ currentSlide: index, currentHouse: this.houses[index] });
+        this.setState({ currentSlide: index, currentHouse: this.state.houseOptions[index].HouseID });
     };
 
     handleClose = () => {
         const { handleClose, onModalClose } = this.props;
         // Use the callback to send the current slide index and current house to GameBoard.js
         if (onModalClose) {
-            onModalClose(this.state.currentSlide, this.state.currentHouse);
+            onModalClose(this.state.currentSlide, this.state.currentHouseId);
         }
         // Close the modal
         handleClose();
+    }
+
+    populateHouses = () =>{
+        return this.state.houseOptions.map((house)=>(
+            <HouseCard key = {house.HouseID} name = {house.Name} image = {apartment} price = {house.Cost}/> 
+        ))
     }
   
     render() {
@@ -35,10 +53,8 @@ export default class HousePurchaseModal extends Component {
             <div>
             <h1>Choose a house to buy</h1>
                 {/* TODO: call a flask endpoint to display all the houses not owned by any player */}
-                <Carousel onChange={this.handleSlideChange} onSlideChange={this.props.onSlideChange} showThumbs={false} showArrows={true}>
-                    <HouseCard name = {'House'} image={house} price={200000} />
-                    <HouseCard name = {'Apartment'} image={apartment} price={100000} />
-                    <HouseCard name = {'None'} image={nohouse} price={0} />
+                <Carousel className="modal" onChange={this.handleSlideChange} onSlideChange={this.props.onSlideChange} showThumbs={false} showArrows={true}>
+                    {this.populateHouses()}
                 </Carousel>
                 <button onClick={this.handleClose}>Select</button>
             </div>

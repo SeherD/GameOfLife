@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import Modal from 'react-modal'
 import ModalContent from './ModalContent'
 import Tile from './Tile';
-import { getPlayerData, updatePlayerPosition, updatePlayerCareer, addPlayerHouse, addPlayerLanguage, updatePlayerCash } from './Players';
+import { getPlayerData, updatePlayerPosition, addPlayerLanguage, updatePlayerCash } from './Players';
 import Piece from './Piece';
 import WheelComponent from 'react-wheel-of-prizes';
 import { ToastContainer, toast } from 'react-toastify';
@@ -189,26 +189,18 @@ export default class GameBoard extends Component{
         // if currently on a house point
         else if (this.state.housePoints.includes(this.state.path[currentPlayer.path][currentPlayer.location])) {
             //TODO: call flask endpoint to add house
-            this.setState(
-                (prevState) => ({
-                    players: addPlayerHouse(prevState.players, this.state.playerIndex, newValue),
-                }),
-                () => {
-                    this.updatePlayerPieces();
-            }
-            );
-            const housesList = this.props.playerInfo.houses;
-            housesList.push(newValue);
-            console.log(housesList);
-            const newPlayerInfo = {
-            ...this.props.playerInfo,
-            houses: housesList,
-            };
-            this.props.updatePlayerInfo(this.state.playerIndex+1);
+            console.log("house value is " + newValue)
+            axios({
+                method: "PUT",
+                url:"http://localhost:5000/players/buy-house/P" + (this.state.playerIndex + 1) + "/" + newValue
+              })
+              .then((response) => {
+                console.log('PUT request successful:', response.data);
+                this.setState({currentPlayer: response.data}, this.props.updatePlayerInfo(this.state.playerIndex + 1))});
         }
         // if currently on tile 175 - graduation
         else if (currentPlayer.path === 'universityPath' && currentPlayer.location === 7) { 
-            // TODO: call flask endpoint to find salary of new career and set player's salary   
+            // call flask endpoint to find salary of new career and set player's salary   
             axios({
                 method: "PUT",
                 url:"http://localhost:5000/players/career/P" + (this.state.playerIndex + 1),
@@ -359,7 +351,7 @@ export default class GameBoard extends Component{
 
     calculateNewPosition = (currentPath, currentPosition, increment) => {
         // calculate a tentative new position by increasing the position by the result of the spinner
-        const tempPosition = parseInt(currentPosition) + parseInt(increment);
+        const tempPosition = parseInt(currentPosition) + parseInt(10);
         let newPath = currentPath;
         let newPosition = tempPosition;
         const path = this.state.path;
@@ -613,7 +605,8 @@ export default class GameBoard extends Component{
                                     ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.housePoints.includes(num)){
                                 return <Tile
-                                    onModalClose = {this.handleSale}
+                                playerIndex={this.state.playerIndex}
+                                    onModalClose = {this.handleModalClose}
                                     key = {num} 
                                     color = {"blue"}
                                     word = {"House"}
