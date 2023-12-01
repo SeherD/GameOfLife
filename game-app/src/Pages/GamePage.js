@@ -6,8 +6,9 @@ import avatar from '../assets/avatar1.png';
 function GamePage() {
   const [playerInfo, setPlayerInfo] = useState({
     image: avatar,
-    career: "Barista",
-    balance: 0,
+    career: "",
+    cash: 200000,
+    salary: null,
     languages: [],
     houses: [],
     color: "pink"

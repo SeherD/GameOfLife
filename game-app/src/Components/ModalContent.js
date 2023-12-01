@@ -27,11 +27,11 @@ export default class ModalContent extends Component {
             );
         } else if (this.state.type === "Career") {
             return(
-                <CareerModal handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
+                <CareerModal playerIndex={this.props.playerIndex} handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
             );
         } else if (this.state.type === "STOP" && this.state.stopID === 175) {
             return(
-                <CareerModal handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
+                <CareerModal playerIndex={this.props.playerIndex} handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
             );
         } else if (this.state.type === "STOP" && this.state.stopID === 119) {
             return(

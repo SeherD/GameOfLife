@@ -157,6 +157,10 @@
   z-index: 100;
 }
 
+.modal{
+  width: 50vw;
+}
+
 .playerIcon{
   width: 350px;
   height: 175px;
@@ -198,3 +202,4 @@
 .popup{
   font-size: medium;
 }
+
