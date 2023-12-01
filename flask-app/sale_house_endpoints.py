@@ -112,10 +112,15 @@ class BuyHouseResource(Resource):
 
 
 
+from flask_restful import Resource, reqparse
+
 class SellHouseResource(Resource):
+    
+
     def put(self, player_id, house_id):
         db = get_db()
-
+        parser = reqparse.RequestParser()
+        parser.add_argument('hasIncreased', type=bool, required=True, help='Boolean indicating whether to increase or decrease the price')
         # Retrieve player data
         cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
         player = cur.fetchone()
@@ -133,8 +138,14 @@ class SellHouseResource(Resource):
         if house_id not in player_houses:
             return {"message": "Player does not own this house"}, 400
 
-        # Calculate the selling price based on an increase factor
-        increase_factor = 1.5  # You can adjust this factor as needed
+        # Parse the request arguments using reqparse
+        args = self.parser.parse_args()
+        has_increased = args['hasIncreased']
+
+        # Determine whether to multiply or divide by the increase factor
+        increase_factor = 1.5 if has_increased else 1 / 1.5
+
+        # Calculate the selling price based on the increase factor
         selling_price = house_card[2] * increase_factor
 
         # Update player's money, mark the house as unused, and remove the house from the player's list
@@ -151,6 +162,7 @@ class SellHouseResource(Resource):
         updated_player = cur.fetchone()
 
         return format_player_response(updated_player)
+
 
 # Add the new resource to the API
 api.add_resource(SellHouseResource, "/players/sell-house/<string:player_id>/<string:house_id>")
