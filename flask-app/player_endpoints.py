@@ -280,9 +280,6 @@ class CareerResource(Resource):
         return format_player_response(updated_player)
 
 
-
-
-
 class ChooseUniversity(Resource):
     def put(self, player_id):
         parser = reqparse.RequestParser()
@@ -293,18 +290,18 @@ class ChooseUniversity(Resource):
 
         # Fetch the player data from the database
         cur = db.execute(
-            "SELECT Location, Path, Money, University FROM Players WHERE PlayerID = ?", (player_id,)
+            "SELECT Location, Path, Money, University FROM Players WHERE PlayerID = ?",
+            (player_id,),
         )
         player_data = cur.fetchone()
 
         if player_data:
             # Convert the tuple to a dictionary for modification
             player_data_dict = {
-                
                 "Location": player_data[0],
                 "Path": player_data[1],
                 "Money": int(player_data[2]),  # Convert "Money" to an integer
-                "University": player_data[3]
+                "University": player_data[3],
             }
 
             # Update player data for university choice
@@ -328,7 +325,6 @@ class ChooseUniversity(Resource):
             return "University chosen successfully."
         else:
             return "Player not found.", 404
-
 
 
 class CreateNewPlayer(Resource):
@@ -400,6 +396,46 @@ class CreateNewPlayer(Resource):
             db.close()
 
 
+class PlayerHousesResource(Resource):
+    def get(self, player_id):
+        db = get_db()
+
+        # Fetch the player's data
+        cur_player = db.execute(
+            "SELECT Homes FROM Players WHERE PlayerID = ?", (player_id,)
+        )
+        player_homes = cur_player.fetchone()
+
+        if player_homes is None:
+            return {"message": "Player not found"}, 404
+
+        # Split the comma-separated list of house IDs
+        house_ids = player_homes[0].split(",") if player_homes[0] else []
+
+        # Fetch data for each house owned by the player
+        houses_data = []
+        for house_id in house_ids:
+            cur_house = db.execute(
+                "SELECT * FROM HouseCards WHERE HouseID = ?", (house_id,)
+            )
+            house_card = cur_house.fetchone()
+            if house_card:
+                houses_data.append(
+                    {
+                        "HouseID": house_card[0],
+                        "Name": house_card[1],
+                        "Cost": house_card[2],
+                        "Image": house_card[3],
+                        "Used": bool(house_card[4]),
+                    }
+                )
+
+        return {"houses": houses_data}
+
+
+# Add the new resource to the API
+api.add_resource(PlayerHousesResource, "/players/houses/<string:player_id>")
+
 api.add_resource(CreateNewPlayer, "/create_new_player")
 # Add the new resource to the API
 api.add_resource(PaydayResource, "/players/payday/<string:player_id>")
@@ -407,7 +443,7 @@ api.add_resource(LocationResource, "/players/location/<string:player_id>")
 api.add_resource(CareerResource, "/players/career/<string:player_id>")
 api.add_resource(ChooseUniversity, "/players/university/<string:player_id>")
 
-#api.add_resource(AddCertReource, "/players/add-certificate/<string:player_id>")
+# api.add_resource(AddCertReource, "/players/add-certificate/<string:player_id>")
 
 # Add the new resource to the API
 api.add_resource(IncreaseSalaryResource, "/players/increase-salary/<string:player_id>")
