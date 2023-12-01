@@ -112,7 +112,7 @@ class BuyHouseResource(Resource):
 
 
 
-from flask_restful import Resource, reqparse
+#parser = reqparse.RequestParser()
 
 class SellHouseResource(Resource):
     
@@ -139,7 +139,7 @@ class SellHouseResource(Resource):
             return {"message": "Player does not own this house"}, 400
 
         # Parse the request arguments using reqparse
-        args = self.parser.parse_args()
+        args = parser.parse_args()
         has_increased = args['hasIncreased']
 
         # Determine whether to multiply or divide by the increase factor
