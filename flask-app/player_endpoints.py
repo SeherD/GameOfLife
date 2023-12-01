@@ -280,39 +280,47 @@ class CareerResource(Resource):
         return format_player_response(updated_player)
 
 
-class ChooseUniversity(Resource):
-    def __init__(self):
-        self.parser = reqparse.RequestParser()
-        self.parser.add_argument(
-            "PlayerID", type=int, required=True, help="PlayerID is required."
-        )
 
-    def post(self):
-        args = self.parser.parse_args()
+
+
+class ChooseUniversity(Resource):
+    def put(self, player_id):
+        parser = reqparse.RequestParser()
+        args = parser.parse_args()
 
         # Assuming get_db() returns the database connection
         db = get_db()
 
         # Fetch the player data from the database
         cur = db.execute(
-            "SELECT * FROM Players WHERE PlayerID = ?", (args["PlayerID"],)
+            "SELECT Location, Path, Money, University FROM Players WHERE PlayerID = ?", (player_id,)
         )
         player_data = cur.fetchone()
 
         if player_data:
+            # Convert the tuple to a dictionary for modification
+            player_data_dict = {
+                
+                "Location": player_data[0],
+                "Path": player_data[1],
+                "Money": int(player_data[2]),  # Convert "Money" to an integer
+                "University": player_data[3]
+            }
+
             # Update player data for university choice
-            player_data["Location"] = 0
-            player_data["Path"] = "universityPath"
-            player_data["Money"] -= 100000
+            player_data_dict["Location"] = 0
+            player_data_dict["Path"] = "universityPath"
+            player_data_dict["Money"] -= 100000
 
             # Update the database with the modified player data
             db.execute(
-                "UPDATE Players SET Location = ?, Path = ?, Money = ? WHERE PlayerID = ?",
+                "UPDATE Players SET University=?, Location=?, Path=?, Money=? WHERE PlayerID = ?",
                 (
-                    player_data["Location"],
-                    player_data["Path"],
-                    player_data["Money"],
-                    args["PlayerID"],
+                    True,
+                    player_data_dict["Location"],
+                    player_data_dict["Path"],
+                    player_data_dict["Money"],
+                    player_id,  # Use player_id directly instead of args["PlayerID"]
                 ),
             )
 
@@ -320,6 +328,7 @@ class ChooseUniversity(Resource):
             return "University chosen successfully."
         else:
             return "Player not found.", 404
+
 
 
 class CreateNewPlayer(Resource):
