@@ -58,7 +58,7 @@ export default class GameBoard extends Component{
     componentDidMount() {
         axios({
             method: "GET",
-            url:"/players",
+            url:"http://localhost:5000/players"
           })
           .then((response) => {
             const res =response.data;
@@ -97,11 +97,10 @@ export default class GameBoard extends Component{
         const playerPieces = this.state.playersCopy.map((player) => ({
           key: player.playerid,
                 color: player.color,
-                tile: this.state.path[player.path][player.location],
+                tile: this.state.path[player.path][player.location]
         }));
     
-        this.setState({ playerPieces: playerPieces }, () => {
-        });
+        this.setState({ playerPieces: playerPieces });
     };
 
     /**
@@ -143,7 +142,7 @@ export default class GameBoard extends Component{
                 //update location
                 axios({
                     method: "PUT",
-                    url:"/players/location/P" + (this.state.playerIndex + 1),
+                    url:"http://localhost:5000/players/location/P" + (this.state.playerIndex + 1),
                     data:{
                         "location": newPosition,
                         "path": newPath
@@ -178,7 +177,7 @@ export default class GameBoard extends Component{
             // call flask endpoint to find salary of new career and set player's salary
             axios({
                 method: "PUT",
-                url:"/players/career/P" + (this.state.playerIndex + 1),
+                url:"http://localhost:5000/players/career/P" + (this.state.playerIndex + 1),
                 data:{
                     "career": newValue
                 } 
@@ -212,7 +211,7 @@ export default class GameBoard extends Component{
             // TODO: call flask endpoint to find salary of new career and set player's salary   
             axios({
                 method: "PUT",
-                url:"/players/career/P" + (this.state.playerIndex + 1),
+                url:"http://localhost:5000/players/career/P" + (this.state.playerIndex + 1),
                 data:{
                     "career": newValue
                 } 
@@ -232,7 +231,7 @@ export default class GameBoard extends Component{
                 //update location
                 axios({
                     method: "PUT",
-                    url:"/players/location/P" + (this.state.playerIndex + 1),
+                    url:"http://localhost:5000/players/location/P" + (this.state.playerIndex + 1),
                     data:{
                         "location": newPosition,
                         "path": newPath
@@ -254,7 +253,7 @@ export default class GameBoard extends Component{
                  //update location
                 axios({
                     method: "PUT",
-                    url:"/players/location/P" + (this.state.playerIndex + 1),
+                    url:"http://localhost:5000/players/location/P" + (this.state.playerIndex + 1),
                     data:{
                         "location": newPosition,
                         "path": newPath
@@ -275,7 +274,7 @@ export default class GameBoard extends Component{
                  //update location
                 axios({
                     method: "PUT",
-                    url:"/players/location/P" + (this.state.playerIndex + 1),
+                    url:"http://localhost:5000/players/location/P" + (this.state.playerIndex + 1),
                     data:{
                         "location": newPosition,
                         "path": newPath
@@ -297,7 +296,7 @@ export default class GameBoard extends Component{
                  //update location
                 axios({
                     method: "PUT",
-                    url:"/players/location/P" + (this.state.playerIndex + 1),
+                    url:"http://localhost:5000/players/location/P" + (this.state.playerIndex + 1),
                     data:{
                         "location": newPosition,
                         "path": newPath
@@ -343,7 +342,7 @@ export default class GameBoard extends Component{
                 // call a flask endpoint to add newValue to the player's cash
                 axios({
                     method: "PUT",
-                    url:"/players/payday/P" + (this.state.playerIndex + 1),
+                    url:"http://localhost:5000/players/payday/P" + (this.state.playerIndex + 1),
                     data: {
                         "double-earning": true
                       }
@@ -413,7 +412,7 @@ export default class GameBoard extends Component{
                 // call a flask endpoint to add the player's salary to their cash
                     axios({
                         method: "PUT",
-                        url:"/players/payday/P" + (this.state.playerIndex + 1),
+                        url:"http://localhost:5000/players/payday/P" + (this.state.playerIndex + 1),
                         data: {
                             "double-earning": false
                           }
@@ -479,10 +478,10 @@ export default class GameBoard extends Component{
     }
 
     handleInitialCareerModalClose = (slideIndex, newCareer) => {
-         //call flask endpoint to find salary of new career and set player's salary
+                 //call flask endpoint to find salary of new career and set player's salary
          axios({
             method: "PUT",
-            url:"/players/career/P" + (this.state.playerIndex + 1),
+            url:"http://localhost:5000/players/career/P" + (this.state.playerIndex + 1),
             data:{
                 "career": newCareer
             } 
@@ -568,7 +567,7 @@ export default class GameBoard extends Component{
         
         axios({
             method: "PUT",
-            url:"/players/location/P" + (this.state.playerIndex + 1),
+            url:"http://localhost:5000/players/location/P" + (this.state.playerIndex + 1),
             data:{
                 "location": newPosition,
                 "path": newPath
@@ -661,7 +660,7 @@ export default class GameBoard extends Component{
                                     word = {""} />
                             }
                         })}
-                    </div>
+</div>
                 ))}
                 {/* place a piece for each element in this.state.playerPieces */}
                 {this.state.playerPieces.map((player) => (
@@ -671,7 +670,7 @@ export default class GameBoard extends Component{
                         tile={player.tile}
                     />
                 ))}
-            </div>
+                                </div>
         );
     }
   
@@ -686,6 +685,9 @@ export default class GameBoard extends Component{
               transform: 'translate(-50%, -50%)',
             },
         };
+        if(this.state.playerPieces === undefined || this.state.playerPieces.length === 0){
+            return <div>Loading...</div>
+        }
         return (
         <div>
         <ToastContainer/>
