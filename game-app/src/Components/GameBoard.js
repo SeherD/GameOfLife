@@ -63,7 +63,7 @@ export default class GameBoard extends Component{
           .then((response) => {
             const res =response.data;
             const i = this.state.playerIndex;
-                        this.setState({playersCopy: res.all_players, currentPlayer: res.all_players[i]}, this.showPlayerPieces());
+            this.setState({playersCopy: res.all_players, currentPlayer: res.all_players[i]}, this.showPlayerPieces());
 
           })
     }
@@ -152,7 +152,8 @@ export default class GameBoard extends Component{
                     console.log('PUT request successful:', response.data);
                     this.setState({currentPlayer: response.data}, 
                         ()=>{
-                            this.updatePlayerPieces()})
+                            this.updatePlayerPieces()
+                            this.props.updatePlayerInfo(this.state.playerIndex + 1)})
                   });
                   //TODO: replace with axios call
                 let updatedPlayersArray = updatePlayerPosition(this.state.players, this.state.playerIndex, newPath, newPosition);
@@ -164,7 +165,6 @@ export default class GameBoard extends Component{
                 ...this.props.playerInfo,
                 cash: this.state.players[this.state.playerIndex].cash,
                 };
-                this.props.updatePlayerInfo(newPlayerInfo);
                 }
                 );
             } else {
@@ -184,7 +184,7 @@ export default class GameBoard extends Component{
               })
               .then((response) => {
                 console.log('PUT request successful:', response.data);
-                this.setState({currentPlayer: response.data})});
+                this.setState({currentPlayer: response.data}, this.props.updatePlayerInfo(this.state.playerIndex + 1))});
         }
         // if currently on a house point
         else if (this.state.housePoints.includes(this.state.path[currentPlayer.path][currentPlayer.location])) {
@@ -204,7 +204,7 @@ export default class GameBoard extends Component{
             ...this.props.playerInfo,
             houses: housesList,
             };
-            this.props.updatePlayerInfo(newPlayerInfo);
+            this.props.updatePlayerInfo(this.state.playerIndex+1);
         }
         // if currently on tile 175 - graduation
         else if (currentPlayer.path === 'universityPath' && currentPlayer.location === 7) { 
@@ -218,7 +218,7 @@ export default class GameBoard extends Component{
               })
               .then((response) => {
                 console.log('PUT request successful:', response.data);
-                this.setState({currentPlayer: response.data})
+                this.setState({currentPlayer: response.data}, this.props.updatePlayerInfo(this.state.playerIndex + 1))
               });
 
         }
@@ -334,7 +334,7 @@ export default class GameBoard extends Component{
                             ...this.props.playerInfo,
                             languagesList: languagesList,
                         };
-                        this.props.updatePlayerInfo(newPlayerInfo);
+                        this.props.updatePlayerInfo(this.state.playerIndex + 1);
                     }
                 );
             // if the returned value is a number, it is 2 * the player's salary
@@ -350,7 +350,7 @@ export default class GameBoard extends Component{
                   .then((response) => {
                   console.log('PUT request successful:', response.data);
                   this.setState({currentPlayer: response.data})
-                  //this.props.updatePlayerInfo(response.data)
+                  this.props.updatePlayerInfo(this.state.playerIndex + 1)
                 //TODO: delete setstate below
                   })
                 this.setState(
@@ -364,7 +364,7 @@ export default class GameBoard extends Component{
                 ...this.props.playerInfo,
                 cash: this.state.players[this.state.playerIndex].cash,
                 };
-                this.props.updatePlayerInfo(newPlayerInfo);
+                this.props.updatePlayerInfo(this.state.playerIndex + 1);
                 }
                 )
             }
@@ -420,24 +420,9 @@ export default class GameBoard extends Component{
                       .then((response) => {
                       console.log('PUT request successful:', response.data);
                       this.setState({currentPlayer: response.data})
-                      //this.props.updatePlayerInfo(response.data)
-                      //TODO: delete setstate below
+                      this.props.updatePlayerInfo(this.state.playerIndex+1)
 
                       })
-                this.setState(
-                    (prevState) => ({
-                        players: updatePlayerCash(prevState.players, this.state.playerIndex, salary),
-                    }),
-                    () => {
-                        console.log(this.state.players[this.state.playerIndex]);
-                        this.updatePlayerPieces();
-                        const newPlayerInfo = {
-                            ...this.props.playerInfo,
-                            cash: this.state.players[this.state.playerIndex].cash,
-                        };
-                        this.props.updatePlayerInfo(newPlayerInfo);
-                    }
-                )
             }
             // end on retirement tile
             if (this.state.endPoints.includes(tile)) newPosition = path["mainPath"].indexOf(tile);
@@ -488,7 +473,7 @@ export default class GameBoard extends Component{
           })
           .then((response) => {
             console.log('PUT request successful:', response.data);
-            this.setState({currentPlayer: response.data})});
+            this.setState({currentPlayer: response.data}, this.props.updatePlayerInfo(this.state.playerIndex + 1))});
         
     }
    
@@ -575,7 +560,7 @@ export default class GameBoard extends Component{
           })
           .then((response) => {
             console.log('PUT request successful:', response.data);
-            this.setState({currentPlayer: response.data})
+            this.setState({currentPlayer: response.data}, this.props.updatePlayerInfo(this.state.playerIndex + 1))
           });
         this.handleTile(newPath, newPosition);
         this.updateCurrentPlayer();
