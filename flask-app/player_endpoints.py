@@ -38,10 +38,54 @@ def get_career_title(career_id):
     # Return the career title if found, otherwise return None
     return result[0] if result else None
 
+def get_house_title(house_id):
+    # Replace 'your_database_file.db' with the actual path to your SQLite database file
+    db = get_db()
+    # Establish a connection to the database
+
+    cursor = db.cursor()
+
+    # Execute a query to fetch the career title based on the career ID
+    cursor.execute("SELECT Name FROM HouseCards WHERE HouseID = ?", (house_id,))
+
+    # Fetch the result
+    result = cursor.fetchone()
+
+    # Close the database connection
+
+    # Return the career title if found, otherwise return None
+    return result[0] if result else None
+
+
+def get_language_title(lang_id):
+    # Replace 'your_database_file.db' with the actual path to your SQLite database file
+    db = get_db()
+    # Establish a connection to the database
+
+    cursor = db.cursor()
+
+    # Execute a query to fetch the career title based on the career ID
+    cursor.execute("SELECT CertName FROM Certifications WHERE CertID = ?", (lang_id,))
+
+    # Fetch the result
+    result = cursor.fetchone()
+
+    # Close the database connection
+
+    # Return the career title if found, otherwise return None
+    return result[0] if result else None
 
 def format_player_response(player_data):
     career_id = player_data[3]
     career_title = get_career_title(career_id)
+
+    # Convert house IDs to names
+    house_ids = player_data[8].split(",") if player_data[8] else []
+    house_names = [get_house_title(h_id) for h_id in house_ids]
+
+    # Convert language IDs to names
+    language_ids = player_data[9].split(",") if player_data[9] else []
+    language_names = [get_language_title(lang_id) for lang_id in language_ids]
 
     return {
         "playerid": player_data[0],
@@ -49,11 +93,9 @@ def format_player_response(player_data):
         "career": career_title,
         "cash": player_data[1],  # Assuming 'Money' corresponds to the player's cash
         "salary": player_data[11],
-        "languages": player_data[9].split(",") if player_data[9] else [],
-        "houses": player_data[8].split(",") if player_data[8] else [],
-        "color": player_data[
-            4
-        ],  # Assuming 'ColorOfPiece' corresponds to the player's color
+        "languages": language_names,
+        "houses": house_names,
+        "color": player_data[4],  # Assuming 'ColorOfPiece' corresponds to the player's color
         "path": player_data[13],  # Using the 'Path' variable from player data
         "location": player_data[12],  # Using the 'Location' variable from player data
     }
