@@ -364,7 +364,9 @@ class ChooseUniversity(Resource):
             )
 
             db.commit()
-            return "University chosen successfully."
+            cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
+            updated_player = cur.fetchone()
+            return format_player_response(updated_player)
         else:
             return "Player not found.", 404
 
