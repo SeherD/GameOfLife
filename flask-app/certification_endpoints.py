@@ -77,7 +77,7 @@ class GetRandCertsResource(Resource):
         cur = db.execute("SELECT Languages FROM Players WHERE PlayerID = ?", (player_id,))
         player = cur.fetchone()
         if player is None:
-            return {"message": "Player not found"}, 404
+            return {"message": "Player not found"}, 405
         
         #Get list of current player language/certifications
         currentCerts = player[0]
