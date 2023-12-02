@@ -1,6 +1,7 @@
 from flask import Flask, request
 from flask_restful import Api, Resource, reqparse
 from database_init import *
+from flask_socketio import SocketIO, emit, join_room
 
 def get_career_title(career_id):
     # Replace 'your_database_file.db' with the actual path to your SQLite database file
@@ -69,6 +70,19 @@ def format_player_response(player_data):
     language_ids = player_data[9].split(",") if player_data[9] else []
     language_names = [get_language_title(lang_id) for lang_id in language_ids]
 
+    return {
+        "playerid": player_data[0],
+        "image": player_data[5],  # Assuming 'Avatar' corresponds to the player's image
+        "career": career_title,
+        "cash": player_data[1],  # Assuming 'Money' corresponds to the player's cash
+        "salary": player_data[11],
+        "languages": language_names,
+        "houses": house_names,
+        "color": player_data[4],  # Assuming 'ColorOfPiece' corresponds to the player's color
+        "path": player_data[13],  # Using the 'Path' variable from player data
+        "location": player_data[12],  # Using the 'Location' variable from player data
+    }
+
 class BuyHouseResource(Resource):
     def put(self, player_id, house_id):
         db = get_db()
@@ -107,7 +121,7 @@ class BuyHouseResource(Resource):
         # Retrieve the updated player data
         cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
         updated_player = cur.fetchone()
-
+        emit('player_data_update', format_player_response(player_id), broadcast=True)
         return format_player_response(updated_player)
 
 
@@ -160,7 +174,7 @@ class SellHouseResource(Resource):
         # Retrieve the updated player data
         cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
         updated_player = cur.fetchone()
-
+        emit('player_data_update', format_player_response(player_id), broadcast=True)
         return format_player_response(updated_player)
 
 

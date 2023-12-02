@@ -2,6 +2,7 @@ from flask import Flask, request
 from flask_restful import Api, Resource, reqparse
 from database_init import *
 from flask import Flask, request, jsonify
+from flask_socketio import SocketIO, emit, join_room
 
 parser = reqparse.RequestParser()
 parser.add_argument("PlayerID", type=str, required=True)
@@ -126,7 +127,7 @@ class IndividualPlayerResource(Resource):
             query = f"UPDATE Players SET {update_query}WHERE PlayerID=?"
             db.execute(query, (*update_fields.values(), player_id))
             db.commit()
-
+        emit('player_data_update', format_player_response(player_id), broadcast=True)
         return format_player_response(player_id)
 
     def delete(self, player_id):
@@ -201,7 +202,7 @@ class IncreaseSalaryResource(Resource):
         # Retrieve the updated player data
         cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
         updated_player = cur.fetchone()
-
+        emit('player_data_update', format_player_response(player_id), broadcast=True)
         return format_player_response(updated_player)
 
 
@@ -234,7 +235,7 @@ class PaydayResource(Resource):
         # Retrieve the updated player data
         cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
         updated_player = cur.fetchone()
-
+        emit('player_data_update', format_player_response(player_id), broadcast=True)
         return format_player_response(updated_player)
 
 
@@ -266,7 +267,7 @@ class LocationResource(Resource):
         # Retrieve the updated player data
         cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
         updated_player = cur.fetchone()
-
+        emit('player_data_update', format_player_response(player_id), broadcast=True)
         return format_player_response(updated_player)
 
 
@@ -318,7 +319,7 @@ class CareerResource(Resource):
         # Retrieve the updated player data
         cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
         updated_player = cur.fetchone()
-
+        emit('player_data_update', format_player_response(player_id), broadcast=True)
         return format_player_response(updated_player)
 
 
@@ -366,6 +367,7 @@ class ChooseUniversity(Resource):
             db.commit()
             cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
             updated_player = cur.fetchone()
+            emit('player_data_update', format_player_response(player_id), broadcast=True)
             return format_player_response(updated_player)
         else:
             return "Player not found.", 404
