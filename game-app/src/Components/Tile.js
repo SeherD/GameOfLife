@@ -52,7 +52,7 @@ render()
                         shouldCloseOnEsc={false}
                         shouldCloseOnOverlayClick={false}
                         style={customStyles}>
-                        <ModalContent playerIndex={this.props.playerIndex} type={this.props.word} stopID={this.state.stopID} handleClose={this.handleClose} onModalClose={this.props.onModalClose} />
+                        <ModalContent playerIndex={this.props.playerIndex} type={this.props.word} stopID={this.state.stopID} handleClose={this.handleClose} onModalClose={this.props.onModalClose} handleSale={this.props.handleSale}/>
                     </Modal>
                 </div>
             </div>

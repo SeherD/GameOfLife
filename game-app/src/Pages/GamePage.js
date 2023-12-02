@@ -22,7 +22,6 @@ export default class GamePage extends Component {
         url:"/players/P1"
       })
       .then((response) => {
-        console.log(response.data)
         this.setState({playerInfo: response.data});
 
       })

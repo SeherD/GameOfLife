@@ -395,7 +395,7 @@ export default class GameBoard extends Component{
     }
 
     handleInitialCareerModalClose = (slideIndex, newCareer) => {
-                 //call flask endpoint to find salary of new career and set player's salary
+        //call flask endpoint to find salary of new career and set player's salary
          axios({
             method: "PUT",
             url:"http://localhost:5000/players/career/P" + (this.state.playerIndex + 1),
@@ -417,7 +417,6 @@ export default class GameBoard extends Component{
         // If the player is spinning to determine the sale price of a house
         if(this.state.houseSpin){
             if(this.state.housePoints.includes(this.state.path[currentPath][currentPosition])){
-                // TODO: call flask endpoint to get the original price of the house - let salePrice = this value
                 if(winner % 2 === 0){
                     toast('The price of your house went up!', {
                         position: "top-center",
@@ -429,7 +428,6 @@ export default class GameBoard extends Component{
                         progress: undefined,
                         theme: "dark",
                     });
-                    // TODO: increase the price of the house by 20K
                 }else {
                     toast('The price of your house went down!', {
                         position: "top-center",
@@ -441,11 +439,19 @@ export default class GameBoard extends Component{
                         progress: undefined,
                         theme: "dark",
                     });
-                    // TODO: decrease the price of the house by 20K
                 }
-                //TODO: call flask endpoint to remove this.state.houseToSell from player assets
-                // TODO: call flask endpoint to add salePrice to player assets
-                this.setState({houseSpin: false, houseToSell: ""});
+                //call flask endpoint to sell the house
+                axios({
+                    method: "PUT",
+                    url:"http://localhost:5000/players/sell-house/P" + (this.state.playerIndex + 1) + "/" + this.state.houseToSell,
+                    data:{
+                        "hasIncreased": winner % 2 === 0
+                    }
+                  })
+                  .then((response) => {
+                    console.log('PUT request successful:', response.data);
+                    this.setState({currentPlayer: response.data, houseSpin: false, houseToSell: ""}, 
+                    this.props.updatePlayerInfo(this.state.playerIndex + 1))});
             }
         // If the player is spinning to determine if they get a certification
         } else if(this.state.certSpin){
@@ -561,6 +567,7 @@ export default class GameBoard extends Component{
                                 return <Tile
                                 playerIndex={this.state.playerIndex}
                                     onModalClose = {this.handleModalClose}
+                                    handleSale = {this.handleSale}
                                     key = {num} 
                                     color = {"blue"}
                                     word = {"House"}

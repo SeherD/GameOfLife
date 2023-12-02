@@ -17,17 +17,16 @@ export default class HouseSaleModal extends Component {
     }
 
     handleSlideChange = (index) => {
-        this.setState({ currentSlide: index, currentHouse: this.props.houseOptions[index].HouseID });
+        this.setState({ currentSlide: index, currentHouseId: this.props.houseOptions[index].HouseID });
     };
 
     handleClose = () => {
-        const { handleClose, onModalClose } = this.props;
         // Use the callback to send the current slide index and current house to GameBoard.js
-        if (onModalClose) {
-            onModalClose(this.state.currentSlide, this.state.currentHouseId);
+        if (this.props.handleSale) {
+            this.props.handleSale(this.state.currentHouseId);
         }
         // Close the modal
-        handleClose();
+        this.props.handleClose();
     }
 
     populateHouses = () =>{

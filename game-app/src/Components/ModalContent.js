@@ -23,7 +23,7 @@ export default class ModalContent extends Component {
     render() {
         if (this.state.type === "House") {
             return(
-                <HouseModal playerIndex={this.props.playerIndex} handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
+                <HouseModal playerIndex={this.props.playerIndex} handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} handleSale={this.props.handleSale}/>
             );
         } else if (this.state.type === "Career") {
             return(
