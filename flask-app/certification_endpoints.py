@@ -79,9 +79,8 @@ class GetRandCertsResource(Resource):
         if player is None:
             return {"message": "Player not found"}, 404
         
-        #Get list of current player language/certifications
-        currentCerts = player[0]
-        listOfCerts = currentCerts.split(",")
+         # Split the comma-separated list of Cert IDs
+        listOfCerts = player[0].split(",") if player[0] else []
 
         #Get list of all skills and certifications
         sk = db.execute('SELECT CertID FROM Certifications WHERE IsCert=0')
@@ -89,20 +88,27 @@ class GetRandCertsResource(Resource):
         cer = db.execute('SELECT CertID FROM Certifications WHERE IsCert=1')
         certs = cer.fetchall()
 
+        skillIDs = []
+        certIDs = []
+        for skl in skills:
+            skillIDs.append(skl[0])
+        for crt in certs:
+            certIDs.append(crt[0])
+
         #Check which skills and certs the player already has
-        for i in skills:
-            if skills[i][0] in listOfCerts:
-                skills.remove(i) #Removes skill from list of potential options
-        for j in certs:
-            if certs[j][0] in listOfCerts:
-                certs.remove(j) #Removes certification from list of potential options
+        for i in skillIDs:
+            if i in listOfCerts:
+                skillIDs.remove(i) #Removes skill from list of potential options
+        for j in certIDs:
+            if j in listOfCerts:
+                certIDs.remove(j) #Removes certification from list of potential options
 
         #Grab a random skill and certification to send back
-        randomSkill = random.choice(skills)
-        randomCert = random.choice(certs)
-        rSk = db.execute('SELECT * FROM Certifications WHERE CertID = ?', (randomSkill[0],))
+        randomSkill = random.choice(skillIDs)
+        randomCert = random.choice(certIDs)
+        rSk = db.execute('SELECT * FROM Certifications WHERE CertID = ?', (randomSkill,))
         skill = rSk.fetchone()
-        rCt = db.execute('SELECT * FROM Certifications WHERE CertID = ?', (randomCert[0],))
+        rCt = db.execute('SELECT * FROM Certifications WHERE CertID = ?', (randomCert,))
         cert = rCt.fetchone()
 
         if skill is None or cert is None:
@@ -110,7 +116,7 @@ class GetRandCertsResource(Resource):
 
         #Return a JSON array consisting of the skill first, then the certification
         toReturn = [format_cert_response(skill), format_cert_response(cert)]
-        return toReturn
+        return {"skill_cert": toReturn}
 
 
 api.add_resource(CertResource, "/certifications/<string:cert_id>")
