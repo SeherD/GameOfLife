@@ -1,6 +1,7 @@
 from flask_restful import reqparse, Resource, Api
 from flask import Flask, g
 import sqlite3
+import random
 from database_init import get_db
 
 app = Flask(__name__)
@@ -69,9 +70,52 @@ class CertsResource(Resource):
         )
         db.commit()
         return format_cert_response((args["CertID"], args["CertName"], args["IsCert"], args["Image"]))
+    
+class GetRandCertsResource(Resource):
+    def get(self, player_id):
+        db = get_db()
+        cur = db.execute("SELECT Languages FROM Players WHERE PlayerID = ?", (player_id,))
+        player = cur.fetchone()
+        if player is None:
+            return {"message": "Player not found"}, 404
+        
+        #Get list of current player language/certifications
+        currentCerts = player[0]
+        listOfCerts = currentCerts.split(",")
+
+        #Get list of all skills and certifications
+        sk = db.execute('SELECT CertID FROM Certifications WHERE IsCert=0')
+        skills = sk.fetchall()
+        cer = db.execute('SELECT CertID FROM Certifications WHERE IsCert=1')
+        certs = cer.fetchall()
+
+        #Check which skills and certs the player already has
+        for i in skills:
+            if i in listOfCerts:
+                skills.remove(i) #Removes skill from list of potential options
+        for j in certs:
+            if j in listOfCerts:
+                certs.remove(j) #Removes certification from list of potential options
+
+        #Grab a random skill and certification to send back
+        randomSkill = random.choice(skills)
+        randomCert = random.choice(certs)
+        rSk = db.execute('SELECT * FROM Certifications WHERE CertID = ?', (randomSkill,))
+        skill = rSk.fetchone()
+        rCt = db.execute('SELECT * FROM Certifications WHERE CertID = ?', (randomCert,))
+        cert = rCt.fetchone()
+
+        if skill is None or cert is None:
+            return {'message': 'Certification or Language not found'}, 404
+
+        #Return a JSON array consisting of the skill first, then the certification
+        toReturn = [format_cert_response(skill), format_cert_response(cert)]
+        return toReturn
+
 
 api.add_resource(CertResource, "/certifications/<string:cert_id>")
 api.add_resource(CertsResource, "/certifications")
+api.add_resource(GetRandCertsResource, "/certifications/get-random-certs/<string:player_id>")
 
 if __name__ == '__main__':
     app.run(debug=True)
