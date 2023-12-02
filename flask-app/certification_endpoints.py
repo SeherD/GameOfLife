@@ -91,22 +91,22 @@ class GetRandCertsResource(Resource):
 
         #Check which skills and certs the player already has
         for i in skills:
-            if i in listOfCerts:
+            if skills[i][0] in listOfCerts:
                 skills.remove(i) #Removes skill from list of potential options
         for j in certs:
-            if j in listOfCerts:
+            if certs[j][0] in listOfCerts:
                 certs.remove(j) #Removes certification from list of potential options
 
         #Grab a random skill and certification to send back
         randomSkill = random.choice(skills)
         randomCert = random.choice(certs)
-        rSk = db.execute('SELECT * FROM Certifications WHERE CertID = ?', (randomSkill,))
+        rSk = db.execute('SELECT * FROM Certifications WHERE CertID = ?', (randomSkill[0],))
         skill = rSk.fetchone()
-        rCt = db.execute('SELECT * FROM Certifications WHERE CertID = ?', (randomCert,))
+        rCt = db.execute('SELECT * FROM Certifications WHERE CertID = ?', (randomCert[0],))
         cert = rCt.fetchone()
 
         if skill is None or cert is None:
-            return {'message': 'Certification or Language not found'}, 405
+            return {'message': 'Certification or Language not found'}, 404
 
         #Return a JSON array consisting of the skill first, then the certification
         toReturn = [format_cert_response(skill), format_cert_response(cert)]
