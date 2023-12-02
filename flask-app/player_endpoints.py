@@ -321,6 +321,28 @@ class CareerResource(Resource):
 
         return format_player_response(updated_player)
 
+class AddCertReource(Resource):
+    def put(self, player_id):    
+        parser = reqparse.RequestParser()
+        parser.add_argument("cert", type=str)
+        args = parser.parse_args()
+        db = get_db()
+        cur = db.execute("SELECT Languages FROM Players WHERE PlayerID = ?", (player_id,))
+        player = cur.fetchone()
+        if player is None:
+            return {"message": "Player not found"}, 404
+        
+        #Add language/certification to the player list
+        updatedCerts = player[0] + "," + args["cert"]
+        #Update the certificates in the database
+        db.execute(
+            "UPDATE Players SET Languages=? WHERE PlayerID=?", (updatedCerts, player_id)
+        )
+        db.commit()
+        # Retrieve the updated player data
+        cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
+        updated_player = cur.fetchone()
+        return format_player_response(updated_player) 
 
 class ChooseUniversity(Resource):
     def put(self, player_id):
