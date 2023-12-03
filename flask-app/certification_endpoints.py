@@ -2,10 +2,9 @@ from flask_restful import reqparse, Resource, Api
 from flask import Flask, g
 import sqlite3
 import random
-from database_init import get_db
+from database_init import *
 
-app = Flask(__name__)
-api = Api(app)
+
 
 parser = reqparse.RequestParser()
 parser.add_argument('CertID', type=str)
@@ -123,5 +122,4 @@ api.add_resource(CertResource, "/certifications/<string:cert_id>")
 api.add_resource(CertsResource, "/certifications")
 api.add_resource(GetRandCertsResource, "/certifications/get-random-certs/<string:player_id>")
 
-if __name__ == '__main__':
-    app.run(debug=True)
+
