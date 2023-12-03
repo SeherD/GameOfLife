@@ -509,7 +509,7 @@ api.add_resource(LocationResource, "/players/location/<string:player_id>")
 api.add_resource(CareerResource, "/players/career/<string:player_id>")
 api.add_resource(ChooseUniversity, "/players/university/<string:player_id>")
 
-# api.add_resource(AddCertReource, "/players/add-certificate/<string:player_id>")
+api.add_resource(AddCertReource, "/players/add-certificate/<string:player_id>")
 
 # Add the new resource to the API
 api.add_resource(IncreaseSalaryResource, "/players/increase-salary/<string:player_id>")
