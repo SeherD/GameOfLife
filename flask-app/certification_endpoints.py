@@ -115,7 +115,7 @@ class GetRandCertsResource(Resource):
 
         #Return a JSON array consisting of the skill first, then the certification
         #toReturn = [format_cert_response(skill), format_cert_response(cert)]
-        return {"skill": format_cert_response(skill),"cert": format_cert_response(cert)}
+        return [format_cert_response(skill), format_cert_response(cert)]
 
 
 api.add_resource(CertResource, "/certifications/<string:cert_id>")
