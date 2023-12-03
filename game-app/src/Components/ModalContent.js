@@ -8,7 +8,6 @@ import StopModal3 from './StopModal3';
 import StopModal4 from './StopModal4';
 import UniversityModal from './UniversityModal';
 import SkillsModal from './SkillsModal';
-import { getRandomLanguage } from '../Components/Languages';
 
 
 export default class ModalContent extends Component {
