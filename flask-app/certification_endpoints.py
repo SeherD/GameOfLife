@@ -114,8 +114,8 @@ class GetRandCertsResource(Resource):
             return {'message': 'Certification or Language not found'}, 404
 
         #Return a JSON array consisting of the skill first, then the certification
-        toReturn = [format_cert_response(skill), format_cert_response(cert)]
-        return {"skill_cert": toReturn}
+        #toReturn = [format_cert_response(skill), format_cert_response(cert)]
+        return {"skill": format_cert_response(skill),"cert": format_cert_response(cert)}
 
 
 api.add_resource(CertResource, "/certifications/<string:cert_id>")
