@@ -171,6 +171,21 @@ export default class GameBoard extends Component{
                 console.log('PUT request successful:', response.data);
                 this.setState({currentPlayer: response.data}, this.props.updatePlayerInfo(this.state.playerIndex + 1))});
         }
+        // if currently on a skill point
+        else if (this.state.skillPoints.includes(this.state.path[currentPlayer.path][currentPlayer.location])){
+                axios({
+                    method: "PUT",
+                    url:"http://localhost:5000/players/add-certificate/P" + (this.state.playerIndex + 1),
+                    data:{
+                        "cert": newValue
+                    } 
+                  })
+                  .then((response) => {
+                    console.log('PUT request successful:', response.data);
+                    this.setState({currentPlayer: response.data}, 
+                        this.props.updatePlayerInfo(this.state.playerIndex + 1));
+                  });
+        }
         // if currently on tile 175 - graduation
         else if (currentPlayer.path === 'universityPath' && currentPlayer.location === 7) { 
             // call flask endpoint to find salary of new career and set player's salary   
@@ -284,8 +299,6 @@ export default class GameBoard extends Component{
         if (newValue) {
             // if that value is a string, it is a new skill
             if (newValue instanceof String) {
-                //TODO: add flask endpoint to add free skill to player assets
-
             // if the returned value is a number, it is 2 * the player's salary
             } else {
                 // call a flask endpoint to add newValue to the player's cash
@@ -457,7 +470,7 @@ export default class GameBoard extends Component{
         } else if(this.state.certSpin){
             if(this.state.skillPoints.includes(this.state.path[currentPath][currentPosition])){
                 if(winner % 2 === 0){
-                    //TODO: call flask endpoint to add this.state.cert to player assets
+                    // call flask endpoint to add this.state.cert to player assets
                     toast.success('You passed the certification!', {
                         position: "top-center",
                         autoClose: 2500,
@@ -468,6 +481,18 @@ export default class GameBoard extends Component{
                         progress: undefined,
                         theme: "dark",
                         });
+                    axios({
+                            method: "PUT",
+                            url:"http://localhost:5000/players/add-certificate/P" + (this.state.playerIndex + 1),
+                            data:{
+                                "cert": this.state.cert
+                            } 
+                          })
+                          .then((response) => {
+                            console.log('PUT request successful:', response.data);
+                            this.setState({currentPlayer: response.data}, 
+                                this.props.updatePlayerInfo(this.state.playerIndex + 1));
+                          });
 
                 }else {
                     toast('You did not pass the certification!', {
@@ -567,14 +592,16 @@ export default class GameBoard extends Component{
                                 return <Tile
                                 playerIndex={this.state.playerIndex}
                                     onModalClose = {this.handleModalClose}
-                                    handleSale = {this.handleSale}
+                                    handleRespin = {this.handleSale}
                                     key = {num} 
                                     color = {"blue"}
                                     word = {"House"}
                                     ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.skillPoints.includes(num)){
                                 return <Tile
-                                    onModalClose = {this.handleRisk}
+                                    playerIndex={this.state.playerIndex}
+                                    onModalClose = {this.handleModalClose}
+                                    handleRespin = {this.handleRisk}
                                     key = {num} 
                                     color = {"#fb3199"}
                                     word = {"Skills"}

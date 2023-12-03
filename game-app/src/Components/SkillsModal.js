@@ -2,17 +2,37 @@ import React, { Component } from 'react';
 import SkillsCard from './SkillsCard';
 import python from "../assets/python.png";
 import java from "../assets/java.png";
+import axios from 'axios';
 
 
 export default class SkillsModal extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            skill: {CertName: "Java"},
+            cert: {CertName: "C"}
+        };
+    }
+
+    componentDidMount() {
+        axios({
+            method: "GET",
+            url:"http://localhost:5000/certifications/get-random-certs/P" + (this.props.playerIndex + 1),
+          })
+          .then((response) => {
+            this.setState({skill: response.data[0], cert: response.data[1]});
+            console.log("SKills are " + response.data)
+
+          })
+    }
 
     handleFreeSkill = () =>{
-        //TODO: call flask endpoint to add this.props.freeSkill to player assets
+        this.props.onModalClose(0, this.state.skill.CertID);
         this.props.handleClose();
     }
 
     handleRiskySkill = () =>{
-        this.props.onModalClose(this.props.riskySkill);
+        this.props.handleRespin(this.state.cert.CertID);
         this.props.handleClose();
     }
   
@@ -25,7 +45,7 @@ export default class SkillsModal extends Component {
             <SkillsCard
                 cert={false}
                 image= {python}
-                skill={this.props.freeSkill}
+                skill={this.state.skill.CertName}
                 payoff={"$5,000"}
                 raise={""}
                 />
@@ -35,7 +55,7 @@ export default class SkillsModal extends Component {
             <SkillsCard
                 cert={true}
                 image= {java}
-                skill={this.props.riskySkill}
+                skill={this.state.cert.CertName}
                 payoff={"$5,000"}
                 raise={"$2,000"}
                 />

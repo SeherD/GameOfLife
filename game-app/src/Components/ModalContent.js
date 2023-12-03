@@ -23,7 +23,7 @@ export default class ModalContent extends Component {
     render() {
         if (this.state.type === "House") {
             return(
-                <HouseModal playerIndex={this.props.playerIndex} handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} handleSale={this.props.handleSale}/>
+                <HouseModal playerIndex={this.props.playerIndex} handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} handleRespin={this.props.handleRespin}/>
             );
         } else if (this.state.type === "Career") {
             return(
@@ -55,9 +55,7 @@ export default class ModalContent extends Component {
             );
         } else if (this.state.type === "Skills"){
             return(
-                <SkillsModal handleClose={this.props.handleClose} onModalClose={this.props.onModalClose}
-                    freeSkill={getRandomLanguage()} riskySkill={getRandomLanguage()}
-                /> 
+                <SkillsModal playerIndex={this.props.playerIndex} handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} handleRespin={this.props.handleRespin}/> 
             );
         }
     }

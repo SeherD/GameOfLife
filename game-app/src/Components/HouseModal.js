@@ -76,7 +76,7 @@ export default class HouseModal extends Component {
                     shouldCloseOnEsc={false}
                     shouldCloseOnOverlayClick={false}
                     style={customStyles}>
-                    <HouseSaleModal houseOptions={this.state.sellOptions} isOpen = {this.state.saleModalOpen} handleClose={this.props.handleClose} handleSale={this.props.handleSale}/>
+                    <HouseSaleModal houseOptions={this.state.sellOptions} isOpen = {this.state.saleModalOpen} handleClose={this.props.handleClose} handleSale={this.props.handleRespin}/>
                 </Modal>
             </div>
           );
