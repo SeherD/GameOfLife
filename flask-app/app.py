@@ -24,25 +24,66 @@ def load_all_player_data():
 
 connected_players = set()
 
+
+from enum import Enum
+
+# Define an enumeration of colors
+class PlayerColor(Enum):
+    RED = 'Red'
+    BLUE = 'Blue'
+    GREEN = 'Green'
+    YELLOW = 'Yellow'
+    PINK = 'Pink'
+    # Add more colors as needed
+
+# Rest of your code...
+
 @socketio.on('connect')
 def handle_connect():
     if len(connected_players) < 5:
         # Allow connection
-        connected_players.add(request.sid)
-        join_room(request.sid)
-        print(f"Player {request.sid} connected. Total connected players: {len(connected_players)}")
+        player_id = request.sid
+        connected_players.add(player_id)
+        join_room(player_id)
+        print(f"Player {player_id} connected. Total connected players: {len(connected_players)}")
 
         # Load all player data from the database
         all_player_data = load_all_player_data()
 
+        if len(connected_players) == 1:
+            # First player
+            avatar_number = 1
+            host_value = 1
+            color = PlayerColor.RED.value
+        else:
+            # Subsequent players
+            avatar_number = len(connected_players)
+            host_value = 0
+            color = PlayerColor(avatar_number).name
+
+        # Insert new player into the database
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute("""
+            INSERT INTO Players 
+            (PlayerID, Money, Debt, CareerID, ColorOfPiece, Avatar, University, Host, Homes, Languages, Stocks, Salary, Location, Path)
+            VALUES (?, 200000, 0, '', ?, 'Avatar{}.png', 0, ?, '', '', '', 0, 0, 'mainPath')
+        """.format(avatar_number), (player_id, color, host_value))
+
+        # Commit the changes
+        db.commit()
+
         # Send all player data to the new player
-        emit('all_player_data', all_player_data, room=request.sid)
+        emit('all_player_data', all_player_data, room=player_id)
 
         # Broadcast to all clients about the new player
-        emit('new_player_connected', {'player_id': request.sid}, broadcast=True)
+        emit('new_player_connected', {'player_id': player_id}, broadcast=True)
 
     else:
         print("Room full")
+
+# Rest of the code remains unchanged
+
 
 def load_player_data(player_id):
     db = get_db()
