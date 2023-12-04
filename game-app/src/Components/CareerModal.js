@@ -18,10 +18,9 @@ export default class CareerModal extends Component {
     componentDidMount() {
         axios({
             method: "GET",
-            url:"/career/filterByUniversity/P" + (this.props.playerIndex + 1),
+            url:"http://localhost:5000/career/filterByUniversity/P" + (this.props.playerIndex + 1),
           })
           .then((response) => {
-            console.log(response.data.available_career_cards)
             this.setState({careerOptions: response.data.available_career_cards});
 
           })

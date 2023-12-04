@@ -7,20 +7,26 @@ import avatar2 from '../assets/avatar2.jpg';
 import avatar3 from '../assets/avatar3.jpg';
 import avatar4 from '../assets/avatar4.jpg';
 
-function LandingPage() {
-  // eslint-disable-next-line
-    const [waiting, setWaiting] = useState(false);
+function LobbyPage() {
+    // TODO: call a flask endpoint to find out if the current player is the host
+    // eslint-disable-next-line
+    const [host, setHost] = useState(true);
+    // TODO: call a flask endpoint to get the current game ID
+    // eslint-disable-next-line
+    const [gameID, setGameID] = useState();
 
   return (
-    <div className="LandingPage">
+    <div className="LobbyPage">
       <div>
         <h1>THE GAME OF LIFE <br/> SOFTWARE DEVELOPER EDITION</h1>
+        <div id='gameCode'>Game code: {gameID}</div>
         <hr/>
       </div>
       <div>
-        {waiting ?
-            <h3>Waiting for players to join...</h3> :
-            <h3>Ready to Start</h3>}
+        {host ?
+            <h3>Ready to Start</h3> :
+            <h3>Waiting for host to start game...</h3>
+        }
       </div>
       <div>
         <PlayerIcon image= {avatar1}
@@ -49,10 +55,11 @@ function LandingPage() {
         />
       </div>
     <div>
-        {waiting ? <div/>: <div className="startButton"><Link to="/game">START GAME</Link></div>}
+          {/* TODO: Call a flask endpoint to find out if the current player is the host */}
+          {host ? <div className="landingPageButton"><Link to="/game">START GAME</Link></div> : <div/> }
     </div>
     </div>
   );
 }
 
-export default LandingPage;
+export default LobbyPage;
