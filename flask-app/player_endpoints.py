@@ -340,21 +340,21 @@ class AddCertReource(Resource):
 
         # Retrieve certification data
         cur = db.execute(
-            "SELECT IsCert, CertID FROM Certifications WHERE CertName = ?", (cert,)
+            "SELECT IsCert FROM Certifications WHERE CertID = ?", (cert,)
         )
-        isCert, CertID = cur.fetchone()
-        if CertID is None:
+        isCert= cur.fetchone()
+        if isCert is None:
             return {"message": "Certification not found"}, 404
 
         # Check if the certification is already associated with the player
         certs = (player[0] or "").split(",")
-        if CertID not in certs:
+        if cert not in certs:
             # Add language/certification to the player list
-            certs.append(CertID)
+            certs.append(cert)
             updatedCerts = ",".join(certs)
 
             # Check if the certification exists in the database
-            updatedSalary = float(player[1]) + 2000 if isCert == 1 else player[1]
+            updatedSalary = float(player[1]) + 2000 if isCert[0] == 1 else player[1]
 
             # Update the certificates in the database
             db.execute(
