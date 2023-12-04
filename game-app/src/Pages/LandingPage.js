@@ -1,11 +1,11 @@
 import React, {useState} from 'react';
 import {Link} from 'react-router-dom';
 import PlayerIcon from '../Components/PlayerIcon';
-import avatar5 from '../assets/avatar5.jpg';
-import avatar1 from '../assets/avatar1.png';
-import avatar2 from '../assets/avatar2.jpg';
-import avatar3 from '../assets/avatar3.jpg';
-import avatar4 from '../assets/avatar4.jpg';
+import avatar5 from '../assets/Avatars/Avatar5.png';
+import avatar1 from '../assets/Avatars/Avatar1.png';
+import avatar2 from '../assets/Avatars/Avatar2.png';
+import avatar3 from '../assets/Avatars/Avatar3.png';
+import avatar4 from '../assets/Avatars/Avatar4.png';
 
 function LandingPage() {
   // eslint-disable-next-line
