@@ -1,8 +1,5 @@
 import React, { Component } from 'react';
 import { Carousel } from 'react-responsive-carousel';
-import house from '../assets/house.jpg';
-import apartment from '../assets/apartment.jpg';
-import nohouse from '../assets/nohouse.png';
 import HouseCard from './HouseCard.js';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import axios from 'axios';

@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import GameBoard from '../Components/GameBoard';
 import PlayerInfo from '../Components/PlayerInfo';
-import avatar from '../assets/avatar1.png';
 import axios from 'axios';
 
 export default class GamePage extends Component {

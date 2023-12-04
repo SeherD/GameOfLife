@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 import SkillsCard from './SkillsCard';
-import python from "../assets/python.png";
-import java from "../assets/java.png";
 import axios from 'axios';
 import { LanguageImage } from './services/LanguageImage';
 
