@@ -1,8 +1,9 @@
 import React from 'react';
 import './App.css';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import LandingPage from './Pages/LandingPage';
+import LobbyPage from './Pages/LobbyPage';
 import GamePage from './Pages/GamePage';
+import SigninPage from './Pages/SigninPage';
 
 function App() {
 
@@ -11,7 +12,8 @@ function App() {
     <header className="App-header">
     <BrowserRouter>
     <Routes>
-      <Route path="/" element = {<LandingPage/>}/>
+      <Route path="/" element = {<SigninPage/>}/>
+      <Route path="lobby" element = {<LobbyPage/>}/>
       <Route path="game" element ={<GamePage/>}/>
     </Routes>
     </BrowserRouter>
