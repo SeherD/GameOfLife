@@ -78,11 +78,11 @@ END;
 
 INSERT INTO Players (PlayerID, Money, Debt, CareerID, ColorOfPiece, Avatar, University, Host, Homes, Languages, Stocks, Salary, Location, Path)
 VALUES
-    ('P1', 200000, 0, '', 'Red', 'Avatar1', 0, 1, '', '', '', 0, 0, 'mainPath'),
-    ('P2', 200000, 0, '', 'Blue', 'Avatar2', 0, 0, '', '', '', 0, 0, 'mainPath'),
-    ('P3', 200000, 0, '', 'Green', 'Avatar3', 0, 0, '', '', '',0, 0, 'mainPath'),
-    ('P4', 200000, 0, '', 'Yellow', 'Avatar4', 0, 0, '', '', '', 0, 0, 'mainPath'),
-    ('P5', 200000, 0, '', 'Purple', 'Avatar5', 0, 0, '', '', '', 0, 0, 'mainPath');
+    ('P1', 200000, 0, '', 'Red', 'Avatar1.png', 0, 1, '', '', '', 0, 0, 'mainPath'),
+    ('P2', 200000, 0, '', 'Blue', 'Avatar2.png', 0, 0, '', '', '', 0, 0, 'mainPath'),
+    ('P3', 200000, 0, '', 'Green', 'Avatar3.png', 0, 0, '', '', '',0, 0, 'mainPath'),
+    ('P4', 200000, 0, '', 'Yellow', 'Avatar4.png', 0, 0, '', '', '', 0, 0, 'mainPath'),
+    ('P5', 200000, 0, '', 'Purple', 'Avatar5.png', 0, 0, '', '', '', 0, 0, 'mainPath');
 
 CREATE TABLE Games (
     GameID TEXT PRIMARY KEY,
