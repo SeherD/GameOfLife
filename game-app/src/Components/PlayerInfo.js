@@ -11,8 +11,8 @@ render(){
             <p>Career: {this.props.playerInfo.career}</p>
             <p>Salary: ${this.props.playerInfo.salary}</p>
             <p>Cash: ${this.props.playerInfo.cash}</p>
-            <p>Programming Languages: {this.props.playerInfo.languages.toString()}</p>
-            <p>Houses: {this.props.playerInfo.houses.toString()}</p>
+            <p>Programming Languages: {this.props.playerInfo.languages.join(', ')}</p>
+            <p>Houses: {this.props.playerInfo.houses.join(', ')}</p>
             </div>
         )
     }
