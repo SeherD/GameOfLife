@@ -457,6 +457,27 @@ class PlayerHousesResource(Resource):
 
         return {"houses": houses_data}
 
+class GetSkillPayments(Resource):
+    def get(self, player_id):
+        db = get_db()
+
+        # Fetch the player's data
+        cur_player = db.execute(
+            "SELECT Languages FROM Players WHERE PlayerID = ?", (player_id,)
+        )
+        player_certs = cur_player.fetchone()
+
+        if player_certs is None:
+            return {"message": "Player not found"}, 404
+
+        # Split the comma-separated list of Cert IDs
+        cert_ids = player_certs[0].split(",") if player_certs[0] else []
+
+        #Calulate the total sum that the player should receive
+        multiplier = cert_ids.length
+        payment = multiplier*5000
+        return {"skill_payment": payment}
+
 
 # Add the new resource to the API
 api.add_resource(PlayerHousesResource, "/players/houses/<string:player_id>")
@@ -467,6 +488,7 @@ api.add_resource(PaydayResource, "/players/payday/<string:player_id>")
 api.add_resource(LocationResource, "/players/location/<string:player_id>")
 api.add_resource(CareerResource, "/players/career/<string:player_id>")
 api.add_resource(ChooseUniversity, "/players/university/<string:player_id>")
+api.add_resource(GetSkillPayments, "/players/skill-payments/<string:player_id>")
 
 api.add_resource(AddCertReource, "/players/add-certificate/<string:player_id>")
 
