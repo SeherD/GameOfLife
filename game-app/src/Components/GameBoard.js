@@ -8,8 +8,11 @@ import WheelComponent from 'react-wheel-of-prizes';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
+import io from 'socket.io-client';
 
 export default class GameBoard extends Component{
+    // set up socket.io socket used to connect to the server
+    socket = io('http://localhost:5000');
     // used to access specific tiles by index
     tiles = Array.from({ length: 225 });
     state = {
@@ -63,10 +66,43 @@ export default class GameBoard extends Component{
           .then((response) => {
             const res =response.data;
             const i = this.state.playerIndex;
-                        this.setState({playersCopy: res.all_players, currentPlayer: res.all_players[i]}, this.showPlayerPieces());
+            this.setState({playersCopy: res.all_players, currentPlayer: res.all_players[i]}, () => {
+                this.showPlayerPieces()
+            });
+        })
+        
+        // Connect to the server
+        this.socket.on('connect', () => {
+            console.log('Connected to server');
+        });
 
-          })
+        // Add the socket.io event listener for 'update_player_data'
+        this.socket.on('update_player_data', (data) => {
+            console.log('Player data updated!');
+            // Update the player data stored in the state
+            const updatedPlayers = this.state.playersCopy.map((player) => 
+                player.playerid === data.playerid
+                ?
+                {image: data.image,
+                career: data.career,
+                cash: data.cash,
+                salary: data.salary,
+                languages: data.languages,
+                houses: data.houses,
+                color: player.color,
+                path: data.path,
+                location: data.location}
+                : player
+            );
+            this.setState({playersCopy: updatedPlayers});
+        });
     }
+
+    componentWillUnmount() {
+        // Disconnect from the server
+        this.socket.disconnect();
+        console.log('Disconnected from server');
+      }
 
     componentDidUpdate(prevProps, prevState) {
         // check if the state that affects the pieces has changed
@@ -74,6 +110,14 @@ export default class GameBoard extends Component{
           this.updatePlayerPieces();
         }
     }
+
+    updateServerWithPlayerData = () => {
+        // Emit the 'update_player_data' event to the server with updated player data
+        this.socket.emit('update_player_data', {
+          playerIndex: this.state.playerIndex,
+          updatedData: this.state.currentPlayer, // Pass the updated player data
+        });
+    };
 
     // cycle through the players in this.state.players
     updateCurrentPlayer = () => {
@@ -127,6 +171,9 @@ export default class GameBoard extends Component{
       
           this.setState({ playerPieces: playerPieces }, () => {
           });
+        
+        // Update the server with the new player data
+        this.updateServerWithPlayerData();
     };
 
 
@@ -309,6 +356,9 @@ export default class GameBoard extends Component{
 
             }
         }
+
+        // Update the server with the new player data
+        this.updateServerWithPlayerData();
     };
 
     handleTile = (onPath, atPosition) => {
@@ -369,6 +419,9 @@ export default class GameBoard extends Component{
                 )
             }
         }
+
+        // Update the server with the new player data
+        this.updateServerWithPlayerData();
     }
 
     calculateNewPosition = (currentPath, currentPosition, increment) => {
@@ -580,7 +633,10 @@ export default class GameBoard extends Component{
         this.handleTile(newPath, newPosition);
         this.updateCurrentPlayer();
         }
-          }
+
+        // Update the server with the new player data
+        this.updateServerWithPlayerData();
+    }
 
     //create game board
     createBoard = () =>{
