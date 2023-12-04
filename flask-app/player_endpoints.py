@@ -463,20 +463,42 @@ class GetSkillPayments(Resource):
 
         # Fetch the player's data
         cur_player = db.execute(
-            "SELECT Languages FROM Players WHERE PlayerID = ?", (player_id,)
+            "SELECT Languages, Money FROM Players WHERE PlayerID = ?", (player_id,)
         )
-        player_certs = cur_player.fetchone()
-
-        if player_certs is None:
+        player = cur_player.fetchone()
+        if player is None:
             return {"message": "Player not found"}, 404
 
         # Split the comma-separated list of Cert IDs
-        cert_ids = player_certs[0].split(",") if player_certs[0] else []
-
+        cert_ids = player[0].split(",") if player[0] else []
+        money = player[1]
+        
         #Calulate the total sum that the player should receive
         multiplier = cert_ids.length
         payment = multiplier*5000
-        return {"skill_payment": payment}
+        newMoney = money + payment
+
+        #Update the database with the new total money
+        db.execute(
+            "UPDATE Players SET Money=? WHERE PlayerID = ?",
+            (
+                newMoney,
+                player_id,  
+            ),
+        )
+
+        #Get the updated player information
+        updated_player = db.execute(
+            "SELECT * FROM Players WHERE PlayerID = ?", 
+            (
+                player_id,
+            )
+        )
+        updated = updated_player.fetchone()
+        if player is None:
+            return {"message": "Player not found"}, 404
+
+        return format_player_response(updated)
 
 
 # Add the new resource to the API
