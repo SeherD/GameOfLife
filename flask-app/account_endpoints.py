@@ -71,6 +71,38 @@ class AccountsResource(Resource):
         )
         db.commit()
         return "done" #format_account_response(cur.lastrowid)
+    
+class AuthenticateResource(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("clientUsername", type=str, required=True)
+        parser.add_argument("clientPassword", type=str, required=True)
+        args = parser.parse_args()
+
+        uName = args["clientUsername"]
+        passWord = args["clientPassword"]
+
+        db = get_db()
+        cur = db.execute("SELECT Username, Password FROM Accounts WHERE Username = ?", (uName,))
+        account = cur.fetchone()
+        accID = account[0]
+
+        if account is None:
+            return {"message": "Account not found"}, 404
+        elif account.length >= 2:
+            return {"message": "Error: multiple accounts found"}, 502
+        
+        if passWord != account[2]:
+            return {"message": "Authentication failed"}, 401
+        elif passWord == account[2]:
+            account = db.execute("SELECT * FROM Accounts WHERE Username = ?", (accID,))
+            return format_account_response(account)
+        else:
+            return {"message": "I'm a teapot"}, 418
+        
+
+        
 
 api.add_resource(AccountResource, "/accounts/<string:account_id>")
 api.add_resource(AccountsResource, "/accounts")
+api.add_resource(AuthenticateResource, "/accounts/authenticate")
