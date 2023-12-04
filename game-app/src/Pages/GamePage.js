@@ -32,7 +32,6 @@ export default class GamePage extends Component {
       url:"/players/P" + playerId
     })
     .then((response) => {
-      console.log(response.data)
       this.setState({playerInfo: response.data});
 
     })

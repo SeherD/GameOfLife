@@ -38,7 +38,7 @@ export default class HousePurchaseModal extends Component {
     }
 
     handleSlideChange = (index) => {
-        this.setState({ currentSlide: index}, console.log("changing to " + this.state.houseOptions[index].HouseID ));
+        this.setState({ currentSlide: index});
     };
 
     handleClose = () => {
