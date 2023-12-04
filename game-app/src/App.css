@@ -85,9 +85,13 @@
   padding: 10px;
 }
 
+.playerInfo h3{
+  margin: 0.5em 0;
+}
+
 .avatar{
   width: 50%;
-  border-radius: 50%;
+  border-radius: 5%;
 }
 
 .waitingAvatar{
