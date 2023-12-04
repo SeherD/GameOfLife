@@ -113,8 +113,8 @@ function SigninPage() {
           {hasAccount ?
           <div className='signin'>
               <h2>Sign in to play!</h2>
-              <label>Username <input name="username" autoFocus={true} /></label>
-              <label>Password <input name="password" /></label>
+              <label>Username <input name="username" type='text' autoFocus={true} /></label>
+              <label>Password <input name="password" type='password' /></label>
               <button className='landingPageButton' onClick={() => {verifySignin()}}>Sign in</button>
               <div>
                   <p>Don't have an account?</p>
@@ -123,8 +123,8 @@ function SigninPage() {
           </div> :
           <div className='signin'>
               <h2>Create a new account</h2>
-              <label>Choose a username <input name="newUsername" autoFocus={true} /></label>
-              <label>Choose a password <input name="newPassword" /></label>
+              <label>Choose a username <input name="newUsername" type='text' autoFocus={true} /></label>
+              <label>Choose a password <input name="newPassword" type='password' /></label>
               <button className='landingPageButton' onClick={() => {verifyCreateAccount()}}>Create account</button>
               {/* TODO: button should check if username is already in DB, and if password isn't empty, then add account to DB */}
               <div>
