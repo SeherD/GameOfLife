@@ -3,14 +3,17 @@ import SkillsCard from './SkillsCard';
 import python from "../assets/python.png";
 import java from "../assets/java.png";
 import axios from 'axios';
+import { LanguageImage } from './services/LanguageImage';
 
 
 export default class SkillsModal extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            skill: {CertName: "Java"},
-            cert: {CertName: "C"}
+            skill: {},
+            cert: {},
+            skillImage: null,
+            certImage: null
         };
     }
 
@@ -20,9 +23,10 @@ export default class SkillsModal extends Component {
             url:"http://localhost:5000/certifications/get-random-certs/P" + (this.props.playerIndex + 1),
           })
           .then((response) => {
-            this.setState({skill: response.data[0], cert: response.data[1]});
-            console.log("SKills are " + response.data)
+        const img1 = LanguageImage.GetImage(response.data[0].Image);
+        const img2 = LanguageImage.GetImage(response.data[1].Image);
 
+            this.setState({skill: response.data[0], cert: response.data[1], skillImage: img1, certImage: img2});
           })
     }
 
@@ -44,7 +48,7 @@ export default class SkillsModal extends Component {
             <div className='optionDiv'>
             <SkillsCard
                 cert={false}
-                image= {python}
+                image= {this.state.skillImage}
                 skill={this.state.skill.CertName}
                 payoff={"$5,000"}
                 raise={""}
@@ -54,7 +58,7 @@ export default class SkillsModal extends Component {
             <div className='optionDiv'>
             <SkillsCard
                 cert={true}
-                image= {java}
+                image= {this.state.certImage}
                 skill={this.state.cert.CertName}
                 payoff={"$5,000"}
                 raise={"$2,000"}

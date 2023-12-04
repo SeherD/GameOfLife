@@ -167,7 +167,10 @@
 }
 
 .skillCard img{
-  width:200px;
+  height: 100px;
+    margin: auto;
+    justify-content: center;
+    display: grid;
 }
 
 .optionDiv button{
