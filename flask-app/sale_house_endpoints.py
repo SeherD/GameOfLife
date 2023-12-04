@@ -162,6 +162,7 @@ class SellHouseResource(Resource):
 
         # Calculate the selling price based on the increase factor
         selling_price = house_card[2] * increase_factor
+        selling_price = int(selling_price)
 
         # Update player's money, mark the house as unused, and remove the house from the player's list
         new_money = player[1] + selling_price
