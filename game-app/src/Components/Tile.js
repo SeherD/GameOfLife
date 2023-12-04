@@ -16,11 +16,11 @@ export default class Tile extends Component {
         this.handleClick = this.handleClick.bind(this)
     }
 
-    handleClick = (player) =>{
+    handleClick = () =>{
         if (this.props.word !== "" && this.props.word !== "PayDay") {
             this.setState({open: true});
         } else if (this.props.word === "PayDay") {
-            return 2 * player.salary;
+            return 2;
         }
     }
 
@@ -52,7 +52,7 @@ render()
                         shouldCloseOnEsc={false}
                         shouldCloseOnOverlayClick={false}
                         style={customStyles}>
-                        <ModalContent playerIndex={this.props.playerIndex} type={this.props.word} stopID={this.state.stopID} handleClose={this.handleClose} onModalClose={this.props.onModalClose} />
+                        <ModalContent playerIndex={this.props.playerIndex} type={this.props.word} stopID={this.state.stopID} handleClose={this.handleClose} onModalClose={this.props.onModalClose} handleRespin={this.props.handleRespin}/>
                     </Modal>
                 </div>
             </div>

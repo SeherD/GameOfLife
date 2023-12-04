@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import Modal from 'react-modal'
 import ModalContent from './ModalContent'
 import Tile from './Tile';
-import { getPlayerData, updatePlayerPosition, updatePlayerCareer, addPlayerHouse, addPlayerLanguage, updatePlayerCash } from './Players';
 import Piece from './Piece';
 import WheelComponent from 'react-wheel-of-prizes';
 import { ToastContainer, toast } from 'react-toastify';
@@ -44,13 +43,11 @@ export default class GameBoard extends Component{
                         '#fa1da9',
                         '#ba38b4'
                         ],
-            // player data
-            players: getPlayerData(),
             playerIndex: 0,
             playerPieces: [],
             // for tracking the initial path choice modal
             universityModalOpen: true,
-            playersCopy: [],
+            players: [],
             currentPlayer: null
         }
 
@@ -63,7 +60,7 @@ export default class GameBoard extends Component{
           .then((response) => {
             const res =response.data;
             const i = this.state.playerIndex;
-                        this.setState({playersCopy: res.all_players, currentPlayer: res.all_players[i]}, this.showPlayerPieces());
+            this.setState({players: res.all_players, currentPlayer: res.all_players[i]}, this.showPlayerPieces());
 
           })
     }
@@ -78,7 +75,7 @@ export default class GameBoard extends Component{
     // cycle through the players in this.state.players
     updateCurrentPlayer = () => {
         return;
-        // if (this.state.playerIndex === this.state.playersCopy.length - 1) {
+        // if (this.state.playerIndex === this.state.players.length - 1) {
         //     this.setState({
         //         playerIndex: 0,
         //     });
@@ -91,10 +88,10 @@ export default class GameBoard extends Component{
 
 //initialize player pieces
     showPlayerPieces = () => {
-        if(this.state.playersCopy === undefined)
+        if(this.state.players === undefined)
             return
 
-        const playerPieces = this.state.playersCopy.map((player) => ({
+        const playerPieces = this.state.players.map((player) => ({
           key: player.playerid,
                 color: player.color,
                 tile: this.state.path[player.path][player.location]
@@ -111,9 +108,6 @@ export default class GameBoard extends Component{
             return;
         }
         const player = this.state.currentPlayer;
-        console.log("updating player tile to " + player.location)
-
-
         const playerPieces = this.state.playerPieces.map((piece) => {
             if(piece.key === player.playerid)
             return {
@@ -135,40 +129,20 @@ export default class GameBoard extends Component{
         // if it's the beginning of the game (i.e. the current player isn't on a path yet)
         if (currentPlayer.path === 'mainPath' && currentPlayer.location === 0) {
             // if player chose university path
-            let newPath = null;
             if (slideIndex === 0) {
-                newPath = 'universityPath';
-                const newPosition = 0;
                 //update location
                 axios({
                     method: "PUT",
-                    url:"http://localhost:5000/players/location/P" + (this.state.playerIndex + 1),
-                    data:{
-                        "location": newPosition,
-                        "path": newPath
-                    } 
+                    url:"http://localhost:5000/players/university/P" + (this.state.playerIndex + 1)
                   })
                   .then((response) => {
                     console.log('PUT request successful:', response.data);
                     this.setState({currentPlayer: response.data}, 
                         ()=>{
-                            this.updatePlayerPieces()})
+                            this.updatePlayerPieces()
+                            this.props.updatePlayerInfo(this.state.playerIndex + 1)})
                   });
-                  //TODO: replace with axios call
-                let updatedPlayersArray = updatePlayerPosition(this.state.players, this.state.playerIndex, newPath, newPosition);
-                updatedPlayersArray = updatePlayerCash(updatedPlayersArray, this.state.playerIndex, -100000);
-                this.setState({players: updatedPlayersArray,},
-                    () => {
-                        this.updatePlayerPieces();
-                const newPlayerInfo = {
-                ...this.props.playerInfo,
-                cash: this.state.players[this.state.playerIndex].cash,
-                };
-                this.props.updatePlayerInfo(newPlayerInfo);
-                }
-                );
-            } else {
-                newPath = 'mainPath';
+              } else {
                 this.setState({initialCareerModalOpen: true});
             }
         }
@@ -184,31 +158,37 @@ export default class GameBoard extends Component{
               })
               .then((response) => {
                 console.log('PUT request successful:', response.data);
-                this.setState({currentPlayer: response.data})});
+                this.setState({currentPlayer: response.data}, this.props.updatePlayerInfo(this.state.playerIndex + 1))});
         }
         // if currently on a house point
         else if (this.state.housePoints.includes(this.state.path[currentPlayer.path][currentPlayer.location])) {
-            //TODO: call flask endpoint to add house
-            this.setState(
-                (prevState) => ({
-                    players: addPlayerHouse(prevState.players, this.state.playerIndex, newValue),
-                }),
-                () => {
-                    this.updatePlayerPieces();
-            }
-            );
-            const housesList = this.props.playerInfo.houses;
-            housesList.push(newValue);
-            console.log(housesList);
-            const newPlayerInfo = {
-            ...this.props.playerInfo,
-            houses: housesList,
-            };
-            this.props.updatePlayerInfo(newPlayerInfo);
+            //call flask endpoint to add house
+            axios({
+                method: "PUT",
+                url:"http://localhost:5000/players/buy-house/P" + (this.state.playerIndex + 1) + "/" + newValue
+              })
+              .then((response) => {
+                console.log('PUT request successful:', response.data);
+                this.setState({currentPlayer: response.data}, this.props.updatePlayerInfo(this.state.playerIndex + 1))});
+        }
+        // if currently on a skill point
+        else if (this.state.skillPoints.includes(this.state.path[currentPlayer.path][currentPlayer.location])){
+                axios({
+                    method: "PUT",
+                    url:"http://localhost:5000/players/add-certificate/P" + (this.state.playerIndex + 1),
+                    data:{
+                        "cert": newValue
+                    } 
+                  })
+                  .then((response) => {
+                    console.log('PUT request successful:', response.data);
+                    this.setState({currentPlayer: response.data}, 
+                        this.props.updatePlayerInfo(this.state.playerIndex + 1));
+                  });
         }
         // if currently on tile 175 - graduation
         else if (currentPlayer.path === 'universityPath' && currentPlayer.location === 7) { 
-            // TODO: call flask endpoint to find salary of new career and set player's salary   
+            // call flask endpoint to find salary of new career and set player's salary   
             axios({
                 method: "PUT",
                 url:"http://localhost:5000/players/career/P" + (this.state.playerIndex + 1),
@@ -218,7 +198,7 @@ export default class GameBoard extends Component{
               })
               .then((response) => {
                 console.log('PUT request successful:', response.data);
-                this.setState({currentPlayer: response.data})
+                this.setState({currentPlayer: response.data}, this.props.updatePlayerInfo(this.state.playerIndex + 1))
               });
 
         }
@@ -313,30 +293,12 @@ export default class GameBoard extends Component{
 
     handleTile = (onPath, atPosition) => {
         const index = this.state.path[onPath][atPosition];
-        console.log(`player ${this.state.playerIndex} is now on tile ${index}`);
         const tile = this.tiles[index];
-        const newValue = tile.handleClick(this.state.players[this.state.playerIndex]);
+        const newValue = tile.handleClick();
         // if handleClick returned a value
         if (newValue) {
             // if that value is a string, it is a new skill
             if (newValue instanceof String) {
-                //TODO: add flask endpoint to add free skill to player assets
-                this.setState(
-                    (prevState) => ({
-                        players: addPlayerLanguage(prevState.players, this.state.playerIndex, newValue),
-                    }),
-                    () => {
-                                                this.updatePlayerPieces();
-                        const languagesList = this.props.playerInfo.languages;
-                        languagesList.push(newValue);
-                        console.log(languagesList);
-                        const newPlayerInfo = {
-                            ...this.props.playerInfo,
-                            languagesList: languagesList,
-                        };
-                        this.props.updatePlayerInfo(newPlayerInfo);
-                    }
-                );
             // if the returned value is a number, it is 2 * the player's salary
             } else {
                 // call a flask endpoint to add newValue to the player's cash
@@ -344,29 +306,15 @@ export default class GameBoard extends Component{
                     method: "PUT",
                     url:"http://localhost:5000/players/payday/P" + (this.state.playerIndex + 1),
                     data: {
-                        "double-earning": true
+                        "double_earning": true
                       }
                   })
                   .then((response) => {
                   console.log('PUT request successful:', response.data);
                   this.setState({currentPlayer: response.data})
-                  //this.props.updatePlayerInfo(response.data)
-                //TODO: delete setstate below
+                  this.props.updatePlayerInfo(this.state.playerIndex + 1)
+
                   })
-                this.setState(
-                (prevState) => ({
-                players: updatePlayerCash(prevState.players, this.state.playerIndex, newValue),
-                }),
-                () => {
-                console.log(this.state.players[this.state.playerIndex]);
-                        this.updatePlayerPieces();
-                const newPlayerInfo = {
-                ...this.props.playerInfo,
-                cash: this.state.players[this.state.playerIndex].cash,
-                };
-                this.props.updatePlayerInfo(newPlayerInfo);
-                }
-                )
             }
         }
     }
@@ -398,7 +346,6 @@ export default class GameBoard extends Component{
         }
 
         // check if the player is passing any stop tiles or reaching the end of the board
-        console.log("Tiles passed:", tilesPassed);
         for (let tile of tilesPassed) {
             // stop for stop tiles
             if (this.state.stopPoints.includes(tile)) {
@@ -407,37 +354,20 @@ export default class GameBoard extends Component{
                                 break;
             // receive salary when passing payday tiles
             } else if (this.state.paydayPoints.includes(tile)) {
-                console.log("passing a payday");
-                const salary = this.state.players[this.state.playerIndex].salary;
                 // call a flask endpoint to add the player's salary to their cash
                     axios({
                         method: "PUT",
                         url:"http://localhost:5000/players/payday/P" + (this.state.playerIndex + 1),
                         data: {
-                            "double-earning": false
+                            "double_earning": false
                           }
                       })
                       .then((response) => {
                       console.log('PUT request successful:', response.data);
                       this.setState({currentPlayer: response.data})
-                      //this.props.updatePlayerInfo(response.data)
-                      //TODO: delete setstate below
+                      this.props.updatePlayerInfo(this.state.playerIndex+1)
 
                       })
-                this.setState(
-                    (prevState) => ({
-                        players: updatePlayerCash(prevState.players, this.state.playerIndex, salary),
-                    }),
-                    () => {
-                        console.log(this.state.players[this.state.playerIndex]);
-                        this.updatePlayerPieces();
-                        const newPlayerInfo = {
-                            ...this.props.playerInfo,
-                            cash: this.state.players[this.state.playerIndex].cash,
-                        };
-                        this.props.updatePlayerInfo(newPlayerInfo);
-                    }
-                )
             }
             // end on retirement tile
             if (this.state.endPoints.includes(tile)) newPosition = path["mainPath"].indexOf(tile);
@@ -478,7 +408,7 @@ export default class GameBoard extends Component{
     }
 
     handleInitialCareerModalClose = (slideIndex, newCareer) => {
-                 //call flask endpoint to find salary of new career and set player's salary
+        //call flask endpoint to find salary of new career and set player's salary
          axios({
             method: "PUT",
             url:"http://localhost:5000/players/career/P" + (this.state.playerIndex + 1),
@@ -488,7 +418,7 @@ export default class GameBoard extends Component{
           })
           .then((response) => {
             console.log('PUT request successful:', response.data);
-            this.setState({currentPlayer: response.data})});
+            this.setState({currentPlayer: response.data}, this.props.updatePlayerInfo(this.state.playerIndex + 1))});
         
     }
    
@@ -500,7 +430,6 @@ export default class GameBoard extends Component{
         // If the player is spinning to determine the sale price of a house
         if(this.state.houseSpin){
             if(this.state.housePoints.includes(this.state.path[currentPath][currentPosition])){
-                // TODO: call flask endpoint to get the original price of the house - let salePrice = this value
                 if(winner % 2 === 0){
                     toast('The price of your house went up!', {
                         position: "top-center",
@@ -512,7 +441,6 @@ export default class GameBoard extends Component{
                         progress: undefined,
                         theme: "dark",
                     });
-                    // TODO: increase the price of the house by 20K
                 }else {
                     toast('The price of your house went down!', {
                         position: "top-center",
@@ -524,17 +452,25 @@ export default class GameBoard extends Component{
                         progress: undefined,
                         theme: "dark",
                     });
-                    // TODO: decrease the price of the house by 20K
                 }
-                //TODO: call flask endpoint to remove this.state.houseToSell from player assets
-                // TODO: call flask endpoint to add salePrice to player assets
-                this.setState({houseSpin: false, houseToSell: ""});
+                //call flask endpoint to sell the house
+                axios({
+                    method: "PUT",
+                    url:"http://localhost:5000/players/sell-house/P" + (this.state.playerIndex + 1) + "/" + this.state.houseToSell,
+                    data:{
+                        "hasIncreased": winner % 2 === 0
+                    }
+                  })
+                  .then((response) => {
+                    console.log('PUT request successful:', response.data);
+                    this.setState({currentPlayer: response.data, houseSpin: false, houseToSell: ""}, 
+                    this.props.updatePlayerInfo(this.state.playerIndex + 1))});
             }
         // If the player is spinning to determine if they get a certification
         } else if(this.state.certSpin){
             if(this.state.skillPoints.includes(this.state.path[currentPath][currentPosition])){
                 if(winner % 2 === 0){
-                    //TODO: call flask endpoint to add this.state.cert to player assets
+                    // call flask endpoint to add this.state.cert to player assets
                     toast.success('You passed the certification!', {
                         position: "top-center",
                         autoClose: 2500,
@@ -545,6 +481,18 @@ export default class GameBoard extends Component{
                         progress: undefined,
                         theme: "dark",
                         });
+                    axios({
+                            method: "PUT",
+                            url:"http://localhost:5000/players/add-certificate/P" + (this.state.playerIndex + 1),
+                            data:{
+                                "cert": this.state.cert
+                            } 
+                          })
+                          .then((response) => {
+                            console.log('PUT request successful:', response.data);
+                            this.setState({currentPlayer: response.data}, 
+                                this.props.updatePlayerInfo(this.state.playerIndex + 1));
+                          });
 
                 }else {
                     toast('You did not pass the certification!', {
@@ -575,9 +523,10 @@ export default class GameBoard extends Component{
           })
           .then((response) => {
             console.log('PUT request successful:', response.data);
-            this.setState({currentPlayer: response.data})
+            this.setState({currentPlayer: response.data}, 
+                this.props.updatePlayerInfo(this.state.playerIndex + 1));
+                this.handleTile(newPath, newPosition);
           });
-        this.handleTile(newPath, newPosition);
         this.updateCurrentPlayer();
         }
           }
@@ -641,14 +590,18 @@ export default class GameBoard extends Component{
                                     ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.housePoints.includes(num)){
                                 return <Tile
-                                    onModalClose = {this.handleSale}
+                                playerIndex={this.state.playerIndex}
+                                    onModalClose = {this.handleModalClose}
+                                    handleRespin = {this.handleSale}
                                     key = {num} 
                                     color = {"blue"}
                                     word = {"House"}
                                     ref = { (ref) => (this.tiles[(rowIndex*15)+colIndex] = ref)} />
                             } else if(this.state.skillPoints.includes(num)){
                                 return <Tile
-                                    onModalClose = {this.handleRisk}
+                                    playerIndex={this.state.playerIndex}
+                                    onModalClose = {this.handleModalClose}
+                                    handleRespin = {this.handleRisk}
                                     key = {num} 
                                     color = {"#fb3199"}
                                     word = {"Skills"}
