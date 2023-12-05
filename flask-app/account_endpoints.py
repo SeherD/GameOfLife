@@ -81,7 +81,8 @@ class CreateAccountResource(Resource):
 
         #Get and return new account
         cur = db.execute("SELECT * FROM Accounts WHERE Username = ?", (args["Username"],))
-        return format_account_response(cur)
+        newAccount = cur.fetchone()
+        return format_account_response(newAccount)
     
 class AuthenticateResource(Resource):
     def get(self):
