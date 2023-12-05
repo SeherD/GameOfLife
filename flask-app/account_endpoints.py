@@ -115,7 +115,7 @@ class AuthenticateResource(Resource):
         account = cur.fetchone()
 
         if account is None:
-            return {"message": "Account not found"}, 404
+            return {"message": "Account not found"}
         elif cur.rowcount > 1:
             return {"message": "Error: multiple accounts found"}, 502
 
