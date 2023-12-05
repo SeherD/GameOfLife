@@ -66,7 +66,8 @@ class CreateAccountResource(Resource):
 
         #Check to make sure there is no existing account with that username in the database
         checkAccounts = db.execute("SELECT * FROM Accounts WHERE Username = ?", (args["Username"],))
-        if checkAccounts is not None:
+        check = checkAccounts.fetchone()
+        if check is not None:
             return {"message": "Account username is already taken"}, 422       
 
         db.execute(
