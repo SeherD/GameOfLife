@@ -78,7 +78,7 @@ class CreateAccountResource(Resource):
             (
                 uName,
                 passW,
-            ),
+            )
         )
         db.commit()
 
