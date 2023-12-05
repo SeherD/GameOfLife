@@ -63,17 +63,17 @@ class CreateAccountResource(Resource):
         # Prevent nasty shenanigans from illegal database accesses in the login page
         bad_characters = [";", "*", "--", "?", '"', "'", " ", "\\"]
         if args["Username"].lower() == "null" or args["Password"].lower() == "null":
-            return {"message": "You cannot use 'null' as a username or password"}, 422
+            return {"message": "You cannot use 'null' as a username or password"}
         elif any(x in args["Username"] for x in bad_characters):
-            return {"message": "Invalid characters in the username"}, 422
+            return {"message": "Invalid characters in the username"}
         elif any(x in args["Password"] for x in bad_characters):
-            return {"message": "Invalid characters in the password"}, 422
+            return {"message": "Invalid characters in the password"}
 
         # Check to make sure there is no existing account with that username in the database
         check_account = db.execute("SELECT * FROM Accounts WHERE Username = ?", (args["Username"],))
         existing_account = check_account.fetchone()
         if existing_account:
-            return {"message": "Account username is already taken"}, 422
+            return {"message": "Account username is already taken"}
 
         db.execute(
             "INSERT INTO Accounts (Username, Password) VALUES (?, ?)",
@@ -104,11 +104,11 @@ class AuthenticateResource(Resource):
         badCharacters = [";", "*", "--", "?", '"', "'", " ", "\\"]
 
         if uName.lower() == "null" or passWord.lower() == "null":
-            return {"message": "Invalid username or password"}, 422
+            return {"message": "Invalid username or password"}
         elif any(x in args["Username"] for x in badCharacters):
-            return {"message": "Invalid characters in the username"}, 422
+            return {"message": "Invalid characters in the username"}
         elif any(x in args["Password"] for x in badCharacters):
-            return {"message": "Invalid characters in the password"}, 422
+            return {"message": "Invalid characters in the password"}
 
         db = get_db()
         cur = db.execute("SELECT * FROM Accounts WHERE Username = ?", (uName,))
