@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Carousel } from 'react-responsive-carousel';
-import university from '../assets/university.png';
-import bootcamp from '../assets/bootcamp.png';
+import university from '../assets/Paths/university.jpg';
+import bootcamp from '../assets/Paths/bootcamp.jpg';
 import PathCard from './PathCard.js';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
