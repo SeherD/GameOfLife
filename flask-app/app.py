@@ -11,9 +11,8 @@ from sale_house_endpoints import *
 from certification_endpoints import *
 from account_endpoints import *
 
-app = Flask(__name__)
 CORS(app)
-api = Api(app)
+
 socketio = SocketIO(app, cors_allowed_origins="*")  # Adjust the origins as needed
 
 
@@ -29,19 +28,14 @@ connected_players = set()
 
 from enum import Enum
 
-# Define an enumeration of colors
-class PlayerColor(Enum):
-    RED = 'Red'
-    BLUE = 'Blue'
-    GREEN = 'Green'
-    YELLOW = 'Yellow'
-    PINK = 'Pink'
-    # Add more colors as needed
 
+
+PlayerColor = ["Red","Blue", "Green", "Yellow", "Pink"]
 # Rest of your code...
 
 @socketio.on('connect')
-def handle_connect():
+def handle_connect(auth):
+    print(auth)
     if len(connected_players) < 5:
         # Allow connection
         player_id = request.sid
@@ -53,15 +47,17 @@ def handle_connect():
         all_player_data = load_all_player_data()
 
         if len(connected_players) == 1:
-            # First player
+             # First player
+            id = "P1"
             avatar_number = 1
             host_value = 1
-            color = PlayerColor.RED.value
+            color = PlayerColor[avatar_number-1]
         else:
             # Subsequent players
+            id = f"P{len(connected_players)}"
             avatar_number = len(connected_players)
             host_value = 0
-            color = PlayerColor(avatar_number).name
+            color = PlayerColor[avatar_number-1]
 
         # Insert new player into the database
         db = get_db()
@@ -70,7 +66,7 @@ def handle_connect():
             INSERT INTO Players 
             (PlayerID, Money, Debt, CareerID, ColorOfPiece, Avatar, University, Host, Homes, Languages, Stocks, Salary, Location, Path)
             VALUES (?, 200000, 0, '', ?, 'Avatar{}.png', 0, ?, '', '', '', 0, 0, 'mainPath')
-        """.format(avatar_number), (player_id, color, host_value))
+        """.format(avatar_number), (id, color, host_value))
 
         # Commit the changes
         db.commit()
@@ -100,9 +96,10 @@ def load_player_data(player_id):
 def handle_reconnect():
     # Get the player ID from the request
     player_id = request.sid
+    player_num=connected_players.index(player_id)+1
 
     # Load the player data from the database
-    player_data = load_player_data(player_id)
+    player_data = load_player_data(f"P{player_num}")
 
     if player_data:
         # Send the player data to the reconnected player
@@ -126,5 +123,5 @@ def handle_update_player_data(data):
     emit('update_player_data', data, broadcast=True)
 
 if __name__ == '__main__':
-    # init_db()  # Initialize your database if needed
+    #init_db()  # Initialize your database if needed
     socketio.run(app, port=5000)
