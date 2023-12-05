@@ -272,6 +272,11 @@ class LocationResource(Resource):
         location = args["location"]
         path = args["path"]
         # Update the location in the database
+        if location<0 or location >225:
+            return {"message": "Location out of bounds"}, 400
+
+        if path == "null":
+            return {"message": "Path can't be none"}, 400 
         db.execute(
             "UPDATE Players SET Location=?, Path=? WHERE PlayerID=?",
             (location, path, player_id),
@@ -490,7 +495,7 @@ class GetSkillPayments(Resource):
         money = player[1]
         
         #Calulate the total sum that the player should receive
-        multiplier = cert_ids.length
+        multiplier = len(cert_ids)
         payment = multiplier*5000
         newMoney = money + payment
 
