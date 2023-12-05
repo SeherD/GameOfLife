@@ -205,9 +205,25 @@ class IncreaseSalaryResource(Resource):
 
 
 class PaydayResource(Resource):
+    @staticmethod
+    def parse_boolean(value):
+        if isinstance(value, bool):
+            return value
+        elif isinstance(value, str):
+            if value.lower() == 'true':
+                return True
+            elif value.lower() == 'false':
+                return False
+
+        raise ValueError("Invalid boolean value for 'double_earning'")
+    
     def put(self, player_id):
         parser = reqparse.RequestParser()
-        parser.add_argument("double_earning", type=bool, default=False)
+        parser.add_argument(
+            "double_earning",
+            type=self.parse_boolean,
+            default=False
+        )
         args = parser.parse_args()
 
         db = get_db()
@@ -221,7 +237,7 @@ class PaydayResource(Resource):
 
         # Increase the salary by the specified amount
         increase_amount = 1
-        if args["double_earning"]:
+        if args["double_earning"] == True:
             increase_amount = 2
         new_salary = player[0] * increase_amount
 
