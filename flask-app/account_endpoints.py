@@ -93,7 +93,7 @@ class CreateAccountResource(Resource):
 
 
 class AuthenticateResource(Resource):
-    def get(self):
+    def put(self):
         parser = reqparse.RequestParser()
         parser.add_argument("Username", type=str, required=True)
         parser.add_argument("Password", type=str, required=True)
