@@ -39,6 +39,7 @@ def get_career_title(career_id):
     # Return the career title if found, otherwise return None
     return result[0] if result else None
 
+
 def get_house_title(house_id):
     # Replace 'your_database_file.db' with the actual path to your SQLite database file
     db = get_db()
@@ -61,22 +62,20 @@ def get_house_title(house_id):
 def get_language_title(lang_id):
     # Replace 'your_database_file.db' with the actual path to your SQLite database file
     db = get_db()
-    # Establish a connection to the database
-
     cursor = db.cursor()
 
-    # Execute a query to fetch the career title based on the career ID
+    # Execute a query to fetch the language name based on the language ID
     cursor.execute("SELECT CertName FROM Certifications WHERE CertID = ?", (lang_id,))
 
     # Fetch the result
     result = cursor.fetchone()
 
     # Close the database connection
-
-    # Return the career title if found, otherwise return None
     return result[0] if result else None
 
+
 def format_player_response(player_data):
+    print(player_data)
     career_id = player_data[3]
     career_title = get_career_title(career_id)
 
@@ -323,6 +322,57 @@ class CareerResource(Resource):
         return format_player_response(updated_player)
 
 
+class AddCertReource(Resource):
+    def put(self, player_id):
+        parser = reqparse.RequestParser()
+        parser.add_argument("cert", type=str)
+
+        args = parser.parse_args()
+        cert = args["cert"]
+        db = get_db()
+
+        # Retrieve player data
+        cur = db.execute(
+            "SELECT Languages, Salary FROM Players WHERE PlayerID = ?", (player_id,)
+        )
+        player = cur.fetchone()
+        if player is None:
+            return {"message": "Player not found"}, 404
+
+        # Retrieve certification data
+        cur = db.execute(
+            "SELECT IsCert FROM Certifications WHERE CertID = ?", (cert,)
+        )
+        isCert= cur.fetchone()
+        if isCert is None:
+            return {"message": "Certification not found"}, 404
+
+        # Check if the certification is already associated with the player
+        certs = (player[0] or "").split(",")
+        if cert not in certs:
+            # Add language/certification to the player list
+            certs.append(cert)
+            updatedCerts = ",".join(certs)
+
+            # Check if the certification exists in the database
+            updatedSalary = float(player[1]) + 2000 if isCert[0] == 1 else player[1]
+
+            # Update the certificates in the database
+            db.execute(
+                "UPDATE Players SET Languages=?, Salary=? WHERE PlayerID=?",
+                (updatedCerts, updatedSalary, player_id),
+            )
+            db.commit()
+
+            # Retrieve the updated player data
+            cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
+            updated_player = cur.fetchone()
+            return format_player_response(updated_player)
+
+        else:
+            return {"message": "Certification already associated with the player"}, 400
+
+
 class ChooseUniversity(Resource):
     def put(self, player_id):
         parser = reqparse.RequestParser()
@@ -373,75 +423,6 @@ class ChooseUniversity(Resource):
             return "Player not found.", 404
 
 
-class CreateNewPlayer(Resource):
-    def post(self):
-        # Get the JSON data from the request
-        data = request.get_json()
-
-        # Validate that required fields are present
-        required_fields = ["PlayerID", "ColorOfPiece", "Avatar", "Host"]
-        for field in required_fields:
-            if field not in data:
-                return jsonify({"error": f"Field '{field}' is required."}), 400
-
-        # Set default values for other fields
-        default_values = {
-            "Money": 200000,
-            "Debt": 0,
-            "CareerID": "",
-            "University": 0,
-            "Homes": [],
-            "Languages": [],
-            "Stocks": [],
-            "Salary": 0,
-            "Location": 0,
-            "Path": "mainPath",
-        }
-
-        # Update default values with provided values
-        default_values.update(
-            {
-                k: v
-                for k, v in data.items()
-                if k not in ["PlayerID", "ColorOfPiece", "Avatar", "Host"]
-            }
-        )
-
-        # Insert player data into the Players table
-        db = sqlite3.connect(
-            "your_database_file.db"
-        )  # Replace with your actual database file
-        cursor = db.cursor()
-
-        try:
-            cursor.execute(
-                "INSERT INTO Players (PlayerID, Money, Debt, CareerID, ColorOfPiece, Avatar, University, Host, Homes, Languages, Stocks, Salary, Location, Path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (
-                    data["PlayerID"],
-                    default_values["Money"],
-                    default_values["Debt"],
-                    default_values["CareerID"],
-                    data["ColorOfPiece"],
-                    data["Avatar"],
-                    default_values["University"],
-                    data["Host"],
-                    ",".join(default_values["Homes"]),
-                    ",".join(default_values["Languages"]),
-                    ",".join(default_values["Stocks"]),
-                    default_values["Salary"],
-                    default_values["Location"],
-                    default_values["Path"],
-                ),
-            )
-            db.commit()
-            return jsonify({"message": "Player created successfully."})
-        except Exception as e:
-            db.rollback()
-            return jsonify({"error": f"Failed to create player. {str(e)}"}), 500
-        finally:
-            db.close()
-
-
 class PlayerHousesResource(Resource):
     def get(self, player_id):
         db = get_db()
@@ -478,18 +459,62 @@ class PlayerHousesResource(Resource):
 
         return {"houses": houses_data}
 
+class GetSkillPayments(Resource):
+    def get(self, player_id):
+        db = get_db()
+
+        # Fetch the player's data
+        cur_player = db.execute(
+            "SELECT Languages, Money FROM Players WHERE PlayerID = ?", (player_id,)
+        )
+        player = cur_player.fetchone()
+        if player is None:
+            return {"message": "Player not found"}, 404
+
+        # Split the comma-separated list of Cert IDs
+        cert_ids = player[0].split(",") if player[0] else []
+        money = player[1]
+        
+        #Calulate the total sum that the player should receive
+        multiplier = cert_ids.length
+        payment = multiplier*5000
+        newMoney = money + payment
+
+        #Update the database with the new total money
+        db.execute(
+            "UPDATE Players SET Money=? WHERE PlayerID = ?",
+            (
+                newMoney,
+                player_id,  
+            ),
+        )
+
+        #Get the updated player information
+        updated_player = db.execute(
+            "SELECT * FROM Players WHERE PlayerID = ?", 
+            (
+                player_id,
+            )
+        )
+        updated = updated_player.fetchone()
+        if player is None:
+            return {"message": "Player not found"}, 404
+
+        return format_player_response(updated)
+
 
 # Add the new resource to the API
 api.add_resource(PlayerHousesResource, "/players/houses/<string:player_id>")
 
-api.add_resource(CreateNewPlayer, "/create_new_player")
+
 # Add the new resource to the API
 api.add_resource(PaydayResource, "/players/payday/<string:player_id>")
 api.add_resource(LocationResource, "/players/location/<string:player_id>")
 api.add_resource(CareerResource, "/players/career/<string:player_id>")
 api.add_resource(ChooseUniversity, "/players/university/<string:player_id>")
+api.add_resource(GetSkillPayments, "/players/skill-payments/<string:player_id>")
 
-# api.add_resource(AddCertReource, "/players/add-certificate/<string:player_id>")
+api.add_resource(AddCertReource, "/players/add-certificate/<string:player_id>")
 
 # Add the new resource to the API
 api.add_resource(IncreaseSalaryResource, "/players/increase-salary/<string:player_id>")

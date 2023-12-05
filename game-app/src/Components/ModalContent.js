@@ -8,7 +8,6 @@ import StopModal3 from './StopModal3';
 import StopModal4 from './StopModal4';
 import UniversityModal from './UniversityModal';
 import SkillsModal from './SkillsModal';
-import { getRandomLanguage } from '../Components/Languages';
 
 
 export default class ModalContent extends Component {
@@ -23,7 +22,7 @@ export default class ModalContent extends Component {
     render() {
         if (this.state.type === "House") {
             return(
-                <HouseModal handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} />
+                <HouseModal playerIndex={this.props.playerIndex} handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} handleRespin={this.props.handleRespin}/>
             );
         } else if (this.state.type === "Career") {
             return(
@@ -55,9 +54,7 @@ export default class ModalContent extends Component {
             );
         } else if (this.state.type === "Skills"){
             return(
-                <SkillsModal handleClose={this.props.handleClose} onModalClose={this.props.onModalClose}
-                    freeSkill={getRandomLanguage()} riskySkill={getRandomLanguage()}
-                /> 
+                <SkillsModal playerIndex={this.props.playerIndex} handleClose={this.props.handleClose} onModalClose={this.props.onModalClose} handleRespin={this.props.handleRespin}/> 
             );
         }
     }

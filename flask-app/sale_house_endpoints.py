@@ -83,6 +83,7 @@ def format_player_response(player_data):
         "location": player_data[12],  # Using the 'Location' variable from player data
     }
 
+
 class BuyHouseResource(Resource):
     def put(self, player_id, house_id):
         db = get_db()
@@ -161,6 +162,7 @@ class SellHouseResource(Resource):
 
         # Calculate the selling price based on the increase factor
         selling_price = house_card[2] * increase_factor
+        selling_price = int(selling_price)
 
         # Update player's money, mark the house as unused, and remove the house from the player's list
         new_money = player[1] + selling_price

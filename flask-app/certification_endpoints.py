@@ -1,10 +1,10 @@
 from flask_restful import reqparse, Resource, Api
 from flask import Flask, g
 import sqlite3
-from database_init import get_db
+import random
+from database_init import *
 
-app = Flask(__name__)
-api = Api(app)
+
 
 parser = reqparse.RequestParser()
 parser.add_argument('CertID', type=str)
@@ -69,9 +69,57 @@ class CertsResource(Resource):
         )
         db.commit()
         return format_cert_response((args["CertID"], args["CertName"], args["IsCert"], args["Image"]))
+    
+class GetRandCertsResource(Resource):
+    def get(self, player_id):
+        db = get_db()
+        cur = db.execute("SELECT Languages FROM Players WHERE PlayerID = ?", (player_id,))
+        player = cur.fetchone()
+        if player is None:
+            return {"message": "Player not found"}, 404
+        
+         # Split the comma-separated list of Cert IDs
+        listOfCerts = player[0].split(",") if player[0] else []
+
+        #Get list of all skills and certifications
+        sk = db.execute('SELECT CertID FROM Certifications WHERE IsCert=0')
+        skills = sk.fetchall()
+        cer = db.execute('SELECT CertID FROM Certifications WHERE IsCert=1')
+        certs = cer.fetchall()
+
+        skillIDs = []
+        certIDs = []
+        for skl in skills:
+            skillIDs.append(skl[0])
+        for crt in certs:
+            certIDs.append(crt[0])
+
+        #Check which skills and certs the player already has
+        for i in skillIDs:
+            if i in listOfCerts:
+                skillIDs.remove(i) #Removes skill from list of potential options
+        for j in certIDs:
+            if j in listOfCerts:
+                certIDs.remove(j) #Removes certification from list of potential options
+
+        #Grab a random skill and certification to send back
+        randomSkill = random.choice(skillIDs)
+        randomCert = random.choice(certIDs)
+        rSk = db.execute('SELECT * FROM Certifications WHERE CertID = ?', (randomSkill,))
+        skill = rSk.fetchone()
+        rCt = db.execute('SELECT * FROM Certifications WHERE CertID = ?', (randomCert,))
+        cert = rCt.fetchone()
+
+        if skill is None or cert is None:
+            return {'message': 'Certification or Language not found'}, 404
+
+        #Return a JSON array consisting of the skill first, then the certification
+        #toReturn = [format_cert_response(skill), format_cert_response(cert)]
+        return [format_cert_response(skill), format_cert_response(cert)]
+
 
 api.add_resource(CertResource, "/certifications/<string:cert_id>")
 api.add_resource(CertsResource, "/certifications")
+api.add_resource(GetRandCertsResource, "/certifications/get-random-certs/<string:player_id>")
 
-if __name__ == '__main__':
-    app.run(debug=True)
+
