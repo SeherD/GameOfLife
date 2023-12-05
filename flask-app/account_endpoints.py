@@ -85,9 +85,9 @@ class CreateAccountResource(Resource):
         db.commit()
 
         # Get and return the new account
-        cur = db.execute("SELECT * FROM Accounts WHERE Username = ?", (args["Username"],))
+        cur = db.execute("SELECT Username FROM Accounts WHERE Username = ?", (args["Username"],))
         new_account = cur.fetchone()
-        return format_account_response(new_account)
+        return {"username": new_account[0]}
 
     
 
@@ -123,8 +123,8 @@ class AuthenticateResource(Resource):
         if passWord != account[1]:
             return {"message": "Authentication failed"}, 401
 
-        # Assuming you want to return the entire account information
-        return format_account_response(account)
+        # Return the username only
+        return {"username": account[0]}
 
 
 api.add_resource(AccountResource, "/accounts/<string:account_id>")
