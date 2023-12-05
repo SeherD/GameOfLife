@@ -490,7 +490,7 @@ class GetSkillPayments(Resource):
         money = player[1]
         
         #Calulate the total sum that the player should receive
-        multiplier = cert_ids.length
+        multiplier = len(cert_ids)
         payment = multiplier*5000
         newMoney = money + payment
 
