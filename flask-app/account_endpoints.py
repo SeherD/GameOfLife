@@ -54,6 +54,9 @@ class CreateAccountResource(Resource):
         args = parser.parse_args()
         db = get_db()
 
+        uName = args["Username"]
+        passW = args["Password"]
+
         badCharacters = [";", "*", "--", "?", '"', "'", " ", "\\"]
 
         #Prevent nasty shenanigans from illegal database accesses in the login page
@@ -65,7 +68,7 @@ class CreateAccountResource(Resource):
             return {"message": "You cannot use these characters in a password : ';'  '*'  '--' '?', ' "}, 422
 
         #Check to make sure there is no existing account with that username in the database
-        checkAccounts = db.execute("SELECT * FROM Accounts WHERE Username = ?", (args["Username"],))
+        checkAccounts = db.execute("SELECT * FROM Accounts WHERE Username = ?", (uName,))
         check = checkAccounts.fetchone()
         if check is not None:
             return {"message": "Account username is already taken"}, 422       
@@ -73,14 +76,14 @@ class CreateAccountResource(Resource):
         db.execute(
             "INSERT INTO Accounts (Username, Password) VALUES (?, ?)",
             (
-                args["Username"],
-                args["Password"],
+                uName,
+                passW,
             ),
         )
         db.commit()
 
         #Get and return new account
-        cur = db.execute("SELECT * FROM Accounts WHERE Username = ?", (args["Username"],))
+        cur = db.execute("SELECT * FROM Accounts WHERE Username = ?", (uName,))
         newAccount = cur.fetchone()
         return format_account_response(newAccount)
     
