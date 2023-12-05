@@ -1,13 +1,12 @@
 import React, {Component} from 'react';
 import GameBoard from '../Components/GameBoard';
 import PlayerInfo from '../Components/PlayerInfo';
-import avatar from '../assets/avatar1.png';
 import axios from 'axios';
 
 export default class GamePage extends Component {
   state = {
     playerInfo:{
-      image: avatar,
+      image: 'Avatar1.png',
       career: "",
       cash: 200000,
       salary: null,
@@ -33,7 +32,6 @@ export default class GamePage extends Component {
       url:"/players/P" + playerId
     })
     .then((response) => {
-      console.log(response.data)
       this.setState({playerInfo: response.data});
 
     })
@@ -42,8 +40,7 @@ export default class GamePage extends Component {
   render() {return (
     <div className="GamePage">
       <header>
-      {/*TODO: Get player info from database and pass as props */}
-        <PlayerInfo playerInfo = {this.state.playerInfo} image={avatar} />
+        <PlayerInfo playerInfo = {this.state.playerInfo}/>
         <GameBoard playerInfo={this.state.playerInfo} updatePlayerInfo={this.updatePlayerInfo} />
       </header>
     </div>
