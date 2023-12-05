@@ -1,6 +1,7 @@
 from flask import Flask, request
 from flask_restful import Api, Resource, reqparse
 from database_init import *
+from flask_socketio import SocketIO, emit, join_room
 
 def get_career_title(career_id):
     # Replace 'your_database_file.db' with the actual path to your SQLite database file
@@ -82,7 +83,6 @@ def format_player_response(player_data):
         "location": player_data[12],  # Using the 'Location' variable from player data
     }
 
-    
 
 class BuyHouseResource(Resource):
     def put(self, player_id, house_id):
@@ -122,7 +122,7 @@ class BuyHouseResource(Resource):
         # Retrieve the updated player data
         cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
         updated_player = cur.fetchone()
-
+        emit('player_data_update', format_player_response(player_id), broadcast=True)
         return format_player_response(updated_player)
 
 
@@ -176,7 +176,7 @@ class SellHouseResource(Resource):
         # Retrieve the updated player data
         cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
         updated_player = cur.fetchone()
-
+        emit('player_data_update', format_player_response(player_id), broadcast=True)
         return format_player_response(updated_player)
 
 
