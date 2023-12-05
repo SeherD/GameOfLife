@@ -9,6 +9,7 @@ from player_endpoints import *
 from game_endpoints import *
 from sale_house_endpoints import *
 from certification_endpoints import *
+from account_endpoints import *
 
 app = Flask(__name__)
 CORS(app)

@@ -100,6 +100,8 @@ class BuyHouseResource(Resource):
         if house_card is None:
             return {"message": "HouseCard not found"}, 404
 
+        if (house_card[4]):
+             return {"message": "HouseCard already used"}, 404
         # Check if the player has enough money to buy the house
         house_cost = house_card[2]
         if player[1] < house_cost:

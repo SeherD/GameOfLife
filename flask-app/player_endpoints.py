@@ -206,9 +206,25 @@ class IncreaseSalaryResource(Resource):
 
 
 class PaydayResource(Resource):
+    @staticmethod
+    def parse_boolean(value):
+        if isinstance(value, bool):
+            return value
+        elif isinstance(value, str):
+            if value.lower() == 'true':
+                return True
+            elif value.lower() == 'false':
+                return False
+
+        raise ValueError("Invalid boolean value for 'double_earning'")
+    
     def put(self, player_id):
         parser = reqparse.RequestParser()
-        parser.add_argument("double_earning", type=bool, default=False)
+        parser.add_argument(
+            "double_earning",
+            type=self.parse_boolean,
+            default=False
+        )
         args = parser.parse_args()
 
         db = get_db()
@@ -222,7 +238,7 @@ class PaydayResource(Resource):
 
         # Increase the salary by the specified amount
         increase_amount = 1
-        if args["double_earning"]:
+        if args["double_earning"] == True:
             increase_amount = 2
         new_salary = player[0] * increase_amount
 
@@ -257,6 +273,11 @@ class LocationResource(Resource):
         location = args["location"]
         path = args["path"]
         # Update the location in the database
+        if location<0 or location >225:
+            return {"message": "Location out of bounds"}, 400
+
+        if path == "null":
+            return {"message": "Path can't be none"}, 400 
         db.execute(
             "UPDATE Players SET Location=?, Path=? WHERE PlayerID=?",
             (location, path, player_id),
@@ -476,7 +497,7 @@ class GetSkillPayments(Resource):
         money = player[1]
         
         #Calulate the total sum that the player should receive
-        multiplier = cert_ids.length
+        multiplier = len(cert_ids)
         payment = multiplier*5000
         newMoney = money + payment
 

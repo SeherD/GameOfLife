@@ -91,17 +91,14 @@ VALUES
     ('G1', 'Cell7, Cell8, Cell21, Cell4, Cell9', 'P1', 'P1,P2,P3,P4,P5', 0);
 
 CREATE TABLE Accounts (
-    AccountID TEXT PRIMARY KEY,
-    Username TEXT,
-    Password TEXT,
-    FirstName TEXT,
-    LastName TEXT
+    Username TEXT PRIMARY KEY,
+    Password TEXT
 );
 
-INSERT INTO Accounts (AccountID, Username, Password, FirstName, LastName)
+INSERT INTO Accounts (Username, Password)
 VALUES
-    ('A1', 'bestLifeGamePlayer2000', 'thisShouldBeSHA256d', 'Alice', 'Bob'),
-    ('A2', 'bestLifeGamePlayer2001', 'thisShouldBeSHA512d', 'Alice', 'Bob');
+    ('bestLifeGamePlayer2000', 'thisShouldBeSHA256d'),
+    ('bestLifeGamePlayer2001', 'thisShouldBeSHA512d');
 
 CREATE TABLE UserData (
     UserID TEXT PRIMARY KEY,
