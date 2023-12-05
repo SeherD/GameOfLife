@@ -90,44 +90,42 @@ class CreateAccountResource(Resource):
         return format_account_response(new_account)
 
     
+
+
 class AuthenticateResource(Resource):
     def get(self):
         parser = reqparse.RequestParser()
-        parser.add_argument("clientUsername", type=str, required=True)
-        parser.add_argument("clientPassword", type=str, required=True)
+        parser.add_argument("Username", type=str, required=True)
+        parser.add_argument("Password", type=str, required=True)
         args = parser.parse_args()
 
-        uName = args["clientUsername"]
-        passWord = args["clientPassword"]
+        uName = args["Username"]
+        passWord = args["Password"]
         badCharacters = [";", "*", "--", "?", '"', "'", " ", "\\"]
 
-        if uName == "null" or passWord == "null":
+        if uName.lower() == "null" or passWord.lower() == "null":
             return {"message": "Invalid username or password"}, 422
         elif any(x in args["Username"] for x in badCharacters):
-            return {"message": "Invalid username"}, 422
+            return {"message": "Invalid characters in the username"}, 422
         elif any(x in args["Password"] for x in badCharacters):
-            return {"message": "Invalid password"}, 422
+            return {"message": "Invalid characters in the password"}, 422
 
         db = get_db()
-        cur = db.execute("SELECT Username, Password FROM Accounts WHERE Username = ?", (uName,))
+        cur = db.execute("SELECT * FROM Accounts WHERE Username = ?", (uName,))
         account = cur.fetchone()
-        accID = account[0]
 
         if account is None:
             return {"message": "Account not found"}, 404
-        elif account.length >= 2:
+        elif cur.rowcount > 1:
             return {"message": "Error: multiple accounts found"}, 502
-        
-        if passWord != account[2]:
-            return {"message": "Authentication failed"}, 401
-        elif passWord == account[2]:
-            account = db.execute("SELECT * FROM Accounts WHERE Username = ?", (accID,))
-            return format_account_response(account)
-        else:
-            return {"message": "I'm a teapot"}, 418
-        
 
-        
+        # Assuming the password is stored in the second column
+        if passWord != account[1]:
+            return {"message": "Authentication failed"}, 401
+
+        # Assuming you want to return the entire account information
+        return format_account_response(account)
+
 
 api.add_resource(AccountResource, "/accounts/<string:account_id>")
 api.add_resource(CreateAccountResource, "/accounts/create-account")
