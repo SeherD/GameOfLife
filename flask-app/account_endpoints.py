@@ -49,43 +49,46 @@ class AccountResource(Resource):
         db.commit()
         return {'message': 'Account deleted successfully'}
     
+from flask_restful import Resource, reqparse
+
 class CreateAccountResource(Resource):
     def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("Username", required=True, help="Username is required")
+        parser.add_argument("Password", required=True, help="Password is required")
         args = parser.parse_args()
+
         db = get_db()
 
-        uName = args["Username"]
-        passW = args["Password"]
+        # Prevent nasty shenanigans from illegal database accesses in the login page
+        bad_characters = [";", "*", "--", "?", '"', "'", " ", "\\"]
+        if args["Username"].lower() == "null" or args["Password"].lower() == "null":
+            return {"message": "You cannot use 'null' as a username or password"}, 422
+        elif any(x in args["Username"] for x in bad_characters):
+            return {"message": "Invalid characters in the username"}, 422
+        elif any(x in args["Password"] for x in bad_characters):
+            return {"message": "Invalid characters in the password"}, 422
 
-        badCharacters = [";", "*", "--", "?", '"', "'", " ", "\\"]
-
-        #Prevent nasty shenanigans from illegal database accesses in the login page
-        if args["Username"] == "null" or args["Password"] == "null":
-            return {"message": "You cannot use this as a username"}, 422
-        elif any(x in args["Username"] for x in badCharacters):
-            return {"message": "You cannot use these characters in a username : ';'  '*'  '--' '?', '"}, 422
-        elif any(x in args["Password"] for x in badCharacters):
-            return {"message": "You cannot use these characters in a password : ';'  '*'  '--' '?', ' "}, 422
-
-        #Check to make sure there is no existing account with that username in the database
-        checkAccounts = db.execute("SELECT * FROM Accounts WHERE Username = ?", (uName,))
-        check = checkAccounts.fetchone()
-        if check is not None:
-            return {"message": "Account username is already taken"}, 422       
+        # Check to make sure there is no existing account with that username in the database
+        check_account = db.execute("SELECT * FROM Accounts WHERE Username = ?", (args["Username"],))
+        existing_account = check_account.fetchone()
+        if existing_account:
+            return {"message": "Account username is already taken"}, 422
 
         db.execute(
             "INSERT INTO Accounts (Username, Password) VALUES (?, ?)",
             (
-                uName,
-                passW,
+                args["Username"],
+                args["Password"],
             )
         )
         db.commit()
 
-        #Get and return new account
-        cur = db.execute("SELECT * FROM Accounts WHERE Username = ?", (uName,))
-        newAccount = cur.fetchone()
-        return format_account_response(newAccount)
+        # Get and return the new account
+        cur = db.execute("SELECT * FROM Accounts WHERE Username = ?", (args["Username"],))
+        new_account = cur.fetchone()
+        return format_account_response(new_account)
+
     
 class AuthenticateResource(Resource):
     def get(self):
