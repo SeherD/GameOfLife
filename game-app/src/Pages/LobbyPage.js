@@ -8,18 +8,13 @@ import avatar3 from '../assets/Avatars/Avatar3.png';
 import avatar4 from '../assets/Avatars/Avatar4.png';
 
 function LobbyPage() {
-    // TODO: call a flask endpoint to find out if the current player is the host
-    // eslint-disable-next-line
+
     const [host, setHost] = useState(true);
-    // TODO: call a flask endpoint to get the current game ID
-    // eslint-disable-next-line
-    const [gameID, setGameID] = useState();
 
   return (
     <div className="LobbyPage">
       <div>
         <h1>THE GAME OF LIFE <br/> SOFTWARE DEVELOPER EDITION</h1>
-        <div id='gameCode'>Game code: {gameID}</div>
         <hr/>
       </div>
       <div>
@@ -55,7 +50,6 @@ function LobbyPage() {
         />
       </div>
     <div>
-          {/* TODO: Call a flask endpoint to find out if the current player is the host */}
           {host ? <div className="landingPageButton"><Link to="/game">START GAME</Link></div> : <div/> }
     </div>
     </div>
