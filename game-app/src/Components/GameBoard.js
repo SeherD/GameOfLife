@@ -7,6 +7,7 @@ import WheelComponent from 'react-wheel-of-prizes';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
+import OpponentInfo from './OpponentInfo';
 
 export default class GameBoard extends Component{
     // used to access specific tiles by index
@@ -638,6 +639,13 @@ export default class GameBoard extends Component{
               transform: 'translate(-50%, -50%)',
             },
         };
+        const opponentInfo = {
+            image: 'Avatar2.png',
+            career: "Hacker",
+            cash: 200000,
+            color: "pink",
+            username: "opponent1"
+        }
         if(this.state.playerPieces === undefined || this.state.playerPieces.length === 0){
             return <div>Loading...</div>
         }
@@ -654,6 +662,21 @@ export default class GameBoard extends Component{
                         onFinished={(winner) => this.onFinished(winner)}
                         isOnlyOnce={false}
                         downDuration={500} />
+                </div>
+                {/*TODO: populate with playerinfo from backend*/ }
+                <div className="opponentsDiv">
+                    <OpponentInfo 
+                        playerInfo = {opponentInfo}
+                    />
+                    <OpponentInfo 
+                        playerInfo = {opponentInfo}
+                    />
+                    <OpponentInfo 
+                        playerInfo = {opponentInfo}
+                    />
+                    <OpponentInfo 
+                        playerInfo = {opponentInfo}
+                    />
                 </div>
             </div> 
             {/* modal for choosing initial path - open at beginning of game */}
