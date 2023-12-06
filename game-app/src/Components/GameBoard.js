@@ -290,50 +290,65 @@ export default class GameBoard extends Component{
                     console.log('PUT request successful:', response.data);
                     this.setState({currentPlayer: response.data})
                   });
-
+                  this.handleRetirement();
             }
         }
     };
 
-    handleRetirement = async () => {
+    handleRetirement = () => {
         // get a list of the player's houses
-        const response = await axios({
+        axios({
             method: "GET",
-            url: "/players/houses/P" + (this.state.playerIndex + 1),
-        });
-        const houses = response.data.houses;
-
-        // prompt the player to sell all their houses
-        for (let i = 0; i < houses.length; i++) {
-            const house = houses[i];
-
-            toast(`Spin to see whether the price of ${house.Name} went up or down!`, {
-                position: "top-center",
-                autoClose: 2500,
-                hideProgressBar: true,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: false,
-                progress: undefined,
-                theme: "dark",
-                bodyClassName: "popup"
-            });
-
-            this.setState({ houseToSell: house, houseSpin: true });
-        }
+            url:"http://localhost:5000/players/houses/P" + (this.state.playerIndex + 1),
+          })
+          .then(async (response) => {
+            const houses = response.data.houses;
+            for (let i = 0; i < houses.length; i++) {
+                const house = houses[i];
+    
+                toast(`Selling ${house.Name}`, {
+                    position: "top-center",
+                    autoClose: 2500,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: false,
+                    progress: undefined,
+                    theme: "dark",
+                    bodyClassName: "popup"
+                });
+        
+                //call flask endpoint to sell the house
+                await axios({
+                    method: "PUT",
+                    url:"http://localhost:5000/players/sell-house/P" + (this.state.playerIndex + 1) + "/" + house.HouseID,
+                    data:{
+                        "hasIncreased": true
+                    }
+                })
+                .then((response) => {
+                    console.log('PUT request successful:', response.data);
+                    this.setState({currentPlayer: response.data}, 
+                    this.props.updatePlayerInfo(this.state.playerIndex + 1))
+                });
+            }
+        })
 
         // call a flask endpoint to calculate the player's total cash including skill bonuses
-        const skillPaymentsResponse = await axios({
-            method: "GET",
-            url: "/players/skill-payments/P" + (this.state.playerIndex + 1),
-        });
-
-        const totalCash = skillPaymentsResponse.data.cash;
-
-        this.setState({ finalCash: totalCash }, resolve);
-
-        // display the player's final cash
-        this.setState({ endgameModalOpen: true });
+        setTimeout(() => {
+            let skillPaymentsResponse
+            axios({
+                method: "GET",
+                url: "/players/skill-payments/P" + (this.state.playerIndex + 1),
+            })
+            .then((response) => {
+                skillPaymentsResponse = response.data;
+                const totalCash = skillPaymentsResponse.cash;
+                this.setState({ finalCash: totalCash });
+                // display the player's final cash
+                this.setState({ endgameModalOpen: true });
+            })
+          }, 2000);
     };
 
     handleTile = (onPath, atPosition) => {
@@ -412,7 +427,9 @@ export default class GameBoard extends Component{
                       })
             }
             // end on retirement tile
-            if (this.state.endPoints.includes(tile)) newPosition = path["mainPath"].indexOf(tile);
+            if (this.state.endPoints.includes(tile)) {
+                newPosition = path["mainPath"].indexOf(tile);
+            }
         };     
 
         return [newPath, newPosition];
