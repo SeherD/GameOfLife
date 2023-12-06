@@ -10,7 +10,7 @@ import axios from 'axios';
 
 import OpponentInfo from './OpponentInfo';
 
-import {socket, socketPlayerIndex} from '../Socket'
+import {socket, socketPlayerIndex, socketUsername} from '../Socket'
 
 
 

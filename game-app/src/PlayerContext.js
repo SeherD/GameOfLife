@@ -1,42 +1,47 @@
 import React, { createContext, useReducer, useContext } from 'react';
 
-   // Initial state for players
-   const initialState = {
-     players: [],
-     username,
-     
-   };
+// Initial state for players
+const initialState = {
+  players: [],
+  username: '',
+};
 
-   // Create context
-   const PlayerContext = createContext();
+// Create context
+const PlayerContext = createContext();
 
-   // Define reducer function
-   const playerReducer = (state, action) => {
-     switch (action.type) {
-       case 'SET_PLAYERS':
-         return { ...state, players: action.payload };
-       // Add more cases as needed
-       default:
-         return state;
-     }
-   };
+// Define action types
+const SET_PLAYERS = 'SET_PLAYERS';
+const SET_USERNAME = 'SET_USERNAME';
 
-   // Create context provider
-   export const PlayerProvider = ({ children }) => {
-     const [state, dispatch] = useReducer(playerReducer, initialState);
+// Define reducer function
+const playerReducer = (state, action) => {
+  switch (action.type) {
+    case SET_PLAYERS:
+      return { ...state, players: action.payload };
+    case SET_USERNAME:
+      return { ...state, username: action.payload };
+    // Add more cases as needed
+    default:
+      return state;
+  }
+};
 
-     return (
-       <PlayerContext.Provider value={{ state, dispatch }}>
-         {children}
-       </PlayerContext.Provider>
-     );
-   };
+// Create context provider
+export const PlayerProvider = ({ children }) => {
+  const [state, dispatch] = useReducer(playerReducer, initialState);
 
-   // Custom hook to use the context
-   export const usePlayerContext = () => {
-     const context = useContext(PlayerContext);
-     if (!context) {
-       throw new Error('usePlayerContext must be used within a PlayerProvider');
-     }
-     return context;
-   };
+  return (
+    <PlayerContext.Provider value={{ state, dispatch }}>
+      {children}
+    </PlayerContext.Provider>
+  );
+};
+
+// Custom hook to use the context
+export const usePlayerContext = () => {
+  const context = useContext(PlayerContext);
+  if (!context) {
+    throw new Error('usePlayerContext must be used within a PlayerProvider');
+  }
+  return context;
+};
