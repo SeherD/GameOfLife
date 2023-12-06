@@ -217,6 +217,7 @@
   right: 15px;
   font-size: small;
   display: grid;
+
 }
 
 .opponentInfo{
@@ -225,6 +226,8 @@
   border-radius: 5%;
   padding: 10px;
   margin: 5% 0;
+  height: 15vh;
+
 }
 
 .opponentAvatar{
