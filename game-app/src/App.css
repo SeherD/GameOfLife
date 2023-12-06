@@ -85,9 +85,13 @@
   padding: 10px;
 }
 
+.playerInfo h3{
+  margin: 0.5em 0;
+}
+
 .avatar{
   width: 50%;
-  border-radius: 50%;
+  border-radius: 5%;
 }
 
 .waitingAvatar{
@@ -193,7 +197,10 @@
 }
 
 .skillCard img{
-  width:200px;
+  height: 100px;
+    margin: auto;
+    justify-content: center;
+    display: grid;
 }
 
 .optionDiv button{
@@ -204,3 +211,27 @@
   font-size: medium;
 }
 
+.opponentsDiv{
+  position: absolute;
+  top: 50px;
+  right: 15px;
+  font-size: small;
+  display: grid;
+
+}
+
+.opponentInfo{
+  display: inline-flex;
+  width: calc(50vw - 435px);
+  border-radius: 5%;
+  padding: 10px;
+  margin: 5% 0;
+  height: 15vh;
+
+}
+
+.opponentAvatar{
+  width: 40%;
+  border-radius: 5%;
+  margin: 0 5%;
+}

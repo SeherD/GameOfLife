@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Carousel } from 'react-responsive-carousel';
-import sidepath from '../assets/sidepath.png';
-import mainpath from '../assets/mainpath.png';
+import sidepath from '../assets/Paths/side_path.jpg';
+import mainpath from '../assets/Paths/main_path.jpg';
 import PathCard from './PathCard.js';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
