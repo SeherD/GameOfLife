@@ -3,10 +3,16 @@ import { AvatarImage } from './services/AvatarImage';
 
 export default class OpponentInfo extends Component {
     state = {
-        image: 'Avatar2.png'
+        image: 'Avatar3.png'
     };
     componentDidMount() {
         this.setState({image:AvatarImage.GetImage(this.props.playerInfo.image)});
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps!= this.props){
+            console.log(this.props.playerInfo.image);
+        this.setState({image:AvatarImage.GetImage(this.props.playerInfo.image)});}
     }
 
 

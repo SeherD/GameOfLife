@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import { AvatarImage } from './services/AvatarImage';
 
+
 export default class PlayerInfo extends Component {
     state = {
         image: 'Avatar1.png'

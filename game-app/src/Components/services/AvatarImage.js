@@ -34,9 +34,10 @@ class AvatarImage {
       },
   ];
 
-  static GetImage(name) {
+  static async GetImage(name) {
+        console.log(name);
       const found = AvatarImage.images.find(e => e.name === name);
-      return found ? found.image : null;
+      return found ? await found.image() : null;
   }
 }
 

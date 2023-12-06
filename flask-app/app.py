@@ -25,6 +25,10 @@ disconnected_players = []
 
 connection_tuples=[]
 
+@socketio.on('startGame')
+def start_game():
+    print("Switch")
+    socketio.emit('switch_game', {})
 
 
 

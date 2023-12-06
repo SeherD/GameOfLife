@@ -132,17 +132,23 @@ export default class GameBoard extends Component{
         
             // Find the changed player
             const changedPlayer = updatedPlayers.find((player) => player.playerid === data.playerid);
-
+            let socketIndex= parseInt(socketPlayerIndex)+1
+            console.log(socketIndex)
+            console.log(`P${socketIndex}`)
             const opponentInfos = updatedPlayers
-            .filter((player) => player.playerid !== data.playerid)
-            .map((opponent) => ({
+            .filter((player) => player.playerid !== `P${socketIndex}`)
+            .map((opponent) => (
+                {
+                
               image: opponent.image,
               career: opponent.career,
               cash: opponent.cash,
               color: opponent.color,
               //username: opponent.username,
-            }));
-      
+            }
+            
+            ));
+            console.log(opponentInfos[0].image);
           this.setState({
             players: updatedPlayers,
             // Optionally, update currentPlayer if needed
@@ -151,6 +157,8 @@ export default class GameBoard extends Component{
             opponentInfo2: opponentInfos[1],
             opponentInfo3: opponentInfos[2],
             opponentInfo4: opponentInfos[3],
+
+            
           });
         
             // Call updatePlayerPieces only when playerid matches
