@@ -4,7 +4,6 @@ import Modal from 'react-modal'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
-import {socket,socketPlayerIndex} from '../Socket';
 
 function SigninPage() {
     const [hasAccount, setHasAccount] = useState(true);
@@ -36,7 +35,7 @@ function SigninPage() {
       })
       .then((response) => {
         console.log('PUT request successful:', response.data);
-        if (Object.hasOwnProperty(response.data, 'message')) {
+        if(Object.hasOwn(response.data, 'message')){
             toast('Invalid login, please try again', {
                 position: "top-center",
                 autoClose: 2500,
@@ -57,20 +56,10 @@ function SigninPage() {
                 draggable: false,
                 progress: undefined,
                 theme: "dark",
-            });
-
-            setJoinGameModalOpen(true);
-
-            // Move the socket.emit inside the .then block
-            console.log(username);
-            socket.emit('connect_with_username', { username });
+              });
+              setJoinGameModalOpen(true);
         }
     })
-    .catch((error) => {
-        console.error('Error in PUT request:', error);
-        // Handle the error as needed
-    });
-    
   }
 
   function verifyCreateAccount() {
