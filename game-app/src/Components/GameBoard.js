@@ -64,7 +64,7 @@ export default class GameBoard extends Component{
         if (this.state.turnNumber === this.state.playerIndex) {
             toast('Spin to move!', {
                 position: "top-center",
-                autoClose: 2500,
+                autoClose: 1000,
                 hideProgressBar: true,
                 closeOnClick: true,
                 pauseOnHover: true,
@@ -93,7 +93,7 @@ export default class GameBoard extends Component{
                 spinnerElement.style.pointerEvents = 'auto';
                 toast('Spin to move!', {
                     position: "top-center",
-                    autoClose: 2500,
+                    autoClose: 1000,
                     hideProgressBar: true,
                     closeOnClick: true,
                     pauseOnHover: true,
