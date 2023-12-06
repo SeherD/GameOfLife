@@ -210,3 +210,27 @@
   font-size: medium;
 }
 
+.opponentsDiv{
+  position: absolute;
+  top: 50px;
+  right: 15px;
+  font-size: small;
+  display: grid;
+
+}
+
+.opponentInfo{
+  display: inline-flex;
+  width: calc(50vw - 435px);
+  border-radius: 5%;
+  padding: 10px;
+  margin: 5% 0;
+  height: 15vh;
+
+}
+
+.opponentAvatar{
+  width: 40%;
+  border-radius: 5%;
+  margin: 0 5%;
+}

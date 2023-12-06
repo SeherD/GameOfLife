@@ -526,6 +526,28 @@ class GetSkillPayments(Resource):
 
         return format_player_response(updated)
 
+class GetWinner(Resource):
+    def get(self):
+        db = get_db()
+        cur = db.execute("SELECT PlayerID, Money FROM Players")
+        all_players = cur.fetchall()
+        
+        #Determine the winner based on the amount of money they have
+        cur_winner = ["", 0]
+        for player in all_players:
+            if player[1] > cur_winner[1]:
+                cur_winner[0] = player[0]
+                cur_winner[1] = player[1]
+        
+        #Get the winning player from the database
+        win = db.execute("SELECT * FROM Players WHERE PlayerID=?", cur_winner[0],)
+        winning_player = win.fetchone()
+
+        if winning_player is None:
+            return {"message": "No winning player"}
+        else:
+            return {"winner": format_player_response(winning_player)}
+
 
 # Add the new resource to the API
 api.add_resource(PlayerHousesResource, "/players/houses/<string:player_id>")
@@ -537,8 +559,8 @@ api.add_resource(LocationResource, "/players/location/<string:player_id>")
 api.add_resource(CareerResource, "/players/career/<string:player_id>")
 api.add_resource(ChooseUniversity, "/players/university/<string:player_id>")
 api.add_resource(GetSkillPayments, "/players/skill-payments/<string:player_id>")
-
 api.add_resource(AddCertResource, "/players/add-certificate/<string:player_id>")
+api.add_resource(GetWinner, "/players/get-winner")
 
 # Add the new resource to the API
 api.add_resource(IncreaseSalaryResource, "/players/increase-salary/<string:player_id>")
