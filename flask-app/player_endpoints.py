@@ -75,7 +75,7 @@ def get_language_title(lang_id):
 
 
 def format_player_response(player_data):
-    print(player_data)
+   
     career_id = player_data[3]
     career_title = get_career_title(career_id)
 
@@ -126,7 +126,7 @@ class IndividualPlayerResource(Resource):
             query = f"UPDATE Players SET {update_query}WHERE PlayerID=?"
             db.execute(query, (*update_fields.values(), player_id))
             db.commit()
-        emit('player_data_update', format_player_response(player_id), broadcast=True)
+        #socketio.emit('update_player_data', format_player_response(updated_query) )
         return format_player_response(player_id)
 
     def delete(self, player_id):
@@ -201,7 +201,7 @@ class IncreaseSalaryResource(Resource):
         # Retrieve the updated player data
         cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
         updated_player = cur.fetchone()
-        emit('player_data_update', format_player_response(player_id), broadcast=True)
+        socketio.emit('update_player_data', format_player_response(updated_player) )
         return format_player_response(updated_player)
 
 
@@ -250,7 +250,7 @@ class PaydayResource(Resource):
         # Retrieve the updated player data
         cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
         updated_player = cur.fetchone()
-        emit('player_data_update', format_player_response(player_id), broadcast=True)
+        socketio.emit('update_player_data', format_player_response(updated_player) )
         return format_player_response(updated_player)
 
 
@@ -287,7 +287,9 @@ class LocationResource(Resource):
         # Retrieve the updated player data
         cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
         updated_player = cur.fetchone()
-        emit('player_data_update', format_player_response(player_id), broadcast=True)
+        
+        socketio.emit('update_player_data', format_player_response(updated_player) )
+        
         return format_player_response(updated_player)
 
 
@@ -339,11 +341,11 @@ class CareerResource(Resource):
         # Retrieve the updated player data
         cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
         updated_player = cur.fetchone()
-        emit('player_data_update', format_player_response(player_id), broadcast=True)
+        socketio.emit('update_player_data', format_player_response(updated_player) )
         return format_player_response(updated_player)
 
 
-class AddCertReource(Resource):
+class AddCertResource(Resource):
     def put(self, player_id):
         parser = reqparse.RequestParser()
         parser.add_argument("cert", type=str)
@@ -388,6 +390,7 @@ class AddCertReource(Resource):
             # Retrieve the updated player data
             cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
             updated_player = cur.fetchone()
+            socketio.emit('update_player_data', format_player_response(updated_player) )
             return format_player_response(updated_player)
 
         else:
@@ -438,7 +441,7 @@ class ChooseUniversity(Resource):
             db.commit()
             cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
             updated_player = cur.fetchone()
-            emit('player_data_update', format_player_response(player_id), broadcast=True)
+            socketio.emit('update_player_data', format_player_response(updated_player) )
             return format_player_response(updated_player)
         else:
             return "Player not found.", 404
@@ -535,7 +538,7 @@ api.add_resource(CareerResource, "/players/career/<string:player_id>")
 api.add_resource(ChooseUniversity, "/players/university/<string:player_id>")
 api.add_resource(GetSkillPayments, "/players/skill-payments/<string:player_id>")
 
-api.add_resource(AddCertReource, "/players/add-certificate/<string:player_id>")
+api.add_resource(AddCertResource, "/players/add-certificate/<string:player_id>")
 
 # Add the new resource to the API
 api.add_resource(IncreaseSalaryResource, "/players/increase-salary/<string:player_id>")

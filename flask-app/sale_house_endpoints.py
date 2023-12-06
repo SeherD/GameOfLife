@@ -124,7 +124,7 @@ class BuyHouseResource(Resource):
         # Retrieve the updated player data
         cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
         updated_player = cur.fetchone()
-        emit('player_data_update', format_player_response(player_id), broadcast=True)
+        socketio.emit('player_data_update', format_player_response(updated_player), broadcast=True)
         return format_player_response(updated_player)
 
 
@@ -178,7 +178,7 @@ class SellHouseResource(Resource):
         # Retrieve the updated player data
         cur = db.execute("SELECT * FROM Players WHERE PlayerID = ?", (player_id,))
         updated_player = cur.fetchone()
-        emit('player_data_update', format_player_response(player_id), broadcast=True)
+        socketio.emit('player_data_update', format_player_response(updated_player), broadcast=True)
         return format_player_response(updated_player)
 
 
