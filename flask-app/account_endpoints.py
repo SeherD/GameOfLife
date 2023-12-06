@@ -63,17 +63,17 @@ class CreateAccountResource(Resource):
         # Prevent nasty shenanigans from illegal database accesses in the login page
         bad_characters = [";", "*", "--", "?", '"', "'", " ", "\\"]
         if args["Username"].lower() == "null" or args["Password"].lower() == "null":
-            return {"message": "You cannot use 'null' as a username or password"}, 422
+            return {"message": "You cannot use 'null' as a username or password"}
         elif any(x in args["Username"] for x in bad_characters):
-            return {"message": "Invalid characters in the username"}, 422
+            return {"message": "Invalid characters in the username"}
         elif any(x in args["Password"] for x in bad_characters):
-            return {"message": "Invalid characters in the password"}, 422
+            return {"message": "Invalid characters in the password"}
 
         # Check to make sure there is no existing account with that username in the database
         check_account = db.execute("SELECT * FROM Accounts WHERE Username = ?", (args["Username"],))
         existing_account = check_account.fetchone()
         if existing_account:
-            return {"message": "Account username is already taken"}, 422
+            return {"message": "Account username is already taken"}
 
         db.execute(
             "INSERT INTO Accounts (Username, Password) VALUES (?, ?)",
@@ -85,15 +85,15 @@ class CreateAccountResource(Resource):
         db.commit()
 
         # Get and return the new account
-        cur = db.execute("SELECT * FROM Accounts WHERE Username = ?", (args["Username"],))
+        cur = db.execute("SELECT Username FROM Accounts WHERE Username = ?", (args["Username"],))
         new_account = cur.fetchone()
-        return format_account_response(new_account)
+        return {"username": new_account[0]}
 
     
 
 
 class AuthenticateResource(Resource):
-    def get(self):
+    def put(self):
         parser = reqparse.RequestParser()
         parser.add_argument("Username", type=str, required=True)
         parser.add_argument("Password", type=str, required=True)
@@ -104,18 +104,18 @@ class AuthenticateResource(Resource):
         badCharacters = [";", "*", "--", "?", '"', "'", " ", "\\"]
 
         if uName.lower() == "null" or passWord.lower() == "null":
-            return {"message": "Invalid username or password"}, 422
+            return {"message": "Invalid username or password"}
         elif any(x in args["Username"] for x in badCharacters):
-            return {"message": "Invalid characters in the username"}, 422
+            return {"message": "Invalid characters in the username"}
         elif any(x in args["Password"] for x in badCharacters):
-            return {"message": "Invalid characters in the password"}, 422
+            return {"message": "Invalid characters in the password"}
 
         db = get_db()
         cur = db.execute("SELECT * FROM Accounts WHERE Username = ?", (uName,))
         account = cur.fetchone()
 
         if account is None:
-            return {"message": "Account not found"}, 404
+            return {"message": "Account not found"}
         elif cur.rowcount > 1:
             return {"message": "Error: multiple accounts found"}, 502
 
@@ -123,8 +123,8 @@ class AuthenticateResource(Resource):
         if passWord != account[1]:
             return {"message": "Authentication failed"}, 401
 
-        # Assuming you want to return the entire account information
-        return format_account_response(account)
+        # Return the username only
+        return {"username": account[0]}
 
 
 api.add_resource(AccountResource, "/accounts/<string:account_id>")

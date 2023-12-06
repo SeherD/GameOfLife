@@ -8,6 +8,12 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 
+import OpponentInfo from './OpponentInfo';
+
+import {socket, socketPlayerIndex} from '../Socket'
+
+
+
 export default class GameBoard extends Component{
     // used to access specific tiles by index
     tiles = Array.from({ length: 225 });
@@ -43,9 +49,10 @@ export default class GameBoard extends Component{
                         '#fa1da9',
                         '#ba38b4'
                         ],
-            playerIndex: 0,
+            playerIndex: parseInt(socketPlayerIndex),
+            turnNumber: 0,
             playerPieces: [],
-            // for tracking the initial path choice modal
+            // for tracking the initial path choice modalcurrentPlayer
             universityModalOpen: true,
             // for tracking the final modal
             finalCash: 0,
@@ -59,6 +66,7 @@ export default class GameBoard extends Component{
 
 
     componentDidMount() {
+        
         axios({
             method: "GET",
             url:"http://localhost:5000/players"
@@ -74,27 +82,94 @@ export default class GameBoard extends Component{
             console.log(data);
             this.setState({winnerModalOpen: true});
         })
+
+        // Add the socket.io event listener for 'update_player_data'
+        socket.on('update_player_data', (data) => {
+            console.log(data);
+        
+            // Update the player data stored in the state
+            const updatedPlayers = this.state.players.map((player) => 
+                player.playerid === data.playerid
+                    ? {...player,
+                        image: data.image,
+                        career: data.career,
+                        cash: data.cash,
+                        salary: data.salary,
+                        languages: data.languages,
+                        houses: data.houses,
+                        color: data.color,
+                        path: data.path,
+                        location: data.location
+                    }
+                    : player
+            );
+        
+            console.log(updatedPlayers);
+        
+            // Find the changed player
+            const changedPlayer = updatedPlayers.find((player) => player.playerid === data.playerid);
+                    
+            // Update the state with the new players array
+            this.setState({
+                players: updatedPlayers,
+                universityModalOpen: false
+                // Optionally, update currentPlayer if needed
+                // currentPlayer: changedPlayer
+            });
+        
+            // Call updatePlayerPieces only when playerid matches
+            if (changedPlayer) {
+                this.updatePlayerPieces(changedPlayer);
+            }
+        });
+        
+          socket.on('reconnect', (data)=>{
+            console.log("reconnect")
+            this.setState({
+              
+                universityModalOpen: false
+                
+            });
+          });
+            
+            
+      
     }
 
+   /* componentWillUnmount() {
+        // Disconnect from the server
+        socket.disconnect();
+        console.log('Disconnected from server');
+      }
+*/
     componentDidUpdate(prevProps, prevState) {
+        console.log("update pieces time ")
         // check if the state that affects the pieces has changed
         if (prevState.currentPlayer !== this.state.currentPlayer) {
-          this.updatePlayerPieces();
-        }
+            //this.updatePlayerPieces();
+          }
     }
+
+   /* updateServerWithPlayerData = () => {
+        // Emit the 'update_player_data' event to the server with updated player data
+        socket.emit('update_player_data', {
+          playerIndex: this.state.playerIndex,
+          updatedData: this.state.currentPlayer, // Pass the updated player data
+        });
+    };*/
 
     // cycle through the players in this.state.players
     updateCurrentPlayer = () => {
-        return;
-        // if (this.state.playerIndex === this.state.players.length - 1) {
-        //     this.setState({
-        //         playerIndex: 0,
-        //     });
-        // } else {
-        //     this.setState((prevState) => ({
-        //         playerIndex: prevState.playerIndex + 1,
-        //     }));
-        // }
+        
+         if (this.state.playerIndex === this.state.players.length - 1) {
+             this.setState({
+                 turnNumber: 0,
+             });
+         } else {
+             this.setState((prevState) => ({
+                 turnNumber: prevState.turnNumber + 1,
+             }));
+         }
     }
 
 //initialize player pieces
@@ -114,11 +189,11 @@ export default class GameBoard extends Component{
     /**
      * updates the current player's piece stored in the state
      */
-    updatePlayerPieces = () => {
+    updatePlayerPieces = (data) => {
         if(this.state.playerPieces === undefined || this.state.playerPieces.length === 0){
             return;
         }
-        const player = this.state.currentPlayer;
+        const player = data;
         const playerPieces = this.state.playerPieces.map((piece) => {
             if(piece.key === player.playerid)
             return {
@@ -132,11 +207,15 @@ export default class GameBoard extends Component{
       
           this.setState({ playerPieces: playerPieces }, () => {
           });
+        
+        // Update the server with the new player data
+        //this.updateServerWithPlayerData();
     };
 
 
     handleModalClose = (slideIndex, newValue) => {
         const currentPlayer = this.state.currentPlayer;
+        console.log(currentPlayer)
         // if it's the beginning of the game (i.e. the current player isn't on a path yet)
         if (currentPlayer.path === 'mainPath' && currentPlayer.location === 0) {
             // if player chose university path
@@ -150,7 +229,7 @@ export default class GameBoard extends Component{
                     console.log('PUT request successful:', response.data);
                     this.setState({currentPlayer: response.data}, 
                         ()=>{
-                            this.updatePlayerPieces()
+                            //this.updatePlayerPieces()
                             this.props.updatePlayerInfo(this.state.playerIndex + 1)})
                   });
               } else {
@@ -300,6 +379,9 @@ export default class GameBoard extends Component{
                   this.handleRetirement();
             }
         }
+
+        // Update the server with the new player data
+        //this.updateServerWithPlayerData();
     };
 
     handleRetirement = () => {
@@ -381,6 +463,9 @@ export default class GameBoard extends Component{
         } else if (this.state.endPoints.includes(index)) {
             this.handleRetirement();
         }
+
+        // Update the server with the new player data
+        //this.updateServerWithPlayerData();
     }
 
     calculateNewPosition = (currentPath, currentPosition, increment) => {
@@ -595,7 +680,10 @@ export default class GameBoard extends Component{
           });
         this.updateCurrentPlayer();
         }
-          }
+
+        // Update the server with the new player data
+        //this.updateServerWithPlayerData();
+    }
 
     //create game board
     createBoard = () =>{
@@ -704,6 +792,13 @@ export default class GameBoard extends Component{
               transform: 'translate(-50%, -50%)',
             },
         };
+        const opponentInfo = {
+            image: 'Avatar2.png',
+            career: "Hacker",
+            cash: 200000,
+            color: "pink",
+            username: "opponent1"
+        }
         if(this.state.playerPieces === undefined || this.state.playerPieces.length === 0){
             return <div>Loading...</div>
         }
@@ -720,6 +815,21 @@ export default class GameBoard extends Component{
                         onFinished={(winner) => this.onFinished(winner)}
                         isOnlyOnce={false}
                         downDuration={500} />
+                </div>
+                {/*TODO: populate with playerinfo from backend*/ }
+                <div className="opponentsDiv">
+                    <OpponentInfo 
+                        playerInfo = {opponentInfo}
+                    />
+                    <OpponentInfo 
+                        playerInfo = {opponentInfo}
+                    />
+                    <OpponentInfo 
+                        playerInfo = {opponentInfo}
+                    />
+                    <OpponentInfo 
+                        playerInfo = {opponentInfo}
+                    />
                 </div>
             </div> 
             {/* modal for choosing initial path - open at beginning of game */}

@@ -3,6 +3,8 @@ import {Link} from 'react-router-dom';
 import Modal from 'react-modal'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
+import {socket,socketPlayerIndex} from '../Socket';
 
 function SigninPage() {
     const [hasAccount, setHasAccount] = useState(true);
@@ -22,86 +24,97 @@ function SigninPage() {
   function verifySignin() {
       const username = document.querySelector('[name="username"]').value;
       const password = document.querySelector('[name="password"]').value;
-      {/* TODO: button should check if username/password combo is in DB, then call a flask endpoint to set the current account */}
-      const validAccounts = {"user1": "password1", "user2": "password2", "user3": "password3"};
-      if (validAccounts.hasOwnProperty(username) && validAccounts[username] === password) {
-          toast.success('Login successful!', {
-            position: "top-center",
-            autoClose: 2500,
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: false,
-            progress: undefined,
-            theme: "dark",
-          });
-          setJoinGameModalOpen(true);
-      } else {
-          toast('Invalid login, please try again', {
-              position: "top-center",
-              autoClose: 2500,
-              hideProgressBar: true,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: false,
-              progress: undefined,
-              theme: "dark",
-          });
-      }
+      console.log("username is " + username + " password is " + password);
+      {/* check if username/password combo is in DB, then call a flask endpoint to set the current account */}
+      axios({
+        method: "PUT",
+        url:"http://localhost:5000/accounts/authenticate",
+        data:{
+            "Username": username,
+            "Password": password
+        } 
+      })
+      .then((response) => {
+        console.log('PUT request successful:', response.data);
+        if (Object.hasOwnProperty(response.data, 'message')) {
+            toast('Invalid login, please try again', {
+                position: "top-center",
+                autoClose: 2500,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: false,
+                progress: undefined,
+                theme: "dark",
+            });
+        } else {
+            toast.success('Login successful!', {
+                position: "top-center",
+                autoClose: 2500,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: false,
+                progress: undefined,
+                theme: "dark",
+            });
+
+            setJoinGameModalOpen(true);
+
+            // Move the socket.emit inside the .then block
+            console.log(username);
+            socket.emit('connect_with_username', { username });
+        }
+    })
+    .catch((error) => {
+        console.error('Error in PUT request:', error);
+        // Handle the error as needed
+    });
+    
   }
 
   function verifyCreateAccount() {
       const username = document.querySelector('[name="newUsername"]').value;
       const password = document.querySelector('[name="newPassword"]').value;
-      {/* TODO: button should check if username/password combo is in DB, then call a flask endpoint to set the current account */}
-      const currentAccounts = {"user1": "password1", "user2": "password2", "user3": "password3"};
-      if (username.length === 0) {
-          toast('Username must not be null', {
-              position: "top-center",
-              autoClose: 2500,
-              hideProgressBar: true,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: false,
-              progress: undefined,
-              theme: "dark",
-          });
-      } else if (password.length === 0) {
-          toast('Password must not be null', {
-              position: "top-center",
-              autoClose: 2500,
-              hideProgressBar: true,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: false,
-              progress: undefined,
-              theme: "dark",
-          });
-      } else if (currentAccounts.hasOwnProperty(username)) {
-          toast('Username already exists', {
-              position: "top-center",
-              autoClose: 2500,
-              hideProgressBar: true,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: false,
-              progress: undefined,
-              theme: "dark",
-          });
-      } else {
-          toast.success('Successfully created account!', {
-              position: "top-center",
-              autoClose: 2500,
-              hideProgressBar: true,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: false,
-              progress: undefined,
-              theme: "dark",
-          });
-          setHasAccount(true);
-      }
+
+      {/* check if username/password combo is in DB, then call a flask endpoint to set the current account */}
+      axios({
+        method: "POST",
+        url:"http://localhost:5000/accounts/create-account",
+        data:{
+            "Username": username,
+            "Password": password
+        } 
+      })
+      .then((response) => {
+        console.log('PUT request successful:', response.data);
+        if(Object.hasOwn(response.data, 'message')){
+            toast(response.data.message, {
+                position: "top-center",
+                autoClose: 2500,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: false,
+                progress: undefined,
+                theme: "dark",
+            });
+        } else {
+            toast.success('Successfully created account!', {
+                position: "top-center",
+                autoClose: 2500,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: false,
+                progress: undefined,
+                theme: "dark",
+            });
+            setHasAccount(true);
+        }
+    });
   }
+
 
   return (
     <div className="SigninPage">
@@ -126,7 +139,6 @@ function SigninPage() {
               <label>Choose a username <input name="newUsername" type='text' autoFocus={true} /></label>
               <label>Choose a password <input name="newPassword" type='password' /></label>
               <button className='landingPageButton' onClick={() => {verifyCreateAccount()}}>Create account</button>
-              {/* TODO: button should check if username is already in DB, and if password isn't empty, then add account to DB */}
               <div>
                   <p>Already have an account?</p>
                   <button className='landingPageButton' onClick={() => {setHasAccount(true)}}>Sign in</button>
@@ -144,14 +156,7 @@ function SigninPage() {
         style={customStyles}>
         <div id="joinGameModal">
             <h1>Play a game</h1>
-            <Link to="/lobby"><button type='button'>Start a new game as host</button></Link>
-            {/* TODO: Call a flask endpoint to create a new game */}
-            {/* TODO: Call a flask endpoint to create a new player with host: true */}
-            <p>Have a game code already?</p>
-            <input name="gameCode" autoFocus={true} />
             <Link to="/lobby"><button type='button'>Join</button></Link>
-            {/* TODO: Call a flask endpoint to get a game by gameID */}
-            {/* TODO: Call a flask endpoint to create a new player with host: false */}
         </div>
     </Modal>
     </div>
