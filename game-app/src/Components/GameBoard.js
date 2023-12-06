@@ -59,6 +59,8 @@ export default class GameBoard extends Component{
             endgameModalOpen: false,
             // for tracking the final winner modal
             winnerModalOpen: false,
+            winner: null,
+            winnerCash: 0,
 
             players: [],
             currentPlayer: null
@@ -78,8 +80,15 @@ export default class GameBoard extends Component{
             this.setState({players: res.all_players, currentPlayer: res.all_players[i]}, this.showPlayerPieces());
           });
         
-        socket.on('winner', (data) => {
-            console.log(data);
+        socket.on('game_over', () => {
+            axios({
+                method: "GET",
+                url:"http://localhost:5000/players/get-winner"
+            })
+              .then((response) => {
+                const winner = response.data.winner;
+                this.setState({winner: winner.playerid, winnerCash: winner.cash})
+            });
             this.setState({winnerModalOpen: true});
         })
 
@@ -880,8 +889,8 @@ export default class GameBoard extends Component{
                     style={customStyles}>
                     <div>
                         <h1>GAME OVER!</h1>
-                        <p>The winner is {}</p>
-                        <p>with ${}</p>
+                        <p>The winner is {this.state.winner}</p>
+                        <p>with ${this.state.winnerCash}</p>
                     </div>
                 </Modal>
             </div>
