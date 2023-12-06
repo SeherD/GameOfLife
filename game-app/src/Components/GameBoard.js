@@ -50,6 +50,8 @@ export default class GameBoard extends Component{
             // for tracking the final modal
             finalCash: 0,
             endgameModalOpen: false,
+            // for tracking the final winner modal
+            winnerModalOpen: false,
 
             players: [],
             currentPlayer: null
@@ -64,9 +66,14 @@ export default class GameBoard extends Component{
           .then((response) => {
             const res =response.data;
             const i = this.state.playerIndex;
+            console.log(res.all_players[i])
             this.setState({players: res.all_players, currentPlayer: res.all_players[i]}, this.showPlayerPieces());
-
-          })
+          });
+        
+        socket.on('winner', (data) => {
+            console.log(data);
+            this.setState({winnerModalOpen: true});
+        })
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -750,6 +757,22 @@ export default class GameBoard extends Component{
                     style={customStyles}>
                     <h1>YOU RETIRED!</h1>
                     <p>You have ${this.state.finalCash}</p>
+                </Modal>
+            </div>
+            {/* modal for displaying winner of game */}
+            <div>
+                <Modal
+                    ariaHideApp={false}
+                    isOpen = {this.state.winnerModalOpen}
+                    onRequestClose={() => this.setState({winnerModalOpen: false})}
+                    shouldCloseOnEsc={false}
+                    shouldCloseOnOverlayClick={false}
+                    style={customStyles}>
+                    <div>
+                        <h1>GAME OVER!</h1>
+                        <p>The winner is {}</p>
+                        <p>with ${}</p>
+                    </div>
                 </Modal>
             </div>
         </div>
