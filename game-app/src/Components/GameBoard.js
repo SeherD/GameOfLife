@@ -55,9 +55,42 @@ export default class GameBoard extends Component{
             // for tracking the initial path choice modalcurrentPlayer
             universityModalOpen: true,
             players: [],
-            currentPlayer: null
-        }
+            currentPlayer: null,
 
+            opponentInfo1 : {
+                player_id: "P2",
+                image: 'Avatar2.png',
+                career: "Hacker",
+                cash: 200000,
+                color: "pink",
+                username: "Rachel"
+            },
+            opponentInfo2 : {
+                player_id: "P3",
+                image: 'Avatar3.png',
+                career: "Hacker",
+                cash: 200000,
+                color: "pink",
+                username: "Allison"
+            },
+            opponentInfo3 : {
+                player_id: "P4",
+                image: 'Avatar4.png',
+                career: "Hacker",
+                cash: 200000,
+                color: "pink",
+                username: "Taylor"
+            },
+            opponentInfo4 : {
+                player_id: "P5",
+                image: 'Avatar5.png',
+                career: "Hacker",
+                cash: 200000,
+                color: "pink",
+                username: "Andrew"
+            }
+        }
+        
 
     componentDidMount() {
         
@@ -99,14 +132,26 @@ export default class GameBoard extends Component{
         
             // Find the changed player
             const changedPlayer = updatedPlayers.find((player) => player.playerid === data.playerid);
-                    
-            // Update the state with the new players array
-            this.setState({
-                players: updatedPlayers,
-                universityModalOpen: false
-                // Optionally, update currentPlayer if needed
-                // currentPlayer: changedPlayer
-            });
+
+            const opponentInfos = updatedPlayers
+            .filter((player) => player.playerid !== data.playerid)
+            .map((opponent) => ({
+              image: opponent.image,
+              career: opponent.career,
+              cash: opponent.cash,
+              color: opponent.color,
+              //username: opponent.username,
+            }));
+      
+          this.setState({
+            players: updatedPlayers,
+            // Optionally, update currentPlayer if needed
+            // currentPlayer: changedPlayer,
+            opponentInfo1: opponentInfos[0],
+            opponentInfo2: opponentInfos[1],
+            opponentInfo3: opponentInfos[2],
+            opponentInfo4: opponentInfos[3],
+          });
         
             // Call updatePlayerPieces only when playerid matches
             if (changedPlayer) {
@@ -123,7 +168,7 @@ export default class GameBoard extends Component{
             });
           });
             
-            
+         
       
     }
 
@@ -728,13 +773,7 @@ export default class GameBoard extends Component{
               transform: 'translate(-50%, -50%)',
             },
         };
-        const opponentInfo = {
-            image: 'Avatar2.png',
-            career: "Hacker",
-            cash: 200000,
-            color: "pink",
-            username: "opponent1"
-        }
+        
         if(this.state.playerPieces === undefined || this.state.playerPieces.length === 0){
             return <div>Loading...</div>
         }
@@ -755,16 +794,16 @@ export default class GameBoard extends Component{
                 {/*TODO: populate with playerinfo from backend*/ }
                 <div className="opponentsDiv">
                     <OpponentInfo 
-                        playerInfo = {opponentInfo}
+                        playerInfo = {this.state.opponentInfo1}
                     />
                     <OpponentInfo 
-                        playerInfo = {opponentInfo}
+                        playerInfo = {this.state.opponentInfo2}
                     />
                     <OpponentInfo 
-                        playerInfo = {opponentInfo}
+                        playerInfo = {this.state.opponentInfo3}
                     />
                     <OpponentInfo 
-                        playerInfo = {opponentInfo}
+                        playerInfo = {this.state.opponentInfo4}
                     />
                 </div>
             </div> 

@@ -10,18 +10,23 @@ export default class OpponentInfo extends Component {
     }
 
 
-render(){
-        return(
-            <div className = "opponentInfo" style={{backgroundColor: this.props.playerInfo.color}}>
-            <img className="opponentAvatar" src={this.state.image} alt="opponent avatar"></img>
+    render() {
+        const { playerInfo } = this.props;
+      
+        if (!playerInfo) {
+          // If playerInfo is undefined, you can return a default or loading state
+          return <div>Loading...</div>;
+        }
+      
+        return (
+          <div className="opponentInfo" style={{ backgroundColor: playerInfo.color }}>
+            <img className="opponentAvatar" src={this.state.image} alt="opponent avatar" />
             <div>
-            <p>Username: {this.props.playerInfo.username}</p>
-            <p>Career: {this.props.playerInfo.career}</p>
-            <p>Cash: ${this.props.playerInfo.cash}</p>
+              <p>Username: {playerInfo.username}</p>
+              <p>Career: {playerInfo.career}</p>
+              <p>Cash: ${playerInfo.cash}</p>
             </div>
-            
-            </div>
-        )
+          </div>
+        );
+      }
     }
-
-}

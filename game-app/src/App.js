@@ -10,6 +10,7 @@ function App() {
   return (
     <div className="App">
     <header className="App-header">
+    <PlayerProvider>
     <BrowserRouter>
     <Routes>
       <Route path="/" element = {<SigninPage/>}/>
@@ -17,6 +18,7 @@ function App() {
       <Route path="game" element ={<GamePage/>}/>
     </Routes>
     </BrowserRouter>
+    </PlayerProvider>
     </header>
     </div>
   );

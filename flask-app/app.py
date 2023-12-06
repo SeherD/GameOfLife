@@ -28,7 +28,7 @@ connection_tuples=[]
 
 
 
-PlayerColor = ["Red","Blue", "Green", "Yellow", "Pink"]
+PlayerColor = ["#FF9800","#03A9F4", "#9C27B0", "#E91E63", "#4169E1"]
 # Rest of your code...
 
 def is_player_disconnected(username):
