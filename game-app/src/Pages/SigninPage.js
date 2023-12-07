@@ -46,6 +46,7 @@ function SigninPage() {
                 draggable: false,
                 progress: undefined,
                 theme: "dark",
+                bodyClassName: "popup"
             });
         } else {
             toast.success('Login successful!', {
@@ -57,6 +58,7 @@ function SigninPage() {
                 draggable: false,
                 progress: undefined,
                 theme: "dark",
+                bodyClassName: "popup"
             });
 
             setJoinGameModalOpen(true);
@@ -108,6 +110,7 @@ function SigninPage() {
                 draggable: false,
                 progress: undefined,
                 theme: "dark",
+                bodyClassName: "popup"
             });
         } else {
             toast.success('Successfully created account!', {
@@ -119,6 +122,7 @@ function SigninPage() {
                 draggable: false,
                 progress: undefined,
                 theme: "dark",
+                bodyClassName: "popup"
             });
             setHasAccount(true);
         }

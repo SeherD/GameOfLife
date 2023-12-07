@@ -60,7 +60,7 @@ export default class GameBoard extends Component {
         opponentInfo1: {
             player_id: "P2",
             image: 'Avatar2.png',
-            career: "Hacker",
+            career: "",
             cash: 200000,
             color: "pink",
             username: "Rachel"
@@ -68,7 +68,7 @@ export default class GameBoard extends Component {
         opponentInfo2: {
             player_id: "P3",
             image: 'Avatar3.png',
-            career: "Hacker",
+            career: "",
             cash: 200000,
             color: "pink",
             username: "Allison"
@@ -76,7 +76,7 @@ export default class GameBoard extends Component {
         opponentInfo3: {
             player_id: "P4",
             image: 'Avatar4.png',
-            career: "Hacker",
+            career: "",
             cash: 200000,
             color: "pink",
             username: "Taylor"
@@ -84,7 +84,7 @@ export default class GameBoard extends Component {
         opponentInfo4: {
             player_id: "P5",
             image: 'Avatar5.png',
-            career: "Hacker",
+            career: "",
             cash: 200000,
             color: "pink",
             username: "Andrew"
@@ -611,6 +611,7 @@ export default class GameBoard extends Component {
                         draggable: false,
                         progress: undefined,
                         theme: "dark",
+                        bodyClassName: "popup"
                     });
                 } else {
                     toast('The price of your house went down!', {
@@ -622,6 +623,7 @@ export default class GameBoard extends Component {
                         draggable: false,
                         progress: undefined,
                         theme: "dark",
+                        bodyClassName: "popup"
                     });
                 }
                 //call flask endpoint to sell the house
@@ -652,6 +654,7 @@ export default class GameBoard extends Component {
                         draggable: false,
                         progress: undefined,
                         theme: "dark",
+                        bodyClassName: "popup"
                     });
                     axios({
                         method: "PUT",
@@ -676,6 +679,7 @@ export default class GameBoard extends Component {
                         draggable: false,
                         progress: undefined,
                         theme: "dark",
+                        bodyClassName: "popup"
                     });
                 }
                 this.setState({ certSpin: false, cert: "" });
