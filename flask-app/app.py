@@ -169,4 +169,4 @@ def handle_disconnect():
 if __name__ == '__main__':
     #init_db()
     initialize_game_data()
-    socketio.run(app, port=5000)
+    socketio.run(app, host='0.0.0.0', port=5000, use_reloader=True, allow_unsafe_werkzeug=True)
