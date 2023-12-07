@@ -64,6 +64,16 @@ function SigninPage() {
             // Move the socket.emit inside the .then block
             console.log(username);
             socket.emit('connect_with_username', { username });
+            socket.on('update_player_data', (data) => {
+                console.log(data);
+            
+                             }
+            );
+            
+              socket.on('reconnect', (data)=>{
+                console.log("reconnect")
+                
+              });
         }
     })
     .catch((error) => {
