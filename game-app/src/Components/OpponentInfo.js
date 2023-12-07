@@ -10,7 +10,7 @@ export default class OpponentInfo extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (prevProps!= this.props){
+        if (prevProps !== this.props){
             console.log(this.props.playerInfo.image);
         this.setState({image:AvatarImage.GetImage(this.props.playerInfo.image)});}
     }
