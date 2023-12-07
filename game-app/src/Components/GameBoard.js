@@ -105,7 +105,7 @@ export default class GameBoard extends Component{
             });
             this.setState({winnerModalOpen: true});
         })
-        
+
         socket.on('update_turn_number', (data) => {
             this.setState({turnNumber: data.turnNumber});
             const spinnerElement = document.getElementById('canvas');
@@ -708,6 +708,19 @@ export default class GameBoard extends Component{
             socket.emit('update_turn_number', {
                 turnNumber: this.state.turnNumber,
             });
+
+        // Check if game is over (all players have retired)
+        axios({
+            method: "GET",
+            url:"http://localhost:5000/players/is-game-over",
+        })
+        .then((response) => {
+            const gameOver = response.data.message;
+            if (gameOver === "true") {
+                socket.emit('game_over');
+            }
+        });
+        
         }
 
         // Update the server with the new player data

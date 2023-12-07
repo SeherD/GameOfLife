@@ -140,6 +140,9 @@ def update_turn_number(data):
     else:
         new_turn_number = turn_number + 1
     socketio.emit('update_turn_number', {'turnNumber': new_turn_number})
+@socketio.on('game_over')
+def handle_endgame():
+    socketio.emit('game_over')
     
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -170,6 +173,6 @@ def handle_disconnect():
 
 
 if __name__ == '__main__':
-    #init_db()
+    init_db()
     initialize_game_data()
     socketio.run(app, port=5000)
