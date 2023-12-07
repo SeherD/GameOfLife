@@ -68,6 +68,20 @@ export default class GameBoard extends Component{
 
 
     componentDidMount() {
+
+        if (this.state.turnNumber === this.state.playerIndex) {
+            toast('Spin to move!', {
+                position: "top-center",
+                autoClose: 1000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: false,
+                progress: undefined,
+                theme: "dark",
+                bodyClassName: "popup"
+            });
+        }
         
         axios({
             method: "GET",
@@ -91,6 +105,27 @@ export default class GameBoard extends Component{
             });
             this.setState({winnerModalOpen: true});
         })
+        
+        socket.on('update_turn_number', (data) => {
+            this.setState({turnNumber: data.turnNumber});
+            const spinnerElement = document.getElementById('canvas');
+            if (data.turnNumber === this.state.playerIndex) {
+                spinnerElement.style.pointerEvents = 'auto';
+                toast('Spin to move!', {
+                    position: "top-center",
+                    autoClose: 1000,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: false,
+                    progress: undefined,
+                    theme: "dark",
+                    bodyClassName: "popup"
+                });
+            } else {
+                spinnerElement.style.pointerEvents = 'none';
+            }
+        });
 
         // Add the socket.io event listener for 'update_player_data'
         socket.on('update_player_data', (data) => {
@@ -139,10 +174,7 @@ export default class GameBoard extends Component{
                 universityModalOpen: false
                 
             });
-          });
-            
-            
-      
+        });      
     }
 
    /* componentWillUnmount() {
@@ -166,20 +198,6 @@ export default class GameBoard extends Component{
           updatedData: this.state.currentPlayer, // Pass the updated player data
         });
     };*/
-
-    // cycle through the players in this.state.players
-    updateCurrentPlayer = () => {
-        
-         if (this.state.playerIndex === this.state.players.length - 1) {
-             this.setState({
-                 turnNumber: 0,
-             });
-         } else {
-             this.setState((prevState) => ({
-                 turnNumber: prevState.turnNumber + 1,
-             }));
-         }
-    }
 
 //initialize player pieces
     showPlayerPieces = () => {
@@ -687,7 +705,9 @@ export default class GameBoard extends Component{
                 this.props.updatePlayerInfo(this.state.playerIndex + 1));
                 this.handleTile(newPath, newPosition);
           });
-        this.updateCurrentPlayer();
+            socket.emit('update_turn_number', {
+                turnNumber: this.state.turnNumber,
+            });
         }
 
         // Update the server with the new player data
