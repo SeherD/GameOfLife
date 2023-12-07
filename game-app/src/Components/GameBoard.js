@@ -42,12 +42,12 @@ export default class GameBoard extends Component {
         },
         //properties for the spinner
         segments: ['1', '2', '3', '4', '5', '6'],
-        segColors: ['#fcf910',
-            '#e93131',
-            '#b3da42',
-            '#28c3f3',
-            '#fa1da9',
-            '#ba38b4'
+        segColors: ['#FFEB3B',
+            "#FF5252",
+            '#228B22',
+            '#2196F3',
+            '#FF4081',
+            '#9370DB'
         ],
         playerIndex: parseInt(socketPlayerIndex),
         turnNumber: 0,
@@ -67,7 +67,7 @@ export default class GameBoard extends Component {
         opponentInfo1: {
             player_id: "P2",
             image: 'Avatar2.png',
-            career: "Hacker",
+            career: "",
             cash: 200000,
             color: "pink",
             username: "Rachel"
@@ -75,7 +75,7 @@ export default class GameBoard extends Component {
         opponentInfo2: {
             player_id: "P3",
             image: 'Avatar3.png',
-            career: "Hacker",
+            career: "",
             cash: 200000,
             color: "pink",
             username: "Allison"
@@ -83,7 +83,7 @@ export default class GameBoard extends Component {
         opponentInfo3: {
             player_id: "P4",
             image: 'Avatar4.png',
-            career: "Hacker",
+            career: "",
             cash: 200000,
             color: "pink",
             username: "Taylor"
@@ -91,7 +91,7 @@ export default class GameBoard extends Component {
         opponentInfo4: {
             player_id: "P5",
             image: 'Avatar5.png',
-            career: "Hacker",
+            career: "",
             cash: 200000,
             color: "pink",
             username: "Andrew"
@@ -707,6 +707,7 @@ export default class GameBoard extends Component {
                         draggable: false,
                         progress: undefined,
                         theme: "dark",
+                        bodyClassName: "popup"
                     });
                 } else {
                     toast('The price of your house went down!', {
@@ -718,6 +719,7 @@ export default class GameBoard extends Component {
                         draggable: false,
                         progress: undefined,
                         theme: "dark",
+                        bodyClassName: "popup"
                     });
                 }
                 //call flask endpoint to sell the house
@@ -748,6 +750,7 @@ export default class GameBoard extends Component {
                         draggable: false,
                         progress: undefined,
                         theme: "dark",
+                        bodyClassName: "popup"
                     });
                     axios({
                         method: "PUT",
@@ -772,6 +775,7 @@ export default class GameBoard extends Component {
                         draggable: false,
                         progress: undefined,
                         theme: "dark",
+                        bodyClassName: "popup"
                     });
                 }
                 this.setState({ certSpin: false, cert: "" });
@@ -834,21 +838,21 @@ export default class GameBoard extends Component {
                                     playerIndex={this.state.playerIndex}
                                     onModalClose={this.handleModalClose}
                                     key={num}
-                                    color={"purple"}
+                                    color={"#9370DB"}
                                     word={"Career"}
                                     ref={(ref) => (this.tiles[(rowIndex * 15) + colIndex] = ref)} />
                             } else if (this.state.emptyPoints.includes(num)) {
                                 return <Tile
                                     onModalClose={this.handleModalClose}
                                     key={num}
-                                    color={"yellow"}
+                                    color={"#FFEB3B"}
                                     word={""}
                                     ref={(ref) => (this.tiles[(rowIndex * 15) + colIndex] = ref)} />
                             } else if (this.state.paydayPoints.includes(num)) {
                                 return <Tile
                                     onModalClose={this.handleModalClose}
                                     key={num}
-                                    color={"darkgreen"}
+                                    color={"#228B22"}
                                     word={"PayDay"}
                                     ref={(ref) => (this.tiles[(rowIndex * 15) + colIndex] = ref)} />
                             } else if (this.state.stopPoints.includes(num)) {
@@ -856,7 +860,7 @@ export default class GameBoard extends Component {
                                     playerIndex={this.state.playerIndex}
                                     onModalClose={this.handleModalClose}
                                     key={num}
-                                    color={"red"}
+                                    color={"#FF5252"}
                                     word={"STOP"}
                                     stopID={num}
                                     ref={(ref) => (this.tiles[(rowIndex * 15) + colIndex] = ref)} />
@@ -864,14 +868,14 @@ export default class GameBoard extends Component {
                                 return <Tile
                                     onModalClose={this.handleModalClose}
                                     key={num}
-                                    color={"orange"}
+                                    color={"#FF5722"}
                                     word={"Start"}
                                     ref={(ref) => (this.tiles[(rowIndex * 15) + colIndex] = ref)} />
                             } else if (this.state.endPoints.includes(num)) {
                                 return <Tile
                                     onModalClose={this.handleModalClose}
                                     key={num}
-                                    color={"orange"}
+                                    color={"#FF5722"}
                                     word={"Retirement!"}
                                     ref={(ref) => (this.tiles[(rowIndex * 15) + colIndex] = ref)} />
                             } else if (this.state.housePoints.includes(num)) {
@@ -880,7 +884,7 @@ export default class GameBoard extends Component {
                                     onModalClose={this.handleModalClose}
                                     handleRespin={this.handleSale}
                                     key={num}
-                                    color={"blue"}
+                                    color={"#2196F3"}
                                     word={"House"}
                                     ref={(ref) => (this.tiles[(rowIndex * 15) + colIndex] = ref)} />
                             } else if (this.state.skillPoints.includes(num)) {
@@ -889,13 +893,13 @@ export default class GameBoard extends Component {
                                     onModalClose={this.handleModalClose}
                                     handleRespin={this.handleRisk}
                                     key={num}
-                                    color={"#fb3199"}
+                                    color={"#FF4081"}
                                     word={"Skills"}
                                     ref={(ref) => (this.tiles[(rowIndex * 15) + colIndex] = ref)} />
                             } else {
                                 return <Tile
                                     key={num}
-                                    color={"green"}
+                                    color={"#4CAF50"}
                                     word={""} />
                             }
                         })}
