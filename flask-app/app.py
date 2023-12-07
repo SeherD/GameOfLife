@@ -139,7 +139,17 @@ def load_player_data_by_username(username):
     else:
         return None
 
-
+@socketio.on('update_turn_number')
+def update_turn_number(data):
+    turn_number = data.get('turnNumber')
+    if (turn_number == len(connected_players) - 1):
+        new_turn_number = 0
+    else:
+        new_turn_number = turn_number + 1
+    socketio.emit('update_turn_number', {'turnNumber': new_turn_number})
+@socketio.on('game_over')
+def handle_endgame():
+    socketio.emit('game_over')
     
 @socketio.on('disconnect')
 def handle_disconnect():

@@ -568,6 +568,19 @@ class GetWinner(Resource):
         else:
             return {"winner": format_player_response(winning_player)}
 
+class IsGameOver(Resource):
+    def get(self):
+        db = get_db()
+        cur = db.execute("SELECT PlayerID, Location, Path FROM Players")
+        all_players = cur.fetchall()
+        
+        #Determine whether or not the game is over based on the location and path they are on
+        for player in all_players:
+            if player[1] != 64 or player[2] is not "mainPath":
+                return {"message": "false"}
+
+        return {"message": "true"}
+
 
 api.add_resource(UsernamesResource, '/players/usernames')
 # Add the new resource to the API
@@ -582,6 +595,7 @@ api.add_resource(ChooseUniversity, "/players/university/<string:player_id>")
 api.add_resource(GetSkillPayments, "/players/skill-payments/<string:player_id>")
 api.add_resource(AddCertResource, "/players/add-certificate/<string:player_id>")
 api.add_resource(GetWinner, "/players/get-winner")
+api.add_resource(IsGameOver, "/players/is-game-over")
 
 # Add the new resource to the API
 api.add_resource(IncreaseSalaryResource, "/players/increase-salary/<string:player_id>")

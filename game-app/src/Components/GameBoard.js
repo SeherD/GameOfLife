@@ -54,6 +54,13 @@ export default class GameBoard extends Component {
         playerPieces: [],
         // for tracking the initial path choice modalcurrentPlayer
         universityModalOpen: true,
+        // for tracking the final modal
+        finalCash: 0,
+        endgameModalOpen: false,
+        // for tracking the final winner modal
+        winnerModalOpen: false,
+        winner: null,
+        winnerCash: 0,
         players: [],
         currentPlayer: null,
 
@@ -94,18 +101,69 @@ export default class GameBoard extends Component {
 
     componentDidMount() {
 
+        if (this.state.turnNumber === this.state.playerIndex) {
+            toast('Spin to move!', {
+                position: "top-center",
+                autoClose: 1000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: false,
+                progress: undefined,
+                theme: "dark",
+                bodyClassName: "popup"
+            });
+        }
+        
         axios({
             method: "GET",
-            url: "http://localhost:5000/players"
-        })
-            .then((response) => {
-                const res = response.data;
-                const i = this.state.playerIndex;
-                console.log(res.all_players[i])
-                this.setState({ players: res.all_players, currentPlayer: res.all_players[i] }, this.showPlayerPieces(),);
+            url:"http://localhost:5000/players"
+          })
+          .then((response) => {
+            const res =response.data;
+            const i = this.state.playerIndex;
+            console.log(res.all_players[i])
+            this.setState({players: res.all_players, currentPlayer: res.all_players[i]}, this.showPlayerPieces());
+          });
+        
+        socket.on('game_over', () => {
+            axios({
+                method: "GET",
+                url:"http://localhost:5000/players/get-winner"
+            })
+              .then((response) => {
+                const winner = response.data.winner;
+                this.setState({winner: winner.playerid, winnerCash: winner.cash})
             });
+            this.setState({winnerModalOpen: true});
+        })
 
-
+        socket.on('update_turn_number', (data) => {
+            this.setState({turnNumber: data.turnNumber});
+            const spinnerElement = document.getElementById('canvas');
+            if (data.turnNumber === this.state.playerIndex) {
+                if (this.state.players[this.state.playerIndex].path === 'mainPath' && this.state.players[this.state.playerIndex].location === 64) {
+                    socket.emit('update_turn_number', {
+                        turnNumber: data.turnNumber,
+                    });
+                } else {
+                    spinnerElement.style.pointerEvents = 'auto';
+                    toast('Spin to move!', {
+                        position: "top-center",
+                        autoClose: 1000,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: false,
+                        progress: undefined,
+                        theme: "dark",
+                        bodyClassName: "popup"
+                    });
+                }
+            } else {
+                spinnerElement.style.pointerEvents = 'none';
+            }
+        });
 
         // Add the socket.io event listener for 'update_player_data'
         socket.on('update_player_data', (data) => {
@@ -201,10 +259,7 @@ export default class GameBoard extends Component {
                 universityModalOpen: false
 
             });
-        });
-
-
-
+        });      
     }
 
     /* componentWillUnmount() {
@@ -229,21 +284,7 @@ export default class GameBoard extends Component {
          });
      };*/
 
-    // cycle through the players in this.state.players
-    updateCurrentPlayer = () => {
-
-        if (this.state.playerIndex === this.state.players.length - 1) {
-            this.setState({
-                turnNumber: 0,
-            });
-        } else {
-            this.setState((prevState) => ({
-                turnNumber: prevState.turnNumber + 1,
-            }));
-        }
-    }
-
-    //initialize player pieces
+//initialize player pieces
     showPlayerPieces = () => {
         if (this.state.players === undefined)
             return
@@ -444,13 +485,13 @@ export default class GameBoard extends Component {
                     data: {
                         "location": newPosition,
                         "path": newPath
-                    }
-                })
-                    .then((response) => {
-                        console.log('PUT request successful:', response.data);
-                        this.setState({ currentPlayer: response.data })
-                    });
-
+                    } 
+                  })
+                  .then((response) => {
+                    console.log('PUT request successful:', response.data);
+                    this.setState({currentPlayer: response.data})
+                  });
+                  this.handleRetirement();
             }
         }
 
@@ -458,31 +499,84 @@ export default class GameBoard extends Component {
         //this.updateServerWithPlayerData();
     };
 
+    handleRetirement = () => {
+        // get a list of the player's houses
+        axios({
+            method: "GET",
+            url:"http://localhost:5000/players/houses/P" + (this.state.playerIndex + 1),
+          })
+          .then(async (response) => {
+            const houses = response.data.houses;
+            for (let i = 0; i < houses.length; i++) {
+                const house = houses[i];
+    
+                toast(`Selling ${house.Name}`, {
+                    position: "top-center",
+                    autoClose: 2500,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: false,
+                    progress: undefined,
+                    theme: "dark",
+                    bodyClassName: "popup"
+                });
+        
+                //call flask endpoint to sell the house
+                await axios({
+                    method: "PUT",
+                    url:"http://localhost:5000/players/sell-house/P" + (this.state.playerIndex + 1) + "/" + house.HouseID,
+                    data:{
+                        "hasIncreased": true
+                    }
+                })
+                .then((response) => {
+                    console.log('PUT request successful:', response.data);
+                    this.setState({currentPlayer: response.data}, 
+                    this.props.updatePlayerInfo(this.state.playerIndex + 1))
+                });
+            }
+        })
+
+        // call a flask endpoint to calculate the player's total cash including skill bonuses
+        setTimeout(() => {
+            let skillPaymentsResponse
+            axios({
+                method: "GET",
+                url: "/players/skill-payments/P" + (this.state.playerIndex + 1),
+            })
+            .then((response) => {
+                skillPaymentsResponse = response.data;
+                const totalCash = skillPaymentsResponse.cash;
+                this.setState({ finalCash: totalCash });
+                // display the player's final cash
+                this.setState({ endgameModalOpen: true });
+            })
+          }, 2000);
+    };
+
     handleTile = (onPath, atPosition) => {
         const index = this.state.path[onPath][atPosition];
         const tile = this.tiles[index];
-        const newValue = tile.handleClick();
-        // if handleClick returned a value
-        if (newValue) {
-            // if that value is a string, it is a new skill
-            if (newValue instanceof String) {
-                // if the returned value is a number, it is 2 * the player's salary
-            } else {
-                // call a flask endpoint to add newValue to the player's cash
-                axios({
-                    method: "PUT",
-                    url: "http://localhost:5000/players/payday/P" + (this.state.playerIndex + 1),
-                    data: {
-                        "double_earning": true
+        tile.handleClick();
+        // if the tile is a payday point
+        if (this.state.paydayPoints.includes(index)) {
+            // call a flask endpoint to add double to the player's cash
+            axios({
+                method: "PUT",
+                url:"http://localhost:5000/players/payday/P" + (this.state.playerIndex + 1),
+                data: {
+                    "double_earning": true
                     }
                 })
-                    .then((response) => {
-                        console.log('PUT request successful:', response.data);
-                        this.setState({ currentPlayer: response.data })
-                        this.props.updatePlayerInfo(this.state.playerIndex + 1)
-
-                    })
-            }
+                .then((response) => {
+                console.log('PUT request successful:', response.data);
+                this.setState({currentPlayer: response.data})
+                this.props.updatePlayerInfo(this.state.playerIndex + 1)
+            })
+        // if the tile is the retirement tile
+        } else if (this.state.endPoints.includes(index)) {
+            this.handleRetirement();
         }
 
         // Update the server with the new player data
@@ -540,8 +634,10 @@ export default class GameBoard extends Component {
                     })
             }
             // end on retirement tile
-            if (this.state.endPoints.includes(tile)) newPosition = path["mainPath"].indexOf(tile);
-        };
+            if (this.state.endPoints.includes(tile)) {
+                newPosition = path["mainPath"].indexOf(tile);
+            }
+        };     
 
         return [newPath, newPosition];
     }
@@ -685,25 +781,40 @@ export default class GameBoard extends Component {
                 this.setState({ certSpin: false, cert: "" });
             }
         } else {
-            const newPathAndPosition = this.calculateNewPosition(currentPath, currentPosition, winner);
-            const newPath = newPathAndPosition[0];
-            const newPosition = newPathAndPosition[1];
+        const newPathAndPosition = this.calculateNewPosition(currentPath, currentPosition, winner);
+        const newPath = newPathAndPosition[0];
+        const newPosition = newPathAndPosition[1];
+        
+        axios({
+            method: "PUT",
+            url:"http://localhost:5000/players/location/P" + (this.state.playerIndex + 1),
+            data:{
+                "location": newPosition,
+                "path": newPath
+            } 
+          })
+          .then((response) => {
+            console.log('PUT request successful:', response.data);
+            this.setState({currentPlayer: response.data}, 
+                this.props.updatePlayerInfo(this.state.playerIndex + 1));
+                this.handleTile(newPath, newPosition);
+          });
+            socket.emit('update_turn_number', {
+                turnNumber: this.state.turnNumber,
+            });
 
-            axios({
-                method: "PUT",
-                url: "http://localhost:5000/players/location/P" + (this.state.playerIndex + 1),
-                data: {
-                    "location": newPosition,
-                    "path": newPath
-                }
-            })
-                .then((response) => {
-                    console.log('PUT request successful:', response.data);
-                    this.setState({ currentPlayer: response.data },
-                        this.props.updatePlayerInfo(this.state.playerIndex + 1));
-                    this.handleTile(newPath, newPosition);
-                });
-            this.updateCurrentPlayer();
+        // Check if game is over (all players have retired)
+        axios({
+            method: "GET",
+            url:"http://localhost:5000/players/is-game-over",
+        })
+        .then((response) => {
+            const gameOver = response.data.message;
+            if (gameOver === "true") {
+                socket.emit('game_over');
+            }
+        });
+        
         }
 
         // Update the server with the new player data
@@ -875,7 +986,35 @@ export default class GameBoard extends Component {
                         <ModalContent playerIndex={this.state.playerIndex} type={"Career"} handleClose={() => this.setState({ initialCareerModalOpen: false })} onModalClose={this.handleInitialCareerModalClose} />
                     </Modal>
                 </div>
+            {/* modal for displaying player's final score at endgame */}
+            <div>
+                <Modal
+                    ariaHideApp={false}
+                    isOpen = {this.state.endgameModalOpen}
+                    onRequestClose={() => this.setState({endgameModalOpen: true})}
+                    shouldCloseOnEsc={false}
+                    shouldCloseOnOverlayClick={false}
+                    style={customStyles}>
+                    <h1>YOU RETIRED!</h1>
+                    <p>You have ${this.state.finalCash}</p>
+                </Modal>
             </div>
-        );
-    }
+            {/* modal for displaying winner of game */}
+            <div>
+                <Modal
+                    ariaHideApp={false}
+                    isOpen = {this.state.winnerModalOpen}
+                    onRequestClose={() => this.setState({winnerModalOpen: false})}
+                    shouldCloseOnEsc={false}
+                    shouldCloseOnOverlayClick={false}
+                    style={customStyles}>
+                    <div>
+                        <h1>GAME OVER!</h1>
+                        <p>The winner is {this.state.winner}</p>
+                        <p>with ${this.state.winnerCash}</p>
+                    </div>
+                </Modal>
+            </div>
+        </div>
+    );}
 }
