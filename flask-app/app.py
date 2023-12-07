@@ -11,7 +11,10 @@ from sale_house_endpoints import *
 from certification_endpoints import *
 from account_endpoints import *
 
-
+@socketio.on('hostInLobby')
+def handle_host_in_lobby():
+    # Emit the number of connected players to the host
+    socketio.emit('updatePlayers', len(connected_players))
 
 def load_all_player_data():
     db = get_db()
@@ -25,10 +28,14 @@ disconnected_players = []
 
 connection_tuples=[]
 
+@socketio.on('startGame')
+def start_game():
+    print("Switch")
+    socketio.emit('switch_game', {})
 
 
 
-PlayerColor = ["Red","Blue", "Green", "Yellow", "Pink"]
+PlayerColor = ["#FF9800","#03A9F4", "#9C27B0", "#E91E63", "#4169E1"]
 # Rest of your code...
 
 def is_player_disconnected(username):
@@ -65,7 +72,7 @@ def handle_connect_with_username(auth):
             connected_players.append(username)
             join_room(player_id)
             print(f"Player {username} connected. Total connected players: {len(connected_players)}")
-
+            socketio.emit('updatePlayers', len(connected_players))
             # Load all player data from the database
             all_player_data = load_all_player_data()
 
@@ -172,4 +179,4 @@ def handle_disconnect():
 if __name__ == '__main__':
     #init_db()
     initialize_game_data()
-    socketio.run(app, port=5000)
+    socketio.run(app, host='0.0.0.0', port=5000, use_reloader=True, allow_unsafe_werkzeug=True)

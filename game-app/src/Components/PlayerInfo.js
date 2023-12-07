@@ -1,12 +1,19 @@
 import React, {Component} from 'react'
 import { AvatarImage } from './services/AvatarImage';
 
+
 export default class PlayerInfo extends Component {
     state = {
         image: 'Avatar1.png'
     };
     componentDidMount() {
         this.setState({image:AvatarImage.GetImage(this.props.playerInfo.image)});
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps !== this.props){
+            console.log(this.props.playerInfo.image);
+        this.setState({image:AvatarImage.GetImage(this.props.playerInfo.image)});}
     }
 
 

@@ -1,0 +1,23 @@
+version: "3"
+services:
+  flask-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.flask
+    ports:
+      - "5000:5000"
+    networks:
+      - app-network
+
+  react-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.react
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
