@@ -526,7 +526,26 @@ class GetSkillPayments(Resource):
 
         return format_player_response(updated)
 
+class UsernamesResource(Resource):
+    def get(self):
+        try:
+            db = get_db()
 
+        # Fetch the player's data
+            cur_player = db.execute(
+            "SELECT PlayerID, Username FROM UserPlayer"        )
+            user_names = cur_player.fetchall()
+            
+          
+
+            usernames = [{'playerid': row[0], 'username': row[1]} for row in user_names]
+
+            return jsonify(usernames)
+
+        except Exception as e:
+            return jsonify({'error': str(e)})
+
+api.add_resource(UsernamesResource, '/players/usernames')
 # Add the new resource to the API
 api.add_resource(PlayerHousesResource, "/players/houses/<string:player_id>")
 

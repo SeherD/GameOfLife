@@ -10,10 +10,11 @@ export default class OpponentInfo extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (prevProps !== this.props){
-            console.log(this.props.playerInfo.image);
-        this.setState({image:AvatarImage.GetImage(this.props.playerInfo.image)});}
-    }
+      if (this.props.playerInfo && prevProps.playerInfo !== this.props.playerInfo) {
+          console.log(this.props.playerInfo.image);
+          this.setState({ image: AvatarImage.GetImage(this.props.playerInfo.image) });
+      }
+  }
 
 
     render() {
@@ -21,7 +22,7 @@ export default class OpponentInfo extends Component {
       
         if (!playerInfo) {
           // If playerInfo is undefined, you can return a default or loading state
-          return <div>Loading...</div>;
+          return <div></div>;
         }
       
         return (

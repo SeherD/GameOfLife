@@ -11,7 +11,10 @@ from sale_house_endpoints import *
 from certification_endpoints import *
 from account_endpoints import *
 
-
+@socketio.on('hostInLobby')
+def handle_host_in_lobby():
+    # Emit the number of connected players to the host
+    socketio.emit('updatePlayers', len(connected_players))
 
 def load_all_player_data():
     db = get_db()
@@ -69,7 +72,7 @@ def handle_connect_with_username(auth):
             connected_players.append(username)
             join_room(player_id)
             print(f"Player {username} connected. Total connected players: {len(connected_players)}")
-
+            socketio.emit('updatePlayers', len(connected_players))
             # Load all player data from the database
             all_player_data = load_all_player_data()
 
