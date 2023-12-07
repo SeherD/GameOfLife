@@ -90,18 +90,24 @@ export default class GameBoard extends Component{
             this.setState({turnNumber: data.turnNumber});
             const spinnerElement = document.getElementById('canvas');
             if (data.turnNumber === this.state.playerIndex) {
-                spinnerElement.style.pointerEvents = 'auto';
-                toast('Spin to move!', {
-                    position: "top-center",
-                    autoClose: 1000,
-                    hideProgressBar: true,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: false,
-                    progress: undefined,
-                    theme: "dark",
-                    bodyClassName: "popup"
-                });
+                if (this.state.players[this.state.playerIndex].path === 'mainPath' && this.state.players[this.state.playerIndex].location === 64) {
+                    socket.emit('update_turn_number', {
+                        turnNumber: data.turnNumber,
+                    });
+                } else {
+                    spinnerElement.style.pointerEvents = 'auto';
+                    toast('Spin to move!', {
+                        position: "top-center",
+                        autoClose: 1000,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: false,
+                        progress: undefined,
+                        theme: "dark",
+                        bodyClassName: "popup"
+                    });
+                }
             } else {
                 spinnerElement.style.pointerEvents = 'none';
             }
