@@ -2,11 +2,13 @@ import React, {Component} from 'react';
 import GameBoard from '../Components/GameBoard';
 import PlayerInfo from '../Components/PlayerInfo';
 import axios from 'axios';
+import {socket, socketPlayerIndex, socketUsername} from '../Socket'
 
+let socketIndex= parseInt(socketPlayerIndex)+1;
 export default class GamePage extends Component {
   state = {
     playerInfo:{
-      image: 'Avatar1.png',
+      image: `Avatar${socketIndex}.png`,
       career: "",
       cash: 200000,
       salary: null,

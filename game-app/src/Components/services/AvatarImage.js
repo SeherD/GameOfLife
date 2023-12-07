@@ -35,7 +35,9 @@ class AvatarImage {
   ];
 
   static GetImage(name) {
+    console.log(name)
       const found = AvatarImage.images.find(e => e.name === name);
+      console.log(found);
       return found ? found.image : null;
   }
 }
