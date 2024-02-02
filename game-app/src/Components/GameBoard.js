@@ -3,7 +3,12 @@ import Modal from 'react-modal'
 import ModalContent from './ModalContent'
 import Tile from './Tile';
 import Piece from './Piece';
+
 import WheelComponent from 'react-wheel-of-prizes';
+import Dice from "react-dice-roll";
+
+import Wheel from './Wheel';
+
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
@@ -64,6 +69,15 @@ export default class GameBoard extends Component {
         players: [],
         currentPlayer: null,
 
+        //Width of screen. 
+        width: 0,
+
+        xPos: 0,
+        yPos: 0, 
+
+
+
+
         opponentInfo1: {
             player_id: "P2",
             image: 'Avatar2.png',
@@ -95,11 +109,21 @@ export default class GameBoard extends Component {
             cash: 200000,
             color: "pink",
             username: "Andrew"
-        }
+        },
+
+        transform: -180,
+
+
     }
+
+    updateDimensions = () => {
+        this.setState({ width: window.innerWidth });
+      };
 
 
     componentDidMount() {
+
+        window.addEventListener('resize', this.updateDimensions);
 
         if (this.state.turnNumber === this.state.playerIndex) {
             toast('Spin to move!', {
@@ -139,15 +163,31 @@ export default class GameBoard extends Component {
         })
 
         socket.on('update_turn_number', (data) => {
+            console.log("update turn number")
             this.setState({turnNumber: data.turnNumber});
-            const spinnerElement = document.getElementById('canvas');
+            let spinnerElement = document.getElementById("canvas");
+            
+            try{
+
+                spinnerElement.style.pointerEvents = "auto";
+
+            }
+
+            catch (e){
+
+                spinnerElement = document.getElementById("dice");
+
+            }
+
             if (data.turnNumber === this.state.playerIndex) {
                 if (this.state.players[this.state.playerIndex].path === 'mainPath' && this.state.players[this.state.playerIndex].location === 64) {
                     socket.emit('update_turn_number', {
                         turnNumber: data.turnNumber,
                     });
                 } else {
-                    spinnerElement.style.pointerEvents = 'auto';
+                    console.log(spinnerElement);
+                    spinnerElement.style.pointerEvents = "auto";
+
                     toast('Spin to move!', {
                         position: "top-center",
                         autoClose: 1000,
@@ -161,7 +201,8 @@ export default class GameBoard extends Component {
                     });
                 }
             } else {
-                spinnerElement.style.pointerEvents = 'none';
+                    console.log("Disbable spinner");
+                    spinnerElement.style.pointerEvents = "none";                
             }
         });
 
@@ -262,6 +303,10 @@ export default class GameBoard extends Component {
         });      
     }
 
+    componentWillUnmount(){
+        window.removeEventListener("resize", this.updateDimensions);
+    }
+
     /* componentWillUnmount() {
          // Disconnect from the server
          socket.disconnect();
@@ -306,7 +351,43 @@ export default class GameBoard extends Component {
             return;
         }
         const player = data;
+
+        let last_player_tile = this.state.path[this.state.players[0].path][this.state.players[0].location];
+        let first_player_tile = this.state.path[this.state.players[0].path][this.state.players[0].location];
+
+        for(let i = 0; i < this.state.players.length; i++){
+            if(last_player_tile % 15 >
+                this.state.path[this.state.players[i].path][this.state.players[i].location] % 15){
+                    last_player_tile = this.state.path[this.state.players[i].path][this.state.players[i].location];
+                }
+            if(first_player_tile % 15 <
+            this.state.path[this.state.players[i].path][this.state.players[i].location] % 15){
+                first_player_tile = this.state.path[this.state.players[i].path][this.state.players[i].location];
+
+            }
+        }
+
+        console.log("First player Tile: " ,first_player_tile);
+        console.log("Last player tile: ", last_player_tile);
+
+        if(first_player_tile % 15 >= 8 && last_player_tile % 15 >= 8){
+            this.setState({transform: -180});
+        }
+
+        else if(first_player_tile % 15 < 8 && last_player_tile % 15 < 8){
+            this.setState({transform: 240});
+        }
+
+        else if(first_player_tile % 15 < 13 && last_player_tile % 15 < 8){
+            this.setState({transform: 0});
+
+        }
+
+        
         const playerPieces = this.state.playerPieces.map((piece) => {
+
+            let tile = this.state.path[player.path][player.location];
+
             if (piece.key === player.playerid)
                 return {
                     key: player.playerid,
@@ -315,6 +396,8 @@ export default class GameBoard extends Component {
                 }
             else
                 return piece;
+
+
         });
 
         this.setState({ playerPieces: playerPieces }, () => {
@@ -556,6 +639,7 @@ export default class GameBoard extends Component {
     };
 
     handleTile = (onPath, atPosition) => {
+        console.log(onPath, atPosition);
         const index = this.state.path[onPath][atPosition];
         const tile = this.tiles[index];
         tile.handleClick();
@@ -691,6 +775,8 @@ export default class GameBoard extends Component {
 
     //function that is called after the spinner is done spinning
     onFinished = (winner) => {
+        
+        console.log("Finished spinning!", winner);
 
         const currentPath = this.state.currentPlayer.path;
         const currentPosition = this.state.currentPlayer.location;
@@ -819,13 +905,17 @@ export default class GameBoard extends Component {
 
         // Update the server with the new player data
         //this.updateServerWithPlayerData();
+
+        console.log("Finished function!");
     }
+
+
 
     //create game board
     createBoard = () => {
         //create 15 by 15 grid
         return (
-            <div>
+            <div style={this.boardStyle}>
                 {Array.from({ length: 15 }).map((_, rowIndex) => (
                     <div className='boardRow' key={rowIndex}>
                         {Array.from({ length: 15 }).map((_, colIndex) => {
@@ -932,19 +1022,28 @@ export default class GameBoard extends Component {
         if (this.state.playerPieces === undefined || this.state.playerPieces.length === 0) {
             return <div>Loading...</div>
         }
-        return (
+
+        let str;
+
+        if(this.state.width <= 760){
+
+        str = "translate(" + this.state.transform + "px, 10%) scale(1.3, 1.3)";
+
+        }
+
+        else{
+            str = "";
+        }
+        return ( //Change this bit!
             <div>
                 <ToastContainer />
                 {/* game board */}
                 <div className='board'>
+                    <div style = {{transform: str}}>
                     {this.createBoard()}
+                    </div>
                     <div className='spinner'>
-                        <WheelComponent
-                            segments={this.state.segments}
-                            segColors={this.state.segColors}
-                            onFinished={(winner) => this.onFinished(winner)}
-                            isOnlyOnce={false}
-                            downDuration={500} />
+                        <Wheel onFinished = {this.onFinished}></Wheel>
                     </div>
                     {/*TODO: populate with playerinfo from backend*/}
                     <div className="opponentsDiv">
